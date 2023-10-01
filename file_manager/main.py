@@ -1,13 +1,15 @@
 import os
 import logging
 
+import log_messages
+
 
 def configure_logger(logger_name, output_file_name):
     logger = logging.getLogger(logger_name)
     s_handler = logging.StreamHandler()
-    f_handler = logging.FileHandler(filename=output_file_name, mode='w')
+    f_handler = logging.FileHandler(filename=output_file_name, mode="w")
 
-    formatter = logging.Formatter('%(message)s')
+    formatter = logging.Formatter("%(message)s")
     s_handler.setFormatter(formatter)
     f_handler.setFormatter(formatter)
 
@@ -27,60 +29,30 @@ class DirScanner:
         self.dir_list = os.listdir(self.dir_path)
 
     def scan_files(self):
-        files_list = [entry for entry in self.dir_list if os.path.isfile(os.path.join(self.dir_path, entry))]
+        files_list = [
+            entry
+            for entry in self.dir_list
+            if os.path.isfile(os.path.join(self.dir_path, entry))
+        ]
         if not files_list:
-            return (f"The given directory {self.dir_path} contains no files:\n\n" +
-                    "\n=========================================\n")
+            return log_messages.NO_FILES.format(dir_path=self.dir_path)
         else:
-            return (f"The given directory {self.dir_path} contains the following files:\n\n" +
-                    "\n".join(files_list) +
-                    "\n\n=========================================\n")
+            return log_messages.LISTED_FILES.format(
+                dir_path=self.dir_path, files_list="\n".join(files_list)
+            )
 
     def scan_subdirs(self):
-        subdirs_list = [entry for entry in self.dir_list if os.path.isdir(os.path.join(self.dir_path, entry))]
+        subdirs_list = [
+            entry
+            for entry in self.dir_list
+            if os.path.isdir(os.path.join(self.dir_path, entry))
+        ]
         if not subdirs_list:
-            return (f"The given directory {self.dir_path} contains no nested subdirectories:\n\n" +
-                    "\n=========================================\n")
+            return log_messages.NO_SUBDIRS.format(dir_path=self.dir_path)
         else:
-            return (f"The given directory {self.dir_path} contains the following subdirectories:\n\n" +
-                    "\n".join(subdirs_list) +
-                    "\n\n=========================================\n")
-
-    def build_catalog_recursively(self, subdir_path=None):
-        if subdir_path is None:
-            subdir_path = self.dir_path
-            subdir_list = self.dir_list
-        else:
-            subdir_list = os.listdir(subdir_path)
-
-        files_list = []
-        nested_dirs = []
-        inner_msg = ''
-        for entry in subdir_list:
-            entry_path = os.path.join(subdir_path, entry)
-            if os.path.isfile(entry_path):
-                files_list.append(entry)
-            else:
-                nested_dirs.append(entry)
-                inner_msg += self.build_catalog_recursively(entry_path)
-
-        if not files_list:
-            files_msg = (f"The given directory {subdir_path} contains no files:\n" +
-                         "\n=========================================\n")
-        else:
-            files_msg = (f"The given directory {subdir_path} contains the following files:\n\n" +
-                         "\n".join(files_list) +
-                         "\n\n=========================================\n")
-
-        if not nested_dirs:
-            nested_dirs_msg = (f"The given directory {subdir_path} contains no nested subdirectories:\n" +
-                               "\n=========================================\n")
-        else:
-            nested_dirs_msg = (f"The given directory {subdir_path} contains the following nested subdirectories:\n\n" +
-                               "\n".join(nested_dirs) +
-                               "\n\n=========================================\n")
-
-        return files_msg + nested_dirs_msg + inner_msg
+            return log_messages.NESTED_SUBDIRS.format(
+                dir_path=self.dir_path, subdirs_list="\n".join(subdirs_list)
+            )
 
     def build_catalog(self):
         files_list = []
@@ -92,27 +64,63 @@ class DirScanner:
                 nested_dirs.append(entry)
 
         if not files_list:
-            files_msg = (f"The given directory {self.dir_path} contains no files:\n" +
-                         "\n=========================================\n")
+            files_msg = log_messages.NO_FILES.format(self.dir_path)
         else:
-            files_msg = (f"The given directory {self.dir_path} contains the following files:\n\n" +
-                         "\n".join(files_list) +
-                         "\n\n=========================================\n")
+            files_msg = log_messages.LISTED_FILES.format(
+                dir_path=self.dir_path, files_list="\n".join(files_list)
+            )
 
         if not nested_dirs:
-            nested_dirs_msg = (f"The given directory {self.dir_path} contains no nested subdirectories:\n" +
-                               "\n=========================================\n")
+            nested_dirs_msg = log_messages.NO_SUBDIRS.format(
+                dir_path=self.dir_path
+            )
         else:
-            nested_dirs_msg = (
-                    f"The given directory {self.dir_path} contains the following nested subdirectories:\n\n" +
-                    "\n".join(nested_dirs) +
-                    "\n\n=========================================\n")
+            nested_dirs_msg = log_messages.NESTED_SUBDIRS.format(
+                dir_path=self.dir_path, subdirs_list="\n".join(nested_dirs)
+            )
 
         return files_msg + nested_dirs_msg
 
+    def build_catalog_recursively(self, subdir_path=None):
+        if subdir_path is None:
+            subdir_path = self.dir_path
+            subdir_list = self.dir_list
+        else:
+            subdir_list = os.listdir(subdir_path)
 
-if __name__ == '__main__':
-    logger = configure_logger('basic_logger', 'output.log')
+        files_list = []
+        nested_dirs = []
+        inner_msg = ""
+        for entry in subdir_list:
+            entry_path = os.path.join(subdir_path, entry)
+            if os.path.isfile(entry_path):
+                files_list.append(entry)
+            else:
+                nested_dirs.append(entry)
+                inner_msg += self.build_catalog_recursively(entry_path)
+
+        if not files_list:
+            files_msg = log_messages.NO_FILES.format(self.dir_path)
+        else:
+            files_msg = log_messages.LISTED_FILES.format(
+                dir_path=subdir_path, files_list="\n".join(files_list)
+            )
+
+        if not nested_dirs:
+            nested_dirs_msg = log_messages.NO_SUBDIRS.format(
+                dir_path=subdir_path
+            )
+        else:
+            nested_dirs_msg = log_messages.NESTED_SUBDIRS.format(
+                dir_path=subdir_path, subdirs_list="\n".join(nested_dirs)
+            )
+
+        return files_msg + nested_dirs_msg + inner_msg
+
+
+if __name__ == "__main__":
+    # TODO: extract logging setup and use logger factory
+    logger = configure_logger("basic_logger", "output.log")
     target_dir = input()
 
     scanner = DirScanner(target_dir)
@@ -121,10 +129,12 @@ if __name__ == '__main__':
     files_list = scanner.scan_files()
     logger.info(files_list)
 
-    catalog_logger = configure_logger('catalog_logger', 'catalog.log')
+    catalog_logger = configure_logger("catalog_logger", "catalog.log")
     catalog = scanner.build_catalog()
     catalog_logger.info(catalog)
 
-    recursive_catalog_logger = configure_logger('recursive_catalog_logger', 'recursive_catalog.log')
+    recursive_catalog_logger = configure_logger(
+        "recursive_catalog_logger", "recursive_catalog.log"
+    )
     recursive_catalog = scanner.build_catalog_recursively()
     recursive_catalog_logger.info(recursive_catalog)
