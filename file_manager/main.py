@@ -100,7 +100,7 @@ class DirScanner:
                 inner_msg += self.build_catalog_recursively(entry_path)
 
         if not files_list:
-            files_msg = log_messages.NO_FILES.format(self.dir_path)
+            files_msg = log_messages.NO_FILES.format(subdir_path)
         else:
             files_msg = log_messages.LISTED_FILES.format(
                 dir_path=subdir_path, files_list="\n".join(files_list)
