@@ -15,6 +15,6 @@ NO_SUBDIRS = (
 
 NESTED_SUBDIRS = (
     "The given directory {dir_path} contains the following subdirectories:\n"
-    + "\n{subdirs_list}\n"
+    + "\n{subdir_list}\n"
     + DELIMITER
 )
