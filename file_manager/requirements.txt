@@ -1,5 +1,7 @@
 black==23.9.1
 click==8.1.7
+directory-tree==0.0.4
+emoji==2.8.0
 mypy-extensions==1.0.0
 packaging==23.2
 pathspec==0.11.2
