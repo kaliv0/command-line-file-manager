@@ -1,5 +1,8 @@
 import os
 
+import emoji
+from directory_tree import display_tree
+
 from log import log_messages
 
 
@@ -99,3 +102,20 @@ class DirScanner:
             )
 
         return files_msg + nested_dirs_msg + inner_msg
+
+    def build_tree(self):
+        folder_emoji = emoji.emojize(":file_folder:")
+        file_emoji = emoji.emojize(":page_with_curl:")
+
+        tree_msg = ""
+        for root, _, files in os.walk(self.dir_path):
+            level = root.count(os.sep) - 1
+            indent = " " * 4 * level
+            tree_msg += "{}{} {}/\n".format(indent, folder_emoji, os.path.basename(root))
+            sub_indent = " " * 4 * (level + 1)
+            for file in files:
+                tree_msg += "{}{} {}\n".format(sub_indent, file_emoji, file)
+        return tree_msg
+
+    def build_pretty_tree(self):
+        return display_tree(self.dir_path, string_rep=True, show_hidden=True)
