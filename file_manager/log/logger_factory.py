@@ -12,15 +12,21 @@ class LoggerFactory:
     @classmethod
     def get_logger(cls, logger_type, output_dir):
         if logger_type == logger_types.BASIC:
-            return cls._configure_logger(logger_types.BASIC, output_dir + cls.FILES)
+            return cls._configure_logger(
+                logger_types.BASIC, output_dir + cls.FILES
+            )
         elif logger_type == logger_types.CATALOG:
-            return cls._configure_logger(logger_types.CATALOG, output_dir + cls.CATALOG)
+            return cls._configure_logger(
+                logger_types.CATALOG, output_dir + cls.CATALOG
+            )
         elif logger_type == logger_types.RECURSIVE:
             return cls._configure_logger(
                 logger_types.RECURSIVE, output_dir + cls.RECURSIVE_CATALOG
             )
         elif logger_type == logger_types.TREE:
-            return cls._configure_logger(logger_types.TREE, output_dir + cls.TREE)
+            return cls._configure_logger(
+                logger_types.TREE, output_dir + cls.TREE
+            )
 
     @staticmethod
     def _configure_logger(logger_name, output_file_name):

@@ -17,7 +17,9 @@ if __name__ == "__main__":
     catalog = scanner.build_catalog()
     catalog_logger.info(catalog)
 
-    recursive_catalog_logger = LoggerFactory.get_logger(logger_types.RECURSIVE, output_dir)
+    recursive_catalog_logger = LoggerFactory.get_logger(
+        logger_types.RECURSIVE, output_dir
+    )
     recursive_catalog = scanner.build_catalog_recursively()
     recursive_catalog_logger.info(recursive_catalog)
 
@@ -25,3 +27,7 @@ if __name__ == "__main__":
     tree_catalog = scanner.build_tree()
     # tree_catalog = scanner.build_pretty_tree()
     tree_logger.info(tree_catalog)
+
+    name = input()
+    entries_by_name = scanner.search_by_name(name)
+    logger.info(entries_by_name)
