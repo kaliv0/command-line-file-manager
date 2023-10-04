@@ -3,8 +3,9 @@ TODO:
 add click -> migrate to command line tool
 
 ---------------
-add search by name -> in current dir
-               -> recursively
+#add search by name -> in current dir*
+                   -> recursively*
+
 add search files by extension -> in current dir
                           -> recursively
                           -> to be used in move_files functionality?
@@ -27,5 +28,6 @@ handle log output dir and log file name
 add stats (count and size) to catalogs (optional)
 
 ======================
+add docstring
 add unit tests
 upload to PYPI with twine

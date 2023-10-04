@@ -119,10 +119,57 @@ class DirScanner:
                 tree_msg += "{}{} {}\n".format(sub_indent, file_emoji, file)
         return tree_msg
 
-    def build_pretty_tree(self):
-        # TODO: potentially ask the user if hidden files should be included
-        return display_tree(self.dir_path, string_rep=True, show_hidden=True)
+    def build_pretty_tree(self, show_hidden=True):
+        return display_tree(
+            self.dir_path, string_rep=True, show_hidden=show_hidden
+        )
 
     def search_by_name(self, name):
-        entries_list = [entry for entry in self.dir_list if name in entry]
-        return "\n".join(entries_list)
+        files_list = []
+        nested_dirs = []
+        for entry in self.dir_list:
+            if name in entry:
+                if os.path.isfile(os.path.join(self.dir_path, entry)):
+                    files_list.append(entry)
+                else:
+                    nested_dirs.append(entry)
+        return log_messages.FOUND_BY_NAME.format(
+            files_list="\n\t".join(files_list),
+            nested_dirs="\n\t".join(nested_dirs),
+        )
+
+    def search_by_name_recursively(self, name, subdir_path=None):
+        if subdir_path is None:
+            subdir_path = self.dir_path
+            subdir_list = self.dir_list
+        else:
+            subdir_list = os.listdir(subdir_path)
+
+        files_list = []
+        nested_dirs = []
+        valid_dirs = []
+        inner_msg = ""
+        for entry in subdir_list:
+            entry_path = os.path.join(subdir_path, entry)
+            if os.path.isfile(entry_path) and name in entry:
+                files_list.append(entry)
+            elif os.path.isdir(entry_path):
+                if name in entry:
+                    valid_dirs.append(entry)
+                nested_dirs.append(entry)
+                inner_msg += self.search_by_name_recursively(name, entry_path)
+
+        if not files_list and not valid_dirs:
+            return ""
+        log_msg = log_messages.FOUND_BY_NAME.format(
+            dir_path=subdir_path, keyword=name
+        )
+        if files_list:
+            log_msg += log_messages.FOUND_FILES_BY_NAME.format(
+                files_list="\n\t- ".join(files_list),
+            )
+        if valid_dirs:
+            log_msg += log_messages.FOUND_DIRS_BY_NAME.format(
+                subdir_list="\n\t- ".join(valid_dirs),
+            )
+        return log_msg + log_messages.DELIMITER + inner_msg
