@@ -1,20 +1,30 @@
 DELIMITER = "\n=========================================\n"
 
-NO_FILES = "The given directory {dir_path} contains no files:\n\n" + DELIMITER
+NO_FILES = "The given directory '{dir_path}' contains no files:\n\n" + DELIMITER
 
 LISTED_FILES = (
-    "The given directory {dir_path} contains the following files:\n"
+    "The given directory '{dir_path}' contains the following files:\n"
     + "\n{files_list}\n"
     + DELIMITER
 )
 
 NO_SUBDIRS = (
-    "The given directory {dir_path} contains no nested subdirectories:\n\n"
+    "The given directory '{dir_path}' contains no nested subdirectories:\n\n"
     + DELIMITER
 )
 
 NESTED_SUBDIRS = (
-    "The given directory {dir_path} contains the following subdirectories:\n"
+    "The given directory '{dir_path}' contains the following subdirectories:\n"
     + "\n{subdir_list}\n"
     + DELIMITER
+)
+
+FOUND_BY_NAME = (
+    "Inside directory '{dir_path}' the given keyword '{keyword}' was found\n"
+)
+
+FOUND_FILES_BY_NAME = "in the following file names:\n" + "\t- {files_list}\n"
+
+FOUND_DIRS_BY_NAME = (
+    "in the following subdirectory names:\n" + "\t- {subdir_list}\n"
 )
