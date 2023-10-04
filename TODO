@@ -1,0 +1,31 @@
+TODO:
+
+add click -> migrate to command line tool
+
+---------------
+add search by name -> in current dir
+               -> recursively
+add search files by extension -> in current dir
+                          -> recursively
+                          -> to be used in move_files functionality?
+
+------------
+add archiving option -> save to given output dir or in dir to be archived
+                     -> exclude nested dirs option
+                     -> choose type -> .zip, .rar, .tar
+
+upload archived file to GoogleDrive
+
+------------
+show stats (not logged, only in terminal) -> files and dirs count (including recursively)
+                                          -> size in total
+=====================
+TO_IMPROVE:
+
+add boolean flag show_hidden in recursive_catalog
+handle log output dir and log file name
+add stats (count and size) to catalogs (optional)
+
+======================
+add unit tests
+upload to PYPI with twine
