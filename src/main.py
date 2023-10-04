@@ -1,6 +1,6 @@
-from dir_scanner import DirScanner
-from log import logger_types
-from log.logger_factory import LoggerFactory
+from src.dir_scanner import DirScanner
+from src.log import logger_types
+from src.log.logger_factory import LoggerFactory
 
 if __name__ == "__main__":
     target_dir = input()

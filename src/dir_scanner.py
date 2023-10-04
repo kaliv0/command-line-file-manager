@@ -3,7 +3,7 @@ import os
 import emoji
 from directory_tree import display_tree
 
-from log import log_messages
+from src.log import log_messages
 
 
 class DirScanner:
