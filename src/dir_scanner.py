@@ -9,22 +9,38 @@ from src.log import log_messages
 class DirScanner:
     def __init__(self, dir_path):
         self.dir_path = dir_path
-        self.dir_list = None
+        # self.dir_list = None
+        self.dir_list = os.listdir(self.dir_path)
 
+    # TODO: remove?
     def scan_dir(self):
         self.dir_list = os.listdir(self.dir_path)
 
-    def scan_files(self):
+    def scan_files(self, sort_criteria=None, reverse_order=False):
         files_list = [
             entry
             for entry in self.dir_list
             if os.path.isfile(os.path.join(self.dir_path, entry))
         ]
+
+        if not sort_criteria or sort_criteria == "name":
+            files_list.sort(key=sort_criteria, reverse=reverse_order)
+        elif sort_criteria == "size":
+            sort_func = lambda file: os.stat(os.path.join(self.dir_path, file)).st_size
+            # sort_func = lambda file: os.path.getsize(os.path.join(self.dir_path, file))
+            files_list.sort(key=sort_func, reverse=reverse_order)
+            # TODO: add ignore case
+        elif sort_criteria in ["date", "creation_date", "created"]:
+            sort_func = lambda file: os.path.getctime(os.path.join(self.dir_path, file))
+            files_list.sort(key=sort_func, reverse=reverse_order)
+
         if not files_list:
             return log_messages.NO_FILES.format(dir_path=self.dir_path)
         else:
             return log_messages.LISTED_FILES.format(
                 dir_path=self.dir_path, files_list="\n".join(files_list)
+                # dir_path = self.dir_path,
+                # files_list="\n".join([str(os.stat(os.path.join(self.dir_path, f)).st_size) for f in files_list])
             )
 
     def scan_subdirs(self):

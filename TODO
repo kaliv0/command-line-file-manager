@@ -2,9 +2,10 @@ TODO:
 
 add click -> migrate to command line tool
 
----------------
-#add search by name -> in current dir*
-                   -> recursively*
+order files by extension
+order files and dirs alphabetically -> asc/desc
+order by size -> show size in logs -> add header -> "filename:  size:"
+order by date -> show date in logs -> sim.
 
 add search files by extension -> in current dir
                           -> recursively
