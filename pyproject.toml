@@ -14,6 +14,8 @@ mypy-extensions = "1.0.0"
 packaging = "23.2"
 pathspec = "0.11.2"
 platformdirs = "3.10.0"
+tox = "^4.11.3"
+codespell = "^2.2.6"
 
 [build-system]
 requires = ["poetry-core"]
