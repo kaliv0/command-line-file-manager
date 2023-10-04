@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "file-manager"
+version = "0.1.0"
+description = ""
+authors = ["kaliv0 <kaloyan.ivanov88@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+black = "23.9.1"
+click = "8.1.7"
+directory-tree = "0.0.4"
+emoji = "2.8.0"
+mypy-extensions = "1.0.0"
+packaging = "23.2"
+pathspec = "0.11.2"
+platformdirs = "3.10.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
