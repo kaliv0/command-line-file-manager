@@ -42,14 +42,10 @@ class DirScanner:
             return log_messages.NO_FILES.format(dir_path=self.dir_path)
         else:
             return log_messages.LISTED_FILES.format(
-                dir_path=self.dir_path, files_list="\n".join(files_list)
-                # dir_path=self.dir_path,
-                # files_list="\n".join(
-                #     [
-                #         str(os.stat(os.path.join(self.dir_path, f)).st_size)
-                #         for f in files_list
-                #     ]
-                # ),
+                dir_path=self.dir_path,
+                files_list="\n".join(files_list)
+                # dir_path = self.dir_path,
+                # files_list="\n".join([str(os.stat(os.path.join(self.dir_path, f)).st_size) for f in files_list])
             )
 
     def scan_subdirs(self):
