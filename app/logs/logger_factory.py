@@ -1,6 +1,6 @@
 import logging
 
-from src.log import logger_types
+from app.logs import logger_types
 
 
 class LoggerFactory:
