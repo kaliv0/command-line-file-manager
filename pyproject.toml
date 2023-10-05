@@ -1,22 +1,30 @@
-[tool.poetry]
-name = "Advanced_File_Manager"
+[build-system]
+requires = ["setuptools>=65.5.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "File_Manager"
 version = "0.1.0"
 description = ""
-authors = ["kaliv0 <kaloyan.ivanov88@gmail.com>"]
+readme = "README.md"
+authors = [
+  {name = "Kaloyan Ivanov", email = "kaloyan.ivanov88@gmail.com" }
+]
 
-[tool.poetry.dependencies]
-python = "^3.11"
-black = "23.9.1"
-click = "8.1.7"
-directory-tree = "0.0.4"
-emoji = "2.8.0"
-mypy-extensions = "1.0.0"
-packaging = "23.2"
-pathspec = "0.11.2"
-platformdirs = "3.10.0"
-tox = "^4.11.3"
-codespell = "^2.2.6"
+requires-python = ">=3.8"
 
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+dependencies = [
+    "black == 23.9.1",
+    "click == 8.1.7",
+    "directory-tree == 0.0.4",
+    "emoji == 2.8.0",
+    "mypy-extensions == 1.0.0",
+    "packaging == 23.2",
+    "pathspec == 0.11.2",
+    "platformdirs == 3.11.0",
+    "tox >= 4.11.3",
+    "codespell >= 2.2.6",
+]
+
+[project.scripts]
+fm = "app.__main__:cli"
