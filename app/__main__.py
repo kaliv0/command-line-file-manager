@@ -11,15 +11,6 @@ def cli():
 cli.add_command(dir_scanner.scan_files)  # noqa
 
 
-# if __name__ == "__main__":
-# target_dir = input()
-# output_dir = input()
-#
-# sort_criteria = input()
-# reverse_order = bool(input())
-#
-# logger = LoggerFactory.get_logger(logger_types.BASIC, output_dir)
-#
 # scanner = DirScanner(target_dir)
 # # scanner.scan_dir()
 # subdir_list = scanner.scan_subdirs()

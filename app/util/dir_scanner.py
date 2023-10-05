@@ -4,7 +4,8 @@ import click
 import emoji
 from directory_tree import display_tree
 
-from app.logs import log_messages
+from app.logs import log_messages, logger_types
+from app.logs.logger_factory import LoggerFactory
 
 
 @click.command()
@@ -13,10 +14,32 @@ from app.logs import log_messages
     "--sort",
     type=click.STRING,
     default="name",
-    help="Sorting criteria. Choose between 'name', 'size', 'date', 'last_modified'",
+    help="Sorting criteria. Choose between 'name', 'size', 'date', 'last_modified'. "
+         "Defaults to 'name' if not explicitly specified",
 )
-@click.option("--desc", type=click.BOOL, default=False)
-def scan_files(dir_path, sort, desc):
+@click.option(
+    "--desc",
+    type=click.BOOL,
+    default=False,
+    help="Boolean flag to display result in descending order. Defaults to 'false'",
+)
+@click.option(
+    "--save",
+    type=click.BOOL,
+    default=False,
+    help="Boolean flag to save log message to file. Defaults to 'false'",
+)
+@click.option(
+    "--output",
+    type=click.STRING,
+    default=None,
+    help="Path to output directory for the saved log file",
+)
+def scan_files(
+    dir_path: str, sort: str, desc: bool, save: bool, output: str
+) -> None:
+    """DIR_PATH: Path to directory to be scanned"""
+
     dir_list = os.listdir(dir_path)
 
     files_list = [
@@ -30,7 +53,6 @@ def scan_files(dir_path, sort, desc):
     elif sort == "size":
         sort_func = lambda file: os.stat(os.path.join(dir_path, file)).st_size
         # sort_func = lambda file: os.path.getsize(os.path.join(self.dir_path, file))
-        # TODO: add ignore case
     elif sort in "date":
         sort_func = lambda file: os.path.getctime(os.path.join(dir_path, file))
     elif sort in "last_modified":
@@ -40,16 +62,20 @@ def scan_files(dir_path, sort, desc):
     files_list.sort(key=sort_func, reverse=desc)
 
     if not files_list:
-        click.echo(log_messages.NO_FILES.format(dir_path=dir_path))
+        message = log_messages.NO_FILES.format(dir_path=dir_path)
     else:
-        click.echo(
-            log_messages.LISTED_FILES.format(
-                dir_path=dir_path,
-                files_list="\n".join(files_list)
-                # dir_path = self.dir_path,
-                # files_list="\n".join([str(os.stat(os.path.join(self.dir_path, f)).st_size) for f in files_list])
-            )
+        message = log_messages.LISTED_FILES.format(
+            dir_path=dir_path,
+            files_list="\n".join(files_list)
+            # dir_path = self.dir_path,
+            # files_list="\n".join([str(os.stat(os.path.join(self.dir_path, f)).st_size) for f in files_list])
         )
+    click.echo(message)
+
+    if save:
+        if output is None:
+            output = dir_path
+        LoggerFactory.get_logger(logger_types.BASIC, output).info(message)
 
 
 def scan_subdirs(self):

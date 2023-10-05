@@ -31,14 +31,14 @@ class LoggerFactory:
     @staticmethod
     def _configure_logger(logger_name, output_file_name):
         logger = logging.getLogger(logger_name)
-        s_handler = logging.StreamHandler()
+        # s_handler = logging.StreamHandler()
         f_handler = logging.FileHandler(filename=output_file_name, mode="w")
 
         formatter = logging.Formatter("%(message)s")
-        s_handler.setFormatter(formatter)
+        # s_handler.setFormatter(formatter)
         f_handler.setFormatter(formatter)
 
-        logger.addHandler(s_handler)
+        # logger.addHandler(s_handler)
         logger.addHandler(f_handler)
 
         logger.setLevel(logging.INFO)
