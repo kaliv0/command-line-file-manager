@@ -8,10 +8,7 @@ LISTED_FILES = (
     + DELIMITER
 )
 
-NO_SUBDIRS = (
-    "The given directory '{dir_path}' contains no nested subdirectories:\n\n"
-    + DELIMITER
-)
+NO_SUBDIRS = "The given directory '{dir_path}' contains no nested subdirectories:\n\n" + DELIMITER
 
 NESTED_SUBDIRS = (
     "The given directory '{dir_path}' contains the following subdirectories:\n"
@@ -21,12 +18,8 @@ NESTED_SUBDIRS = (
 
 NOT_FOUND = "Nothing found.\n"
 
-FOUND_BY_NAME = (
-    "Inside directory '{dir_path}' the given keyword '{keyword}' was found\n"
-)
+FOUND_BY_NAME = "Inside directory '{dir_path}' the given keyword '{keyword}' was found\n"
 
-FOUND_FILES_BY_NAME = "in the following file names:\n" + "\t- {files_list}\n"
+FOUND_FILES_BY_NAME = "- in the following file names:\n" + "\t- {files_list}\n"
 
-FOUND_DIRS_BY_NAME = (
-    "in the following subdirectory names:\n" + "\t- {subdir_list}\n"
-)
+FOUND_DIRS_BY_NAME = "- in the following subdirectory names:\n" + "\t- {subdir_list}\n"

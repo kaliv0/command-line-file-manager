@@ -15,7 +15,7 @@ from app.logs.logger_factory import LoggerFactory
     "--sort",
     type=click.STRING,
     default="name",
-    help="Sorting criteria. Choose between 'name', 'size', 'date', 'modified'. "
+    help="Sorting criteria. Choose between 'name', 'size', 'date', 'modified', 'type' (i.e. files extension). "
     "Defaults to 'name' if not explicitly specified",
 )
 @click.option(
@@ -36,17 +36,11 @@ from app.logs.logger_factory import LoggerFactory
     default=None,
     help="Path to output directory for the saved log file",
 )
-def scan_files(
-    dir_path: str, sort: str, desc: bool, save: bool, output: str
-) -> None:
+def scan_files(dir_path: str, sort: str, desc: bool, save: bool, output: str) -> None:
     """DIR_PATH: Path to directory to be scanned"""
 
     dir_list = os.listdir(dir_path)
-    files_list = [
-        entry
-        for entry in dir_list
-        if os.path.isfile(os.path.join(dir_path, entry))
-    ]
+    files_list = [entry for entry in dir_list if os.path.isfile(os.path.join(dir_path, entry))]
 
     if not files_list:
         message = log_messages.NO_FILES.format(dir_path=dir_path)
@@ -87,17 +81,11 @@ def scan_files(
     default=None,
     help="Path to output directory for the saved log file",
 )
-def scan_subdirs(
-    dir_path: str, sort: str, desc: bool, save: bool, output: str
-) -> None:
+def scan_subdirs(dir_path: str, sort: str, desc: bool, save: bool, output: str) -> None:
     """DIR_PATH: Path to directory to be scanned"""
 
     dir_list = os.listdir(dir_path)
-    subdir_list = [
-        entry
-        for entry in dir_list
-        if os.path.isdir(os.path.join(dir_path, entry))
-    ]
+    subdir_list = [entry for entry in dir_list if os.path.isdir(os.path.join(dir_path, entry))]
 
     if not subdir_list:
         message = log_messages.NO_SUBDIRS.format(dir_path=dir_path)
@@ -111,9 +99,7 @@ def scan_subdirs(
         _save_logs_to_file(output, dir_path, message, logger_types.BASIC)
 
 
-def _sort_entries_list(
-    dir_path: str, entries_list: List[str], criteria: str, desc: bool
-) -> None:
+def _sort_entries_list(dir_path: str, entries_list: List[str], criteria: str, desc: bool) -> None:
     if criteria == "name":
         sort_func = None
     elif criteria == "size":
@@ -122,6 +108,8 @@ def _sort_entries_list(
         sort_func = lambda file: os.path.getctime(os.path.join(dir_path, file))
     elif criteria in "modified":
         sort_func = lambda file: os.path.getmtime(os.path.join(dir_path, file))
+    elif criteria in "type":
+        sort_func = lambda file: os.path.splitext(os.path.join(dir_path, file))[1]
     else:
         raise ValueError("Invalid sort criteria!")
     entries_list.sort(key=sort_func, reverse=desc)
@@ -184,9 +172,7 @@ def build_catalog_recursively(dir_path: str, save: bool, output: str) -> None:
         _save_logs_to_file(output, dir_path, message, logger_types.RECURSIVE)
 
 
-def _get_recursive_catalog(
-    root_dir: str, dir_list: List[str], subdir_path: Optional[str]
-) -> str:
+def _get_recursive_catalog(root_dir: str, dir_list: List[str], subdir_path: Optional[str]) -> str:
     if subdir_path is None:
         subdir_path = root_dir
         subdir_list = dir_list
@@ -208,9 +194,7 @@ def _get_recursive_catalog(
     return message + inner_msg
 
 
-def _get_catalog_messages(
-    dir_path: str, files_list: List[str], nested_dirs: List[str]
-) -> str:
+def _get_catalog_messages(dir_path: str, files_list: List[str], nested_dirs: List[str]) -> str:
     if not files_list:
         files_msg = log_messages.NO_FILES.format(dir_path=dir_path)
     else:
@@ -252,9 +236,7 @@ def build_tree(dir_path: str, save: bool, output: str) -> None:
     for root, _, files in os.walk(dir_path):
         level = root.count(os.sep) - 1
         indent = " " * 4 * level
-        tree_msg += "{}{} {}/\n".format(
-            indent, folder_emoji, os.path.abspath(root)
-        )
+        tree_msg += "{}{} {}/\n".format(indent, folder_emoji, os.path.abspath(root))
         sub_indent = " " * 4 * (level + 1)
         for file in files:
             tree_msg += "{}{} {}\n".format(sub_indent, file_emoji, file)
@@ -284,9 +266,7 @@ def build_tree(dir_path: str, save: bool, output: str) -> None:
     default=None,
     help="Path to output directory for the saved log file",
 )
-def build_pretty_tree(
-    dir_path: str, hidden: bool, save: bool, output: str
-) -> None:
+def build_pretty_tree(dir_path: str, hidden: bool, save: bool, output: str) -> None:
     """DIR_PATH: Path to directory to be scanned"""
 
     tree_msg = display_tree(dir_path, string_rep=True, show_hidden=hidden)
@@ -329,9 +309,7 @@ def search_by_name(dir_path: str, name: str, save: bool, output: str) -> None:
     if not files_list and not nested_dirs:
         log_msg = log_messages.NOT_FOUND
     else:
-        log_msg = log_messages.FOUND_BY_NAME.format(
-            dir_path=dir_path, keyword=name
-        )
+        log_msg = log_messages.FOUND_BY_NAME.format(dir_path=dir_path, keyword=name)
         if files_list:
             log_msg += log_messages.FOUND_FILES_BY_NAME.format(
                 files_list="\n\t- ".join(files_list),
@@ -360,9 +338,7 @@ def search_by_name(dir_path: str, name: str, save: bool, output: str) -> None:
     default=None,
     help="Path to output directory for the saved log file",
 )
-def search_by_name_recursively(
-    dir_path: str, name: str, save: bool, output: str
-) -> None:
+def search_by_name_recursively(dir_path: str, name: str, save: bool, output: str) -> None:
     """
     Search recursively by NAME keyword inside given DIR_PATH
     """
@@ -397,15 +373,11 @@ def _get_search_result(
             if name in entry:
                 valid_dirs.append(entry)
             nested_dirs.append(entry)
-            inner_msg += _get_search_result(
-                root_dir, dir_list, entry_path, name
-            )
+            inner_msg += _get_search_result(root_dir, dir_list, entry_path, name)
 
     if not files_list and not valid_dirs:
         return ""
-    log_msg = log_messages.FOUND_BY_NAME.format(
-        dir_path=subdir_path, keyword=name
-    )
+    log_msg = log_messages.FOUND_BY_NAME.format(dir_path=subdir_path, keyword=name)
     if files_list:
         log_msg += log_messages.FOUND_FILES_BY_NAME.format(
             files_list="\n\t- ".join(files_list),
