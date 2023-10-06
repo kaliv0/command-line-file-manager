@@ -178,14 +178,14 @@ def build_catalog_recursively(dir_path: str, save: bool, output: str) -> None:
     """DIR_PATH: Path to directory to be scanned"""
 
     dir_list = os.listdir(dir_path)
-    message = _get_recursive_catalog(dir_list, dir_path)
+    message = _get_recursive_catalog(dir_list, dir_path, None)
     click.echo(message)
     if save:
         _save_logs_to_file(output, dir_path, message, logger_types.RECURSIVE)
 
 
 def _get_recursive_catalog(
-    dir_list: List[str], root_dir: str, subdir_path=None
+    dir_list: List[str], root_dir: str, subdir_path: Optional[str]
 ) -> str:
     if subdir_path is None:
         subdir_path = root_dir
@@ -228,12 +228,28 @@ def _get_catalog_messages(
 
 
 #############################################################
-def build_tree(self):
+@click.command()
+@click.argument("dir_path", type=click.STRING)
+@click.option(
+    "--save",
+    type=click.BOOL,
+    default=False,
+    help="Boolean flag to save log message to file. Defaults to 'false'",
+)
+@click.option(
+    "--output",
+    type=click.STRING,
+    default=None,
+    help="Path to output directory for the saved log file",
+)
+def build_tree(dir_path: str, save: bool, output: str) -> None:
+    """DIR_PATH: Path to directory to be scanned"""
+
     folder_emoji = emoji.emojize(":file_folder:")
     file_emoji = emoji.emojize(":page_with_curl:")
 
     tree_msg = ""
-    for root, _, files in os.walk(self.dir_path):
+    for root, _, files in os.walk(dir_path):
         level = root.count(os.sep) - 1
         indent = " " * 4 * level
         tree_msg += "{}{} {}/\n".format(
@@ -242,11 +258,41 @@ def build_tree(self):
         sub_indent = " " * 4 * (level + 1)
         for file in files:
             tree_msg += "{}{} {}\n".format(sub_indent, file_emoji, file)
-    return tree_msg
+
+    click.echo(tree_msg)
+    if save:
+        _save_logs_to_file(output, dir_path, tree_msg, logger_types.TREE)
 
 
-def build_pretty_tree(self, show_hidden=True):
-    return display_tree(self.dir_path, string_rep=True, show_hidden=show_hidden)
+@click.command()
+@click.argument("dir_path", type=click.STRING)
+@click.option(
+    "--hidden",
+    type=click.BOOL,
+    default=False,
+    help="Boolean flag to include hidden files and folders. Defaults to 'false'",
+)
+@click.option(
+    "--save",
+    type=click.BOOL,
+    default=False,
+    help="Boolean flag to save log message to file. Defaults to 'false'",
+)
+@click.option(
+    "--output",
+    type=click.STRING,
+    default=None,
+    help="Path to output directory for the saved log file",
+)
+def build_pretty_tree(
+    dir_path: str, hidden: bool, save: bool, output: str
+) -> None:
+    """DIR_PATH: Path to directory to be scanned"""
+
+    tree_msg = display_tree(dir_path, string_rep=True, show_hidden=hidden)
+    click.echo(tree_msg)
+    if save:
+        _save_logs_to_file(output, dir_path, tree_msg, logger_types.TREE)
 
 
 def search_by_name(self, name):
