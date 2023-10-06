@@ -8,7 +8,7 @@ class LoggerFactory:
     CATALOG = "/catalog.txt"
     RECURSIVE_CATALOG = "/recursive_catalog.txt"
     TREE = "/tree.txt"
-    SEARCH="/search.txt"
+    SEARCH = "/search.txt"
 
     @classmethod
     def get_logger(cls, logger_type, output_dir):

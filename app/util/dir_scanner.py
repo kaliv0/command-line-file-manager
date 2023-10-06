@@ -178,14 +178,14 @@ def build_catalog_recursively(dir_path: str, save: bool, output: str) -> None:
     """DIR_PATH: Path to directory to be scanned"""
 
     dir_list = os.listdir(dir_path)
-    message = _get_recursive_catalog(dir_list, dir_path, None)
+    message = _get_recursive_catalog(dir_path, dir_list, None)
     click.echo(message)
     if save:
         _save_logs_to_file(output, dir_path, message, logger_types.RECURSIVE)
 
 
 def _get_recursive_catalog(
-    dir_list: List[str], root_dir: str, subdir_path: Optional[str]
+    root_dir: str, dir_list: List[str], subdir_path: Optional[str]
 ) -> str:
     if subdir_path is None:
         subdir_path = root_dir
@@ -202,7 +202,7 @@ def _get_recursive_catalog(
             files_list.append(entry)
         else:
             nested_dirs.append(entry)
-            inner_msg += _get_recursive_catalog(dir_list, root_dir, entry_path)
+            inner_msg += _get_recursive_catalog(root_dir, dir_list, entry_path)
 
     message = _get_catalog_messages(subdir_path, files_list, nested_dirs)
     return message + inner_msg
@@ -311,7 +311,7 @@ def build_pretty_tree(
     default=None,
     help="Path to output directory for the saved log file",
 )
-def search_by_name(dir_path: str, name: str, save: bool, output: str):
+def search_by_name(dir_path: str, name: str, save: bool, output: str) -> None:
     """
     Search by NAME keyword inside given DIR_PATH
     """
@@ -329,7 +329,9 @@ def search_by_name(dir_path: str, name: str, save: bool, output: str):
     if not files_list and not nested_dirs:
         log_msg = log_messages.NOT_FOUND
     else:
-        log_msg = log_messages.FOUND_BY_NAME.format(dir_path=dir_path, keyword=name)
+        log_msg = log_messages.FOUND_BY_NAME.format(
+            dir_path=dir_path, keyword=name
+        )
         if files_list:
             log_msg += log_messages.FOUND_FILES_BY_NAME.format(
                 files_list="\n\t- ".join(files_list),
@@ -343,10 +345,43 @@ def search_by_name(dir_path: str, name: str, save: bool, output: str):
         _save_logs_to_file(output, dir_path, log_msg, logger_types.SEARCH)
 
 
-def search_by_name_recursively(self, name, subdir_path=None):
+@click.command()
+@click.argument("dir_path", type=click.STRING)
+@click.argument("name", type=click.STRING)
+@click.option(
+    "--save",
+    type=click.BOOL,
+    default=False,
+    help="Boolean flag to save log message to file. Defaults to 'false'",
+)
+@click.option(
+    "--output",
+    type=click.STRING,
+    default=None,
+    help="Path to output directory for the saved log file",
+)
+def search_by_name_recursively(
+    dir_path: str, name: str, save: bool, output: str
+) -> None:
+    """
+    Search recursively by NAME keyword inside given DIR_PATH
+    """
+
+    dir_list = os.listdir(dir_path)
+    log_msg = _get_search_result(dir_path, dir_list, None, name)
+    if not log_msg:
+        log_msg = log_messages.NOT_FOUND
+    click.echo(log_msg)
+    if save:
+        _save_logs_to_file(output, dir_path, log_msg, logger_types.SEARCH)
+
+
+def _get_search_result(
+    root_dir: str, dir_list: List[str], subdir_path: Optional[str], name: str
+) -> str:
     if subdir_path is None:
-        subdir_path = self.dir_path
-        subdir_list = self.dir_list
+        subdir_path = root_dir
+        subdir_list = dir_list
     else:
         subdir_list = os.listdir(subdir_path)
 
@@ -362,7 +397,9 @@ def search_by_name_recursively(self, name, subdir_path=None):
             if name in entry:
                 valid_dirs.append(entry)
             nested_dirs.append(entry)
-            inner_msg += self.search_by_name_recursively(name, entry_path)
+            inner_msg += _get_search_result(
+                root_dir, dir_list, entry_path, name
+            )
 
     if not files_list and not valid_dirs:
         return ""

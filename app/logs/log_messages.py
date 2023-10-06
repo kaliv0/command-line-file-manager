@@ -19,9 +19,7 @@ NESTED_SUBDIRS = (
     + DELIMITER
 )
 
-NOT_FOUND = (
-    "Nothing found.\n"
-)
+NOT_FOUND = "Nothing found.\n"
 
 FOUND_BY_NAME = (
     "Inside directory '{dir_path}' the given keyword '{keyword}' was found\n"
