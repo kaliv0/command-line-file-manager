@@ -9,27 +9,10 @@ def cli():
 
 
 cli.add_command(dir_scanner.scan_files)  # noqa
+cli.add_command(dir_scanner.scan_subdirs)  # noqa
+cli.add_command(dir_scanner.build_catalog)  # noqa
+cli.add_command(dir_scanner.build_catalog_recursively)  # noqa
 
-
-# scanner = DirScanner(target_dir)
-# # scanner.scan_dir()
-# subdir_list = scanner.scan_subdirs()
-# logger.info(subdir_list)
-# files_list = scanner.scan_files(
-#     sort_criteria=sort_criteria, reverse_order=reverse_order
-# )
-# logger.info(files_list)
-
-# catalog_logger = LoggerFactory.get_logger(logger_types.CATALOG, output_dir)
-# catalog = scanner.build_catalog()
-# catalog_logger.info(catalog)
-#
-# recursive_catalog_logger = LoggerFactory.get_logger(
-#     logger_types.RECURSIVE, output_dir
-# )
-# recursive_catalog = scanner.build_catalog_recursively()
-# recursive_catalog_logger.info(recursive_catalog)
-#
 # tree_logger = LoggerFactory.get_logger(logger_types.TREE, output_dir)
 # tree_catalog = scanner.build_tree()
 # # tree_catalog = scanner.build_pretty_tree()
