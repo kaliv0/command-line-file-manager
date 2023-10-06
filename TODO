@@ -27,7 +27,11 @@ TO_IMPROVE:
 handle log output dir and log file name
 add stats (count and size) to catalogs (optional)
 add exception handling
+add short names for click options
 ======================
-add docstring
 add unit tests
 upload to PYPI with twine
+
+=====================
+NB: -> if default=None in click.options is missing -> sometimes Permission denied exception is raised
+(e.g. output log dir)

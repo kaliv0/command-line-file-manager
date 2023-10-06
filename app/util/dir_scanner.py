@@ -1,4 +1,5 @@
 import os
+from typing import Optional, List
 
 import click
 import emoji
@@ -14,8 +15,8 @@ from app.logs.logger_factory import LoggerFactory
     "--sort",
     type=click.STRING,
     default="name",
-    help="Sorting criteria. Choose between 'name', 'size', 'date', 'last_modified'. "
-         "Defaults to 'name' if not explicitly specified",
+    help="Sorting criteria. Choose between 'name', 'size', 'date', 'modified'. "
+    "Defaults to 'name' if not explicitly specified",
 )
 @click.option(
     "--desc",
@@ -41,87 +42,154 @@ def scan_files(
     """DIR_PATH: Path to directory to be scanned"""
 
     dir_list = os.listdir(dir_path)
-
     files_list = [
         entry
         for entry in dir_list
         if os.path.isfile(os.path.join(dir_path, entry))
     ]
 
-    if sort == "name":
-        sort_func = None
-    elif sort == "size":
-        sort_func = lambda file: os.stat(os.path.join(dir_path, file)).st_size
-        # sort_func = lambda file: os.path.getsize(os.path.join(self.dir_path, file))
-    elif sort in "date":
-        sort_func = lambda file: os.path.getctime(os.path.join(dir_path, file))
-    elif sort in "last_modified":
-        sort_func = lambda file: os.path.getmtime(os.path.join(dir_path, file))
-    else:
-        raise ValueError("Invalid sort criteria!")
-    files_list.sort(key=sort_func, reverse=desc)
-
     if not files_list:
         message = log_messages.NO_FILES.format(dir_path=dir_path)
     else:
+        _sort_entries_list(dir_path, files_list, sort, desc)
         message = log_messages.LISTED_FILES.format(
-            dir_path=dir_path,
-            files_list="\n".join(files_list)
-            # dir_path = self.dir_path,
-            # files_list="\n".join([str(os.stat(os.path.join(self.dir_path, f)).st_size) for f in files_list])
+            dir_path=dir_path, files_list="\n".join(files_list)
         )
     click.echo(message)
-
     if save:
-        if output is None:
-            output = dir_path
-        LoggerFactory.get_logger(logger_types.BASIC, output).info(message)
+        _save_logs_to_file(output, dir_path, message, logger_types.BASIC)
 
 
-def scan_subdirs(self):
+@click.command()
+@click.argument("dir_path", type=click.STRING)
+@click.option(
+    "--sort",
+    type=click.STRING,
+    default="name",
+    help="Sorting criteria. Choose between 'name', 'size', 'date', 'modified'. "
+    "Defaults to 'name' if not explicitly specified",
+)
+@click.option(
+    "--desc",
+    type=click.BOOL,
+    default=False,
+    help="Boolean flag to display result in descending order. Defaults to 'false'",
+)
+@click.option(
+    "--save",
+    type=click.BOOL,
+    default=False,
+    help="Boolean flag to save log message to file. Defaults to 'false'",
+)
+@click.option(
+    "--output",
+    type=click.STRING,
+    default=None,
+    help="Path to output directory for the saved log file",
+)
+def scan_subdirs(
+    dir_path: str, sort: str, desc: bool, save: bool, output: str
+) -> None:
+    """DIR_PATH: Path to directory to be scanned"""
+
+    dir_list = os.listdir(dir_path)
     subdir_list = [
         entry
-        for entry in self.dir_list
-        if os.path.isdir(os.path.join(self.dir_path, entry))
+        for entry in dir_list
+        if os.path.isdir(os.path.join(dir_path, entry))
     ]
+
     if not subdir_list:
-        return log_messages.NO_SUBDIRS.format(dir_path=self.dir_path)
+        message = log_messages.NO_SUBDIRS.format(dir_path=dir_path)
     else:
-        return log_messages.NESTED_SUBDIRS.format(
-            dir_path=self.dir_path, subdir_list="\n".join(subdir_list)
+        _sort_entries_list(dir_path, subdir_list, sort, desc)
+        message = log_messages.NESTED_SUBDIRS.format(
+            dir_path=dir_path, subdir_list="\n".join(subdir_list)
         )
+    click.echo(message)
+    if save:
+        _save_logs_to_file(output, dir_path, message, logger_types.BASIC)
 
 
-def build_catalog(self):
+def _sort_entries_list(
+    dir_path: str, entries_list: List[str], criteria: str, desc: bool
+) -> None:
+    if criteria == "name":
+        sort_func = None
+    elif criteria == "size":
+        sort_func = lambda file: os.path.getsize(os.path.join(dir_path, file))
+    elif criteria in "date":
+        sort_func = lambda file: os.path.getctime(os.path.join(dir_path, file))
+    elif criteria in "modified":
+        sort_func = lambda file: os.path.getmtime(os.path.join(dir_path, file))
+    else:
+        raise ValueError("Invalid sort criteria!")
+    entries_list.sort(key=sort_func, reverse=desc)
+
+
+#############################################################
+@click.command()
+@click.argument("dir_path", type=click.STRING)
+@click.option(
+    "--save",
+    type=click.BOOL,
+    default=False,
+    help="Boolean flag to save log message to file. Defaults to 'false'",
+)
+@click.option(
+    "--output",
+    type=click.STRING,
+    default=None,
+    help="Path to output directory for the saved log file",
+)
+def build_catalog(dir_path: str, save: bool, output: str):
+    """DIR_PATH: Path to directory to be scanned"""
+
+    dir_list = os.listdir(dir_path)
     files_list = []
     nested_dirs = []
-    for entry in self.dir_list:
-        if os.path.isfile(os.path.join(self.dir_path, entry)):
+    for entry in dir_list:
+        if os.path.isfile(os.path.join(dir_path, entry)):
             files_list.append(entry)
         else:
             nested_dirs.append(entry)
 
-    if not files_list:
-        files_msg = log_messages.NO_FILES.format(self.dir_path)
-    else:
-        files_msg = log_messages.LISTED_FILES.format(
-            dir_path=self.dir_path, files_list="\n".join(files_list)
-        )
-
-    if not nested_dirs:
-        nested_dirs_msg = log_messages.NO_SUBDIRS.format(dir_path=self.dir_path)
-    else:
-        nested_dirs_msg = log_messages.NESTED_SUBDIRS.format(
-            dir_path=self.dir_path, subdir_list="\n".join(nested_dirs)
-        )
-
-    return files_msg + nested_dirs_msg
+    message = _get_catalog_messages(dir_path, files_list, nested_dirs)
+    click.echo(message)
+    if save:
+        _save_logs_to_file(output, dir_path, message, logger_types.CATALOG)
 
 
-def build_catalog_recursively(self, subdir_path=None):
+@click.command()
+@click.argument("dir_path", type=click.STRING)
+@click.option(
+    "--save",
+    type=click.BOOL,
+    default=False,
+    help="Boolean flag to save log message to file. Defaults to 'false'",
+)
+@click.option(
+    "--output",
+    type=click.STRING,
+    default=None,
+    help="Path to output directory for the saved log file",
+)
+def build_catalog_recursively(dir_path: str, save: bool, output: str) -> None:
+    """DIR_PATH: Path to directory to be scanned"""
+
+    dir_list = os.listdir(dir_path)
+    message = _get_recursive_catalog(dir_list, dir_path)
+    click.echo(message)
+    if save:
+        _save_logs_to_file(output, dir_path, message, logger_types.RECURSIVE)
+
+
+def _get_recursive_catalog(
+    dir_list: List[str], root_dir: str, subdir_path=None
+) -> str:
     if subdir_path is None:
-        subdir_path = self.dir_path
-        subdir_list = self.dir_list
+        subdir_path = root_dir
+        subdir_list = dir_list
     else:
         subdir_list = os.listdir(subdir_path)
 
@@ -134,25 +202,32 @@ def build_catalog_recursively(self, subdir_path=None):
             files_list.append(entry)
         else:
             nested_dirs.append(entry)
-            inner_msg += self.build_catalog_recursively(entry_path)
+            inner_msg += _get_recursive_catalog(dir_list, root_dir, entry_path)
 
+    message = _get_catalog_messages(subdir_path, files_list, nested_dirs)
+    return message + inner_msg
+
+
+def _get_catalog_messages(
+    dir_path: str, files_list: List[str], nested_dirs: List[str]
+) -> str:
     if not files_list:
-        files_msg = log_messages.NO_FILES.format(dir_path=subdir_path)
+        files_msg = log_messages.NO_FILES.format(dir_path=dir_path)
     else:
         files_msg = log_messages.LISTED_FILES.format(
-            dir_path=subdir_path, files_list="\n".join(files_list)
+            dir_path=dir_path, files_list="\n".join(files_list)
         )
 
     if not nested_dirs:
-        nested_dirs_msg = log_messages.NO_SUBDIRS.format(dir_path=subdir_path)
+        nested_dirs_msg = log_messages.NO_SUBDIRS.format(dir_path=dir_path)
     else:
         nested_dirs_msg = log_messages.NESTED_SUBDIRS.format(
-            dir_path=subdir_path, subdir_list="\n".join(nested_dirs)
+            dir_path=dir_path, subdir_list="\n".join(nested_dirs)
         )
+    return files_msg + nested_dirs_msg
 
-    return files_msg + nested_dirs_msg + inner_msg
 
-
+#############################################################
 def build_tree(self):
     folder_emoji = emoji.emojize(":file_folder:")
     file_emoji = emoji.emojize(":page_with_curl:")
@@ -224,3 +299,11 @@ def search_by_name_recursively(self, name, subdir_path=None):
             subdir_list="\n\t- ".join(valid_dirs),
         )
     return log_msg + log_messages.DELIMITER + inner_msg
+
+
+def _save_logs_to_file(
+    output_dir: Optional[str], dir_path: str, message: str, logger_type: str
+) -> None:
+    if not output_dir:
+        output_dir = dir_path
+    LoggerFactory.get_logger(logger_type, output_dir).info(message)
