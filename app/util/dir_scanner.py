@@ -295,19 +295,52 @@ def build_pretty_tree(
         _save_logs_to_file(output, dir_path, tree_msg, logger_types.TREE)
 
 
-def search_by_name(self, name):
+#############################################################
+@click.command()
+@click.argument("dir_path", type=click.STRING)
+@click.argument("name", type=click.STRING)
+@click.option(
+    "--save",
+    type=click.BOOL,
+    default=False,
+    help="Boolean flag to save log message to file. Defaults to 'false'",
+)
+@click.option(
+    "--output",
+    type=click.STRING,
+    default=None,
+    help="Path to output directory for the saved log file",
+)
+def search_by_name(dir_path: str, name: str, save: bool, output: str):
+    """
+    Search by NAME keyword inside given DIR_PATH
+    """
+
+    dir_list = os.listdir(dir_path)
     files_list = []
     nested_dirs = []
-    for entry in self.dir_list:
+    for entry in dir_list:
         if name in entry:
-            if os.path.isfile(os.path.join(self.dir_path, entry)):
+            if os.path.isfile(os.path.join(dir_path, entry)):
                 files_list.append(entry)
             else:
                 nested_dirs.append(entry)
-    return log_messages.FOUND_BY_NAME.format(
-        files_list="\n\t".join(files_list),
-        nested_dirs="\n\t".join(nested_dirs),
-    )
+
+    if not files_list and not nested_dirs:
+        log_msg = log_messages.NOT_FOUND
+    else:
+        log_msg = log_messages.FOUND_BY_NAME.format(dir_path=dir_path, keyword=name)
+        if files_list:
+            log_msg += log_messages.FOUND_FILES_BY_NAME.format(
+                files_list="\n\t- ".join(files_list),
+            )
+        if nested_dirs:
+            log_msg += log_messages.FOUND_DIRS_BY_NAME.format(
+                subdir_list="\n\t- ".join(nested_dirs),
+            )
+    click.echo(log_msg)
+    if save:
+        _save_logs_to_file(output, dir_path, log_msg, logger_types.SEARCH)
 
 
 def search_by_name_recursively(self, name, subdir_path=None):

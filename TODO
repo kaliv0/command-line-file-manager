@@ -28,6 +28,8 @@ handle log output dir and log file name
 add stats (count and size) to catalogs (optional)
 add exception handling
 add short names for click options
+add check to remove final / in output_dir given by user
+
 ======================
 add unit tests
 upload to PYPI with twine
