@@ -11,6 +11,11 @@ add archiving option -> save to given output dir or in dir to be archived
 upload archived file to GoogleDrive
 
 ------------
+move files to subfolders -> by file extension
+                         -> by date range ??
+                         -> skip hidden files
+
+------------
 show stats (not logged, only in terminal) -> files and dirs count (including recursively)
                                           -> size in total
 =====================
