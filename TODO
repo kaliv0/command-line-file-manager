@@ -29,6 +29,8 @@ add check to remove final '/' in output_dir given by user
 
 move search functions to separate module
 
+change dir_path form relative to absolute in logs?
+
 ======================
 add unit tests
 upload to PYPI with twine
