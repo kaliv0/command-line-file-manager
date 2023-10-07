@@ -3,7 +3,7 @@ import shutil
 
 import click
 
-from app.logs import logger_types
+from app.logs import logger_types, log_messages
 from app.utils.common import save_logs_to_file
 
 FILE_EXTENSIONS = {
@@ -77,7 +77,6 @@ def organize_files(dir_path: str, save: bool, output: str) -> None:
     dir_list = os.listdir(dir_path)
     abs_dir_path = os.path.abspath(dir_path)
     if save:
-        # TODO: use list instead and "\n".join at the end?
         log_msg = ""
     for entry in dir_list:
         abs_entry_path = os.path.join(abs_dir_path, entry)
@@ -86,13 +85,15 @@ def organize_files(dir_path: str, save: bool, output: str) -> None:
             target_dir_name = FILE_EXTENSIONS.get(file_extension, COMMON_DIR)
             target_dir = os.path.join(abs_dir_path, target_dir_name)
             if not os.path.exists(target_dir):
-                click.echo(f"Creating folder {target_dir}")
+                dir_msg = log_messages.CREATE_FOLDER.format(target_dir)
+                click.echo(dir_msg)
                 if save:
-                    log_msg += f"Creating folder {target_dir}" + "\n"
+                    log_msg += dir_msg + "\n"
                 os.makedirs(target_dir)
-            click.echo(f"Moving {entry} to {target_dir}")
+            file_msg = log_messages.MOVE_FILE.format(entry, target_dir)
+            click.echo(file_msg)
             if save:
-                log_msg += f"Moving {entry} to {target_dir}" + "\n"
+                log_msg += file_msg + "\n"
             shutil.copy(abs_entry_path, os.path.join(target_dir, entry))
 
     if save:

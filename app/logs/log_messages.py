@@ -23,3 +23,7 @@ FOUND_BY_NAME = "Inside directory '{dir_path}' the given keyword '{keyword}' was
 FOUND_FILES_BY_NAME = "- in the following file names:\n" + "\t- {files_list}\n"
 
 FOUND_DIRS_BY_NAME = "- in the following subdirectory names:\n" + "\t- {subdir_list}\n"
+
+CREATE_FOLDER = "Creating folder {target_dir}"
+
+MOVE_FILE = "Moving {entry} to {target_dir}"
