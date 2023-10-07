@@ -7,6 +7,7 @@ from directory_tree import display_tree
 
 from app.logs import log_messages, logger_types
 from app.logs.logger_factory import LoggerFactory
+from app.utils.common import save_logs_to_file
 
 
 @click.command()
@@ -51,7 +52,7 @@ def scan_files(dir_path: str, sort: str, desc: bool, save: bool, output: str) ->
         )
     click.echo(message)
     if save:
-        _save_logs_to_file(output, dir_path, message, logger_types.BASIC)
+        save_logs_to_file(output, dir_path, message, logger_types.BASIC)
 
 
 @click.command()
@@ -96,7 +97,7 @@ def scan_subdirs(dir_path: str, sort: str, desc: bool, save: bool, output: str) 
         )
     click.echo(message)
     if save:
-        _save_logs_to_file(output, dir_path, message, logger_types.BASIC)
+        save_logs_to_file(output, dir_path, message, logger_types.BASIC)
 
 
 def _sort_entries_list(dir_path: str, entries_list: List[str], criteria: str, desc: bool) -> None:
@@ -145,7 +146,7 @@ def build_catalog(dir_path: str, save: bool, output: str):
     message = _get_catalog_messages(dir_path, files_list, nested_dirs)
     click.echo(message)
     if save:
-        _save_logs_to_file(output, dir_path, message, logger_types.CATALOG)
+        save_logs_to_file(output, dir_path, message, logger_types.CATALOG)
 
 
 @click.command()
@@ -169,7 +170,7 @@ def build_catalog_recursively(dir_path: str, save: bool, output: str) -> None:
     message = _get_recursive_catalog(dir_path, dir_list, None)
     click.echo(message)
     if save:
-        _save_logs_to_file(output, dir_path, message, logger_types.RECURSIVE)
+        save_logs_to_file(output, dir_path, message, logger_types.RECURSIVE)
 
 
 def _get_recursive_catalog(root_dir: str, dir_list: List[str], subdir_path: Optional[str]) -> str:
@@ -243,7 +244,7 @@ def build_tree(dir_path: str, save: bool, output: str) -> None:
 
     click.echo(tree_msg)
     if save:
-        _save_logs_to_file(output, dir_path, tree_msg, logger_types.TREE)
+        save_logs_to_file(output, dir_path, tree_msg, logger_types.TREE)
 
 
 @click.command()
@@ -272,7 +273,7 @@ def build_pretty_tree(dir_path: str, hidden: bool, save: bool, output: str) -> N
     tree_msg = display_tree(dir_path, string_rep=True, show_hidden=hidden)
     click.echo(tree_msg)
     if save:
-        _save_logs_to_file(output, dir_path, tree_msg, logger_types.TREE)
+        save_logs_to_file(output, dir_path, tree_msg, logger_types.TREE)
 
 
 #############################################################
@@ -320,7 +321,7 @@ def search_by_name(dir_path: str, name: str, save: bool, output: str) -> None:
             )
     click.echo(log_msg)
     if save:
-        _save_logs_to_file(output, dir_path, log_msg, logger_types.SEARCH)
+        save_logs_to_file(output, dir_path, log_msg, logger_types.SEARCH)
 
 
 @click.command()
@@ -349,7 +350,7 @@ def search_by_name_recursively(dir_path: str, name: str, save: bool, output: str
         log_msg = log_messages.NOT_FOUND
     click.echo(log_msg)
     if save:
-        _save_logs_to_file(output, dir_path, log_msg, logger_types.SEARCH)
+        save_logs_to_file(output, dir_path, log_msg, logger_types.SEARCH)
 
 
 def _get_search_result(
@@ -387,11 +388,3 @@ def _get_search_result(
             subdir_list="\n\t- ".join(valid_dirs),
         )
     return log_msg + log_messages.DELIMITER + inner_msg
-
-
-def _save_logs_to_file(
-    output_dir: Optional[str], dir_path: str, message: str, logger_type: str
-) -> None:
-    if not output_dir:
-        output_dir = dir_path
-    LoggerFactory.get_logger(logger_type, output_dir).info(message)

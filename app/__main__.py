@@ -1,6 +1,6 @@
 import click
 
-from app.util import scanner, organizer
+from app.utils import scanner, organizer
 
 
 @click.group()

@@ -4,11 +4,13 @@ from app.logs import logger_types
 
 
 class LoggerFactory:
+    # TODO: etract ass CONFIG map outside class
     FILES = "/list.txt"
     CATALOG = "/catalog.txt"
     RECURSIVE_CATALOG = "/recursive_catalog.txt"
     TREE = "/tree.txt"
     SEARCH = "/search.txt"
+    ORGANIZE = "/organize.txt"
 
     @classmethod
     def get_logger(cls, logger_type, output_dir):
@@ -22,6 +24,8 @@ class LoggerFactory:
             return cls._configure_logger(logger_types.TREE, output_dir + cls.TREE)
         elif logger_type == logger_types.SEARCH:
             return cls._configure_logger(logger_types.SEARCH, output_dir + cls.SEARCH)
+        elif logger_type == logger_types.ORGANIZE:
+            return cls._configure_logger(logger_types.ORGANIZE, output_dir + cls.ORGANIZE)
 
     @staticmethod
     def _configure_logger(logger_name, output_file_name):
