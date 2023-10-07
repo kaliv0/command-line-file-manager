@@ -3,7 +3,7 @@ requires = ["setuptools>=65.5.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "File_Manager"
+name = "Command_Line_File_Manager"
 version = "0.1.0"
 description = ""
 readme = "README.md"
