@@ -35,9 +35,13 @@ change dir_path from relative to absolute in logs?
 
 add autocomplete -> use auo_click_auto or write custom functions
 
+in recursive functions -> remove building dir_list from root and passing by reference to inner function
+
 ======================
 add unit tests
 upload to PYPI with twine
+
+improve logging in organize -> from "bulk" at the end to "stream" in real time
 
 =====================
 NB: -> if default=None in click.options is missing -> sometimes Permission denied exception is raised

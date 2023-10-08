@@ -18,3 +18,4 @@ cli.add_command(scanner.search_by_name)
 cli.add_command(scanner.search_by_name_recursively)
 
 cli.add_command(organizer.organize_files)
+cli.add_command(organizer.organize_files_recursively)

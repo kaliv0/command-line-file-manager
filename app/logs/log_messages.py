@@ -27,3 +27,5 @@ FOUND_DIRS_BY_NAME = "- in the following subdirectory names:\n" + "\t- {subdir_l
 CREATE_FOLDER = "Creating folder {target_dir}"
 
 MOVE_FILE = "Moving {entry} to {target_dir}"
+
+INSIDE_DIR = "Inside {abs_dir_path}"

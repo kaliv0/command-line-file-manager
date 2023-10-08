@@ -9,28 +9,32 @@ RECURSIVE_CATALOG = "/recursive_catalog.txt"
 TREE = "/tree.txt"
 SEARCH = "/search.txt"
 ORGANIZE = "/organize.txt"
+RECURSIVE_ORGANIZE = "/organize_recursively.txt"
 
 LOG_FORMAT = "%(message)s"
 
 
 class LoggerFactory:
     @classmethod
-    def get_logger(cls, logger_type, output_dir):
-        if logger_type == logger_types.BASIC:
-            return cls._configure_logger(logger_types.BASIC, output_dir + FILES)
-        elif logger_type == logger_types.CATALOG:
-            return cls._configure_logger(logger_types.CATALOG, output_dir + CATALOG)
-        elif logger_type == logger_types.RECURSIVE:
-            return cls._configure_logger(logger_types.RECURSIVE, output_dir + RECURSIVE_CATALOG)
-        elif logger_type == logger_types.TREE:
-            return cls._configure_logger(logger_types.TREE, output_dir + TREE)
-        elif logger_type == logger_types.SEARCH:
-            return cls._configure_logger(logger_types.SEARCH, output_dir + SEARCH)
-        elif logger_type == logger_types.ORGANIZE:
-            return cls._configure_logger(logger_types.ORGANIZE, output_dir + ORGANIZE)
+    def get_logger(cls, logger_type: str, output_dir: str) -> logging.Logger:
+        match logger_type:
+            case logger_types.BASIC:
+                return cls._configure_logger(logger_types.BASIC, output_dir + FILES)
+            case logger_types.CATALOG:
+                return cls._configure_logger(logger_types.CATALOG, output_dir + CATALOG)
+            case logger_types.RECURSIVE:
+                return cls._configure_logger(logger_types.RECURSIVE, output_dir + RECURSIVE_CATALOG)
+            case logger_types.TREE:
+                return cls._configure_logger(logger_types.TREE, output_dir + TREE)
+            case logger_types.SEARCH:
+                return cls._configure_logger(logger_types.SEARCH, output_dir + SEARCH)
+            case logger_types.ORGANIZE:
+                return cls._configure_logger(logger_types.ORGANIZE, output_dir + ORGANIZE)
+            case logger_types.RECURSIVE_ORGANIZE:
+                return cls._configure_logger(logger_types.ORGANIZE, output_dir + RECURSIVE_ORGANIZE)
 
     @staticmethod
-    def _configure_logger(logger_name, output_file_name):
+    def _configure_logger(logger_name: str, output_file_name: str) -> logging.Logger:
         logger = logging.getLogger(logger_name)
         f_handler = logging.FileHandler(filename=output_file_name, mode="w")
         formatter = logging.Formatter(LOG_FORMAT)

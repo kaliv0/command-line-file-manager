@@ -6,7 +6,6 @@ import emoji
 from directory_tree import display_tree
 
 from app.logs import log_messages, logger_types
-from app.logs.logger_factory import LoggerFactory
 from app.utils.common import save_logs_to_file
 
 
@@ -101,18 +100,19 @@ def scan_subdirs(dir_path: str, sort: str, desc: bool, save: bool, output: str) 
 
 
 def _sort_entries_list(dir_path: str, entries_list: List[str], criteria: str, desc: bool) -> None:
-    if criteria == "name":
-        sort_func = None
-    elif criteria == "size":
-        sort_func = lambda file: os.path.getsize(os.path.join(dir_path, file))
-    elif criteria in "date":
-        sort_func = lambda file: os.path.getctime(os.path.join(dir_path, file))
-    elif criteria in "modified":
-        sort_func = lambda file: os.path.getmtime(os.path.join(dir_path, file))
-    elif criteria in "type":
-        sort_func = lambda file: os.path.splitext(os.path.join(dir_path, file))[1]
-    else:
-        raise ValueError("Invalid sort criteria!")
+    match criteria:
+        case "name":
+            sort_func = None
+        case "size":
+            sort_func = lambda file: os.path.getsize(os.path.join(dir_path, file))
+        case "date":
+            sort_func = lambda file: os.path.getctime(os.path.join(dir_path, file))
+        case "modified":
+            sort_func = lambda file: os.path.getmtime(os.path.join(dir_path, file))
+        case "type":
+            sort_func = lambda file: os.path.splitext(os.path.join(dir_path, file))[1]
+        case _:
+            raise ValueError("Invalid sort criteria!")
     entries_list.sort(key=sort_func, reverse=desc)
 
 
