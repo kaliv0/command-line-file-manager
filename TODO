@@ -29,8 +29,6 @@ add check to remove final '/' in output_dir given by user
 
 add ignore_case for user input
 
-move search functions to separate module?
-
 change dir_path from relative to absolute in logs?
 
 add autocomplete -> use auo_click_auto or write custom functions

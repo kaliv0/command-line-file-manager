@@ -1,6 +1,6 @@
 import os
 import shutil
-from typing import Optional, List
+from typing import List
 
 import click
 
@@ -92,7 +92,7 @@ def organize_files(dir_path: str, save: bool, output: str) -> None:
             file_msg = log_messages.MOVE_FILE.format(entry=entry, target_dir=target_dir)
             click.echo(file_msg)
             log_msg.append(file_msg)
-            shutil.copy(abs_entry_path, os.path.join(target_dir, entry))
+            shutil.move(abs_entry_path, os.path.join(target_dir, entry))
 
     if save:
         final_msg = "\n".join(log_msg)
@@ -101,6 +101,12 @@ def organize_files(dir_path: str, save: bool, output: str) -> None:
 
 @click.command()
 @click.argument("dir_path", type=click.STRING)
+@click.option(
+    "--flat",
+    type=click.BOOL,
+    default=False,
+    help="Boolean flag to move all files to target directories inside parent folder. Defaults to 'false'",
+)
 @click.option(
     "--save",
     type=click.BOOL,
@@ -113,19 +119,23 @@ def organize_files(dir_path: str, save: bool, output: str) -> None:
     default=None,
     help="Path to output directory for the saved log file",
 )
-def organize_files_recursively(dir_path: str, save: bool, output: str) -> None:
+def organize_files_recursively(dir_path: str, flat: bool, save: bool, output: str) -> None:
     """
     Search recursively by NAME keyword inside given DIR_PATH
     """
 
+    abs_dir_path = os.path.abspath(dir_path)
     log_msg = []
-    _handle_files(os.path.abspath(dir_path), "", save, log_msg)
+    if flat:
+        _handle_files_flat(abs_dir_path, "", abs_dir_path, log_msg)
+    else:
+        _handle_files(abs_dir_path, "", log_msg)
     if save:
         final_msg = "\n".join(log_msg)
         save_logs_to_file(output, dir_path, final_msg, logger_types.RECURSIVE_ORGANIZE)
 
 
-def _handle_files(parent_dir: str, subdir_path: Optional[str], save: bool, log_msg: List) -> None:
+def _handle_files(parent_dir: str, subdir_path: str, log_msg: List) -> None:
     abs_dir_path = os.path.join(parent_dir, subdir_path)
     dir_list = os.listdir(abs_dir_path)
 
@@ -150,9 +160,42 @@ def _handle_files(parent_dir: str, subdir_path: Optional[str], save: bool, log_m
             file_msg = log_messages.MOVE_FILE.format(entry=entry, target_dir=target_dir)
             click.echo(file_msg)
             log_msg.append(file_msg)
-            shutil.copy(abs_entry_path, os.path.join(target_dir, entry))
+            shutil.move(abs_entry_path, os.path.join(target_dir, entry))
         elif os.path.isdir(abs_entry_path):
             nested_dirs.append(abs_entry_path)
 
     for nested_dir in nested_dirs:
-        _handle_files(abs_dir_path, nested_dir, save, log_msg)
+        _handle_files(abs_dir_path, nested_dir, log_msg)
+
+
+def _handle_files_flat(parent_dir: str, subdir_path: str, root_dir: str, log_msg: List) -> None:
+    abs_dir_path = os.path.join(parent_dir, subdir_path)
+    dir_list = os.listdir(abs_dir_path)
+
+    header_msg = log_messages.INSIDE_DIR.format(abs_dir_path=abs_dir_path)
+    click.echo(header_msg)
+    log_msg.append(header_msg)
+
+    nested_dirs = []
+    for entry in dir_list:
+        abs_entry_path = os.path.join(abs_dir_path, entry)
+        if os.path.isfile(abs_entry_path):
+            file_extension = os.path.splitext(entry)[1]
+            target_dir_name = FILE_EXTENSIONS.get(file_extension, COMMON_DIR)
+            target_dir = os.path.join(root_dir, target_dir_name)
+
+            if not os.path.exists(target_dir):
+                dir_msg = log_messages.CREATE_FOLDER.format(target_dir=target_dir)
+                click.echo(dir_msg)
+                log_msg.append(dir_msg)
+                os.makedirs(target_dir)
+
+            file_msg = log_messages.MOVE_FILE.format(entry=entry, target_dir=target_dir)
+            click.echo(file_msg)
+            log_msg.append(file_msg)
+            shutil.move(abs_entry_path, os.path.join(target_dir, entry))
+        elif os.path.isdir(abs_entry_path):
+            nested_dirs.append(abs_entry_path)
+
+    for nested_dir in nested_dirs:
+        _handle_files_flat(abs_dir_path, nested_dir, root_dir, log_msg)

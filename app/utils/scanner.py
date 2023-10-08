@@ -166,19 +166,16 @@ def build_catalog(dir_path: str, save: bool, output: str):
 def build_catalog_recursively(dir_path: str, save: bool, output: str) -> None:
     """DIR_PATH: Path to directory to be scanned"""
 
-    dir_list = os.listdir(dir_path)
-    message = _get_recursive_catalog(dir_path, dir_list, None)
+    message = _get_recursive_catalog(dir_path, None)
     click.echo(message)
     if save:
         save_logs_to_file(output, dir_path, message, logger_types.RECURSIVE)
 
 
-def _get_recursive_catalog(root_dir: str, dir_list: List[str], subdir_path: Optional[str]) -> str:
+def _get_recursive_catalog(root_dir: str, subdir_path: Optional[str]) -> str:
     if subdir_path is None:
         subdir_path = root_dir
-        subdir_list = dir_list
-    else:
-        subdir_list = os.listdir(subdir_path)
+    subdir_list = os.listdir(subdir_path)
 
     files_list = []
     nested_dirs = []
@@ -189,7 +186,7 @@ def _get_recursive_catalog(root_dir: str, dir_list: List[str], subdir_path: Opti
             files_list.append(entry)
         else:
             nested_dirs.append(entry)
-            inner_msg += _get_recursive_catalog(root_dir, dir_list, entry_path)
+            inner_msg += _get_recursive_catalog(root_dir, entry_path)
 
     message = _get_catalog_messages(subdir_path, files_list, nested_dirs)
     return message + inner_msg
@@ -344,8 +341,7 @@ def search_by_name_recursively(dir_path: str, name: str, save: bool, output: str
     Search recursively by NAME keyword inside given DIR_PATH
     """
 
-    dir_list = os.listdir(dir_path)
-    log_msg = _get_search_result(dir_path, dir_list, None, name)
+    log_msg = _get_search_result(dir_path, None, name)
     if not log_msg:
         log_msg = log_messages.NOT_FOUND
     click.echo(log_msg)
@@ -353,14 +349,10 @@ def search_by_name_recursively(dir_path: str, name: str, save: bool, output: str
         save_logs_to_file(output, dir_path, log_msg, logger_types.SEARCH)
 
 
-def _get_search_result(
-    root_dir: str, dir_list: List[str], subdir_path: Optional[str], name: str
-) -> str:
+def _get_search_result(root_dir: str, subdir_path: Optional[str], name: str) -> str:
     if subdir_path is None:
         subdir_path = root_dir
-        subdir_list = dir_list
-    else:
-        subdir_list = os.listdir(subdir_path)
+    subdir_list = os.listdir(subdir_path)
 
     files_list = []
     nested_dirs = []
@@ -374,7 +366,7 @@ def _get_search_result(
             if name in entry:
                 valid_dirs.append(entry)
             nested_dirs.append(entry)
-            inner_msg += _get_search_result(root_dir, dir_list, entry_path, name)
+            inner_msg += _get_search_result(root_dir, entry_path, name)
 
     if not files_list and not valid_dirs:
         return ""
