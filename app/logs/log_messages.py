@@ -29,3 +29,5 @@ CREATE_FOLDER = "Creating folder {target_dir}"
 MOVE_FILE = "Moving {entry} to {target_dir}"
 
 INSIDE_DIR = "----- Inside {abs_dir_path} -----"
+
+SKIP_FILE = "Skipping {entry}"

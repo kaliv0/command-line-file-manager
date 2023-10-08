@@ -59,6 +59,13 @@ COMMON_DIR = "other"
 @click.command()
 @click.argument("dir_path", type=click.STRING)
 @click.option(
+    "--exclude",
+    type=click.STRING,
+    default=None,
+    help="Single or multiple file extensions to be skipped separated by comma. "
+    "E.g. --exclude=.pdf,.mp3",
+)
+@click.option(
     "--save",
     type=click.BOOL,
     default=False,
@@ -70,10 +77,12 @@ COMMON_DIR = "other"
     default=None,
     help="Path to output directory for the saved log file",
 )
-def organize_files(dir_path: str, save: bool, output: str) -> None:
+def organize_files(dir_path: str, exclude: str, save: bool, output: str) -> None:
     """
     Search recursively by NAME keyword inside given DIR_PATH
     """
+
+    exclude_list = exclude.split(",") if exclude else []
 
     dir_list = os.listdir(dir_path)
     abs_dir_path = os.path.abspath(dir_path)
@@ -82,6 +91,12 @@ def organize_files(dir_path: str, save: bool, output: str) -> None:
         abs_entry_path = os.path.join(abs_dir_path, entry)
         if os.path.isfile(abs_entry_path):
             file_extension = os.path.splitext(entry)[1]
+            if file_extension in exclude_list:
+                skip_msg = log_messages.SKIP_FILE.format(entry=entry)
+                click.echo(skip_msg)
+                log_msg.append(skip_msg)
+                continue
+
             target_dir_name = FILE_EXTENSIONS.get(file_extension, COMMON_DIR)
             target_dir = os.path.join(abs_dir_path, target_dir_name)
             if not os.path.exists(target_dir):
@@ -102,6 +117,13 @@ def organize_files(dir_path: str, save: bool, output: str) -> None:
 @click.command()
 @click.argument("dir_path", type=click.STRING)
 @click.option(
+    "--exclude",
+    type=click.STRING,
+    default=None,
+    help="Single or multiple file extensions to be skipped separated by comma. "
+    "E.g. --exclude=.pdf,.mp3",
+)
+@click.option(
     "--flat",
     type=click.BOOL,
     default=False,
@@ -119,23 +141,28 @@ def organize_files(dir_path: str, save: bool, output: str) -> None:
     default=None,
     help="Path to output directory for the saved log file",
 )
-def organize_files_recursively(dir_path: str, flat: bool, save: bool, output: str) -> None:
+def organize_files_recursively(
+    dir_path: str, exclude: str, flat: bool, save: bool, output: str
+) -> None:
     """
     Search recursively by NAME keyword inside given DIR_PATH
     """
 
     abs_dir_path = os.path.abspath(dir_path)
+    exclude_list = exclude.split(",") if exclude else []
     log_msg = []
     if flat:
-        _handle_files_flat(abs_dir_path, "", abs_dir_path, log_msg)
+        _flat_handle_files(abs_dir_path, "", abs_dir_path, exclude_list, log_msg)
     else:
-        _handle_files(abs_dir_path, "", log_msg)
+        _handle_files(abs_dir_path, "", exclude_list, log_msg)
     if save:
         final_msg = "\n".join(log_msg)
         save_logs_to_file(output, dir_path, final_msg, logger_types.RECURSIVE_ORGANIZE)
 
 
-def _handle_files(parent_dir: str, subdir_path: str, log_msg: List) -> None:
+def _handle_files(
+    parent_dir: str, subdir_path: str, exclude_list: List[str], log_msg: List
+) -> None:
     abs_dir_path = os.path.join(parent_dir, subdir_path)
     dir_list = os.listdir(abs_dir_path)
 
@@ -148,6 +175,12 @@ def _handle_files(parent_dir: str, subdir_path: str, log_msg: List) -> None:
         abs_entry_path = os.path.join(abs_dir_path, entry)
         if os.path.isfile(abs_entry_path):
             file_extension = os.path.splitext(entry)[1]
+            if file_extension in exclude_list:
+                skip_msg = log_messages.SKIP_FILE.format(entry=entry)
+                click.echo(skip_msg)
+                log_msg.append(skip_msg)
+                continue
+
             target_dir_name = FILE_EXTENSIONS.get(file_extension, COMMON_DIR)
             target_dir = os.path.join(abs_dir_path, target_dir_name)
 
@@ -165,10 +198,12 @@ def _handle_files(parent_dir: str, subdir_path: str, log_msg: List) -> None:
             nested_dirs.append(abs_entry_path)
 
     for nested_dir in nested_dirs:
-        _handle_files(abs_dir_path, nested_dir, log_msg)
+        _handle_files(abs_dir_path, nested_dir, exclude_list, log_msg)
 
 
-def _handle_files_flat(parent_dir: str, subdir_path: str, root_dir: str, log_msg: List) -> None:
+def _flat_handle_files(
+    parent_dir: str, subdir_path: str, root_dir: str, exclude_list: List[str], log_msg: List
+) -> None:
     abs_dir_path = os.path.join(parent_dir, subdir_path)
     dir_list = os.listdir(abs_dir_path)
 
@@ -181,6 +216,12 @@ def _handle_files_flat(parent_dir: str, subdir_path: str, root_dir: str, log_msg
         abs_entry_path = os.path.join(abs_dir_path, entry)
         if os.path.isfile(abs_entry_path):
             file_extension = os.path.splitext(entry)[1]
+            if file_extension in exclude_list:
+                skip_msg = log_messages.SKIP_FILE.format(entry=entry)
+                click.echo(skip_msg)
+                log_msg.append(skip_msg)
+                continue
+
             target_dir_name = FILE_EXTENSIONS.get(file_extension, COMMON_DIR)
             target_dir = os.path.join(root_dir, target_dir_name)
 
@@ -198,4 +239,4 @@ def _handle_files_flat(parent_dir: str, subdir_path: str, root_dir: str, log_msg
             nested_dirs.append(abs_entry_path)
 
     for nested_dir in nested_dirs:
-        _handle_files_flat(abs_dir_path, nested_dir, root_dir, log_msg)
+        _flat_handle_files(abs_dir_path, nested_dir, root_dir, exclude_list, log_msg)
