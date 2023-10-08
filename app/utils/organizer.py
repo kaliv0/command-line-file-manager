@@ -152,7 +152,8 @@ def organize_files_recursively(
     exclude_list = exclude.split(",") if exclude else []
     log_msg = []
     if flat:
-        _flat_handle_files(abs_dir_path, "", abs_dir_path, exclude_list, log_msg)
+        root_dir = os.path.join(abs_dir_path, "")
+        _flat_handle_files(abs_dir_path, "", root_dir, exclude_list, log_msg)
     else:
         _handle_files(abs_dir_path, "", exclude_list, log_msg)
     if save:
@@ -240,3 +241,9 @@ def _flat_handle_files(
 
     for nested_dir in nested_dirs:
         _flat_handle_files(abs_dir_path, nested_dir, root_dir, exclude_list, log_msg)
+
+    if abs_dir_path != root_dir:
+        remove_dir_msg = log_messages.REMOVE_DIR.format(abs_dir_path=abs_dir_path)
+        click.echo(remove_dir_msg)
+        log_msg.append(remove_dir_msg)
+        os.rmdir(abs_dir_path)

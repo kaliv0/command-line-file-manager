@@ -31,3 +31,5 @@ MOVE_FILE = "Moving {entry} to {target_dir}"
 INSIDE_DIR = "----- Inside {abs_dir_path} -----"
 
 SKIP_FILE = "Skipping {entry}"
+
+REMOVE_DIR = "Removing {abs_dir_path}"
