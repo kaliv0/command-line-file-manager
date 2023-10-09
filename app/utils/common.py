@@ -8,4 +8,4 @@ def save_logs_to_file(
 ) -> None:
     if not output_dir:
         output_dir = dir_path
-    LoggerFactory.get_logger(logger_type, output_dir).info(message)
+    LoggerFactory.get_logger(logger_type, output_dir, True).info(message)

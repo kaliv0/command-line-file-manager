@@ -5,7 +5,7 @@ import click
 import emoji
 from directory_tree import display_tree
 
-from app.logs import log_messages, logger_types
+from app.logs.config import log_messages, logger_types
 from app.utils.common import save_logs_to_file
 
 

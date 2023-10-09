@@ -1,3 +1,5 @@
+LOG_FORMAT = "%(message)s"
+
 DELIMITER = "\n=========================================\n"
 
 NO_FILES = "The given directory '{dir_path}' contains no files:\n\n" + DELIMITER
