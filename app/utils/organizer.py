@@ -5,6 +5,7 @@ from typing import List
 import click
 
 from app.logs import logger_types, log_messages
+from app.logs.logger_factory import LoggerFactory
 from app.utils.common import save_logs_to_file
 
 FILE_EXTENSIONS = {
@@ -63,7 +64,7 @@ COMMON_DIR = "other"
     type=click.STRING,
     default=None,
     help="Single or multiple file extensions to be skipped separated by comma. "
-    "E.g. --exclude=.pdf,.mp3",
+         "E.g. --exclude=.pdf,.mp3",
 )
 @click.option(
     "--save",
@@ -86,32 +87,22 @@ def organize_files(dir_path: str, exclude: str, save: bool, output: str) -> None
 
     dir_list = os.listdir(dir_path)
     abs_dir_path = os.path.abspath(dir_path)
-    log_msg = []
+    logger = LoggerFactory.get_logger(logger_types.ORGANIZE, output)
     for entry in dir_list:
         abs_entry_path = os.path.join(abs_dir_path, entry)
         if os.path.isfile(abs_entry_path):
             file_extension = os.path.splitext(entry)[1]
             if file_extension in exclude_list:
-                skip_msg = log_messages.SKIP_FILE.format(entry=entry)
-                click.echo(skip_msg)
-                log_msg.append(skip_msg)
+                logger.info(log_messages.SKIP_FILE.format(entry=entry))
                 continue
 
             target_dir_name = FILE_EXTENSIONS.get(file_extension, COMMON_DIR)
             target_dir = os.path.join(abs_dir_path, target_dir_name)
             if not os.path.exists(target_dir):
-                dir_msg = log_messages.CREATE_FOLDER.format(target_dir=target_dir)
-                click.echo(dir_msg)
-                log_msg.append(dir_msg)
+                logger.info(log_messages.CREATE_FOLDER.format(target_dir=target_dir))
                 os.makedirs(target_dir)
-            file_msg = log_messages.MOVE_FILE.format(entry=entry, target_dir=target_dir)
-            click.echo(file_msg)
-            log_msg.append(file_msg)
-            shutil.move(abs_entry_path, os.path.join(target_dir, entry))
-
-    if save:
-        final_msg = "\n".join(log_msg)
-        save_logs_to_file(output, dir_path, final_msg, logger_types.ORGANIZE)
+            logger.info(log_messages.MOVE_FILE.format(entry=entry, target_dir=target_dir))
+            shutil.copy(abs_entry_path, os.path.join(target_dir, entry))
 
 
 @click.command()
@@ -121,7 +112,7 @@ def organize_files(dir_path: str, exclude: str, save: bool, output: str) -> None
     type=click.STRING,
     default=None,
     help="Single or multiple file extensions to be skipped separated by comma. "
-    "E.g. --exclude=.pdf,.mp3",
+         "E.g. --exclude=.pdf,.mp3",
 )
 @click.option(
     "--flat",
@@ -142,7 +133,7 @@ def organize_files(dir_path: str, exclude: str, save: bool, output: str) -> None
     help="Path to output directory for the saved log file",
 )
 def organize_files_recursively(
-    dir_path: str, exclude: str, flat: bool, save: bool, output: str
+        dir_path: str, exclude: str, flat: bool, save: bool, output: str
 ) -> None:
     """
     Search recursively by NAME keyword inside given DIR_PATH
@@ -162,7 +153,7 @@ def organize_files_recursively(
 
 
 def _handle_files(
-    parent_dir: str, subdir_path: str, exclude_list: List[str], log_msg: List
+        parent_dir: str, subdir_path: str, exclude_list: List[str], log_msg: List
 ) -> None:
     abs_dir_path = os.path.join(parent_dir, subdir_path)
     dir_list = os.listdir(abs_dir_path)
@@ -203,7 +194,7 @@ def _handle_files(
 
 
 def _flat_handle_files(
-    parent_dir: str, subdir_path: str, root_dir: str, exclude_list: List[str], log_msg: List
+        parent_dir: str, subdir_path: str, root_dir: str, exclude_list: List[str], log_msg: List
 ) -> None:
     abs_dir_path = os.path.join(parent_dir, subdir_path)
     dir_list = os.listdir(abs_dir_path)
