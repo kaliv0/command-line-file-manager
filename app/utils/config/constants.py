@@ -46,3 +46,6 @@ TARGET_MAP = {
     "default": "other",
     "hidden": ".hidden",
 }
+
+BACKUP_FILE_NAME = "backup"
+SKIPPED_BACKUP_FILES = ["backup.tar", "backup.zip"]

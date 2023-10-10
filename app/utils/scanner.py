@@ -7,36 +7,38 @@ from directory_tree import display_tree
 
 from app.logs.config import log_messages, logger_types
 from app.utils.common import save_logs_to_file
-from app.utils.config import error_messages
 
 
 @click.command()
 @click.argument("dir_path", type=click.STRING)
 @click.option(
     "--sort",
-    type=click.STRING,
+    type=click.Choice(["name", "size", "date", "modified", "type"], case_sensitive=False),
     default="name",
-    help="Sorting criteria. Choose between 'name', 'size', 'date', 'modified', 'type' (i.e. files extension). "
-    "Defaults to 'name' if not explicitly specified",
+    show_default=True,
+    help="Sorting criteria.",
 )
 @click.option(
     "--desc",
     type=click.BOOL,
     default=False,
-    help="Boolean flag to display result in descending order. Defaults to 'false'",
+    show_default=True,
+    help="Boolean flag to display result in descending order.",
 )
 @click.option(
     "-s",
     "--save",
     type=click.BOOL,
     default=False,
-    help="Boolean flag to save log message to file. Defaults to 'false'",
+    show_default=True,
+    help="Boolean flag to save log message to file.",
 )
 @click.option(
     "-o",
     "--output",
     type=click.STRING,
     default=None,
+    show_default=True,
     help="Path to output directory for the saved log file",
 )
 def scan_files(dir_path: str, sort: str, desc: bool, save: bool, output: str) -> None:
@@ -61,29 +63,32 @@ def scan_files(dir_path: str, sort: str, desc: bool, save: bool, output: str) ->
 @click.argument("dir_path", type=click.STRING)
 @click.option(
     "--sort",
-    type=click.STRING,
+    type=click.Choice(["name", "size", "date", "modified"], case_sensitive=False),
     default="name",
-    help="Sorting criteria. Choose between 'name', 'size', 'date', 'modified'. "
-    "Defaults to 'name' if not explicitly specified",
+    show_default=True,
+    help="Sorting criteria.",
 )
 @click.option(
     "--desc",
     type=click.BOOL,
     default=False,
-    help="Boolean flag to display result in descending order. Defaults to 'false'",
+    show_default=True,
+    help="Boolean flag to display result in descending order.",
 )
 @click.option(
     "-s",
     "--save",
     type=click.BOOL,
     default=False,
-    help="Boolean flag to save log message to file. Defaults to 'false'",
+    show_default=True,
+    help="Boolean flag to save log message to file.",
 )
 @click.option(
     "-o",
     "--output",
     type=click.STRING,
     default=None,
+    show_default=True,
     help="Path to output directory for the saved log file",
 )
 def scan_subdirs(dir_path: str, sort: str, desc: bool, save: bool, output: str) -> None:
@@ -117,7 +122,7 @@ def _sort_entries_list(dir_path: str, entries_list: List[str], criteria: str, de
         case "type":
             sort_func = lambda file: os.path.splitext(os.path.join(dir_path, file))[1]
         case _:
-            raise ValueError(error_messages.INVALID_CRITERIA)
+            sort_func = None
     entries_list.sort(key=sort_func, reverse=desc)
 
 
@@ -129,13 +134,15 @@ def _sort_entries_list(dir_path: str, entries_list: List[str], criteria: str, de
     "--save",
     type=click.BOOL,
     default=False,
-    help="Boolean flag to save log message to file. Defaults to 'false'",
+    show_default=True,
+    help="Boolean flag to save log message to file.",
 )
 @click.option(
     "-o",
     "--output",
     type=click.STRING,
     default=None,
+    show_default=True,
     help="Path to output directory for the saved log file",
 )
 def build_catalog(dir_path: str, save: bool, output: str):
@@ -163,13 +170,15 @@ def build_catalog(dir_path: str, save: bool, output: str):
     "--save",
     type=click.BOOL,
     default=False,
-    help="Boolean flag to save log message to file. Defaults to 'false'",
+    show_default=True,
+    help="Boolean flag to save log message to file.",
 )
 @click.option(
     "-o",
     "--output",
     type=click.STRING,
     default=None,
+    show_default=True,
     help="Path to output directory for the saved log file",
 )
 def build_catalog_recursively(dir_path: str, save: bool, output: str) -> None:
@@ -226,13 +235,15 @@ def _get_catalog_messages(dir_path: str, files_list: List[str], nested_dirs: Lis
     "--save",
     type=click.BOOL,
     default=False,
-    help="Boolean flag to save log message to file. Defaults to 'false'",
+    show_default=True,
+    help="Boolean flag to save log message to file.",
 )
 @click.option(
     "-o",
     "--output",
     type=click.STRING,
     default=None,
+    show_default=True,
     help="Path to output directory for the saved log file",
 )
 def build_tree(dir_path: str, save: bool, output: str) -> None:
@@ -262,20 +273,23 @@ def build_tree(dir_path: str, save: bool, output: str) -> None:
     "--hidden",
     type=click.BOOL,
     default=False,
-    help="Boolean flag to include hidden files and folders. Defaults to 'false'",
+    show_default=True,
+    help="Boolean flag to include hidden files and folders.",
 )
 @click.option(
     "-s",
     "--save",
     type=click.BOOL,
     default=False,
-    help="Boolean flag to save log message to file. Defaults to 'false'",
+    show_default=True,
+    help="Boolean flag to save log message to file.",
 )
 @click.option(
     "-o",
     "--output",
     type=click.STRING,
     default=None,
+    show_default=True,
     help="Path to output directory for the saved log file",
 )
 def build_pretty_tree(dir_path: str, hidden: bool, save: bool, output: str) -> None:
@@ -296,13 +310,15 @@ def build_pretty_tree(dir_path: str, hidden: bool, save: bool, output: str) -> N
     "--save",
     type=click.BOOL,
     default=False,
-    help="Boolean flag to save log message to file. Defaults to 'false'",
+    show_default=True,
+    help="Boolean flag to save log message to file.",
 )
 @click.option(
     "-o",
     "--output",
     type=click.STRING,
     default=None,
+    show_default=True,
     help="Path to output directory for the saved log file",
 )
 def search_by_name(dir_path: str, name: str, save: bool, output: str) -> None:
@@ -345,13 +361,15 @@ def search_by_name(dir_path: str, name: str, save: bool, output: str) -> None:
     "--save",
     type=click.BOOL,
     default=False,
-    help="Boolean flag to save log message to file. Defaults to 'false'",
+    show_default=True,
+    help="Boolean flag to save log message to file.",
 )
 @click.option(
     "-o",
     "--output",
     type=click.STRING,
     default=None,
+    show_default=True,
     help="Path to output directory for the saved log file",
 )
 def search_by_name_recursively(dir_path: str, name: str, save: bool, output: str) -> None:

@@ -5,10 +5,10 @@ from typing import List
 
 import click
 
+import app.utils.config.constants
 from app.logs.config import log_messages, logger_types, log_output
 from app.logs.logger_factory import LoggerFactory
-from app.utils.config import archive, error_messages
-from app.utils.config.file_extensions import TARGET_MAP
+from app.utils.config.constants import TARGET_MAP
 
 
 @click.command()
@@ -18,6 +18,7 @@ from app.utils.config.file_extensions import TARGET_MAP
     "--exclude",
     type=click.STRING,
     default=None,
+    show_default=True,
     help="Single or multiple file extensions to be skipped separated by comma. "
     "E.g. --exclude .pdf,.mp3",
 )
@@ -26,34 +27,39 @@ from app.utils.config.file_extensions import TARGET_MAP
     "--hidden",
     type=click.BOOL,
     default=False,
-    help="Boolean flag to include hidden files and folders. Defaults to 'false'",
+    show_default=True,
+    help="Boolean flag to include hidden files.",
 )
 @click.option(
     "-b",
     "--backup",
     type=click.BOOL,
     default=False,
-    help="Boolean flag to create an archived file of the given directory before re-organizing it. Defaults to 'false'",
+    show_default=True,
+    help="Boolean flag to create an archived file of the given directory before re-organizing it.",
 )
 @click.option(
     "-f",
     "--archive-format",
-    type=click.STRING,
+    type=click.Choice(["tar", "zip"], case_sensitive=False),
     default=None,
-    help="Archive format for backup file. Choose between zip and tar",
+    show_default=True,
+    help="Archive format for backup file.",
 )
 @click.option(
     "-s",
     "--save",
     type=click.BOOL,
     default=False,
-    help="Boolean flag to save log message to file. Defaults to 'false'",
+    show_default=True,
+    help="Boolean flag to save log message to file.",
 )
 @click.option(
     "-o",
     "--output",
     type=click.STRING,
     default=None,
+    show_default=True,
     help="Path to output directory for the saved log file",
 )
 def organize_files(
@@ -79,10 +85,8 @@ def organize_files(
     logger = LoggerFactory.get_logger(logger_types.ORGANIZE, output, save)
 
     if backup:
-        if archive_format not in archive.SUPPORTED_FORMATS:
-            raise ValueError(error_messages.UNSUPPORTED_FILE_FORMATS)
         shutil.make_archive(
-            base_name=os.path.join(abs_dir_path, archive.FILE_NAME),
+            base_name=os.path.join(abs_dir_path, app.utils.config.constants.BACKUP_FILE_NAME),
             format=archive_format,
             root_dir=os.path.dirname(abs_dir_path),
             base_dir=os.path.basename(abs_dir_path),
@@ -117,6 +121,7 @@ def organize_files(
     "--exclude",
     type=click.STRING,
     default=None,
+    show_default=True,
     help="Single or multiple file extensions to be skipped separated by comma. "
     "E.g. --exclude .pdf,.mp3",
 )
@@ -124,6 +129,7 @@ def organize_files(
     "--exclude-dir",
     type=click.STRING,
     default=None,
+    show_default=True,
     help="Single or multiple directory names to be skipped separated by comma. "
     "E.g. --exclude-dir audio,video",
 )
@@ -131,41 +137,47 @@ def organize_files(
     "--flat",
     type=click.BOOL,
     default=False,
-    help="Boolean flag to move all files to target directories inside parent folder. Defaults to 'false'",
+    show_default=True,
+    help="Boolean flag to move all files to target directories inside parent folder.",
 )
 @click.option(
     "-h",
     "--hidden",
     type=click.BOOL,
     default=False,
-    help="Boolean flag to include hidden files and folders. Defaults to 'false'",
+    show_default=True,
+    help="Boolean flag to include hidden files and folders.",
 )
 @click.option(
     "-b",
     "--backup",
     type=click.BOOL,
     default=False,
-    help="Boolean flag to create an archived file of the given directory before re-organizing it. Defaults to 'false'",
+    show_default=True,
+    help="Boolean flag to create an archived file of the given directory before re-organizing it.",
 )
 @click.option(
     "-f",
     "--archive-format",
-    type=click.STRING,
+    type=click.Choice(["tar", "zip"], case_sensitive=False),
     default=None,
-    help="Archive format for backup file. Choose between zip and tar",
+    show_default=True,
+    help="Archive format for backup file.",
 )
 @click.option(
     "-s",
     "--save",
     type=click.BOOL,
     default=False,
-    help="Boolean flag to save log message to file. Defaults to 'false'",
+    show_default=True,
+    help="Boolean flag to save log message to file.",
 )
 @click.option(
     "-o",
     "--output",
     type=click.STRING,
     default=None,
+    show_default=True,
     help="Path to output directory for the saved log file",
 )
 def organize_files_recursively(
@@ -192,10 +204,8 @@ def organize_files_recursively(
     logger = LoggerFactory.get_logger(logger_types.RECURSIVE_ORGANIZE, output, save)
 
     if backup:
-        if archive_format not in archive.SUPPORTED_FORMATS:
-            raise ValueError(error_messages.UNSUPPORTED_FILE_FORMATS)
         shutil.make_archive(
-            base_name=os.path.join(abs_dir_path, archive.FILE_NAME),
+            base_name=os.path.join(abs_dir_path, app.utils.config.constants.BACKUP_FILE_NAME),
             format=archive_format,
             root_dir=os.path.dirname(abs_dir_path),
             base_dir=os.path.basename(abs_dir_path),
@@ -227,7 +237,7 @@ def _handle_files(
     for entry in dir_list:
         abs_entry_path = os.path.join(abs_dir_path, entry)
         if os.path.isfile(abs_entry_path):
-            if entry == log_output.RECURSIVE_ORGANIZE_BASE or entry in archive.SKIPPED_BACKUP_FILES:
+            if entry == log_output.RECURSIVE_ORGANIZE_BASE or entry in app.utils.config.constants.SKIPPED_BACKUP_FILES:
                 continue
 
             file_extension = os.path.splitext(entry)[1]
@@ -274,7 +284,7 @@ def _handle_files_by_flattening_subdirs(
     for entry in dir_list:
         abs_entry_path = os.path.join(abs_dir_path, entry)
         if os.path.isfile(abs_entry_path):
-            if entry == log_output.RECURSIVE_ORGANIZE_BASE or entry in archive.SKIPPED_BACKUP_FILES:
+            if entry == log_output.RECURSIVE_ORGANIZE_BASE or entry in app.utils.config.constants.SKIPPED_BACKUP_FILES:
                 continue
 
             file_extension = os.path.splitext(entry)[1]
@@ -307,6 +317,10 @@ def _handle_files_by_flattening_subdirs(
             abs_dir_path, nested_dir, root_dir, exclude_list, exclude_dir_list, hidden, logger
         )
 
-    if abs_dir_path != root_dir:
+    is_not_root_dir = abs_dir_path != root_dir
+    is_not_one_level_nested_dir = not os.path.join(os.path.dirname(abs_dir_path), "") == root_dir
+    is_not_target_dir = not os.path.basename(subdir_path) in TARGET_MAP.values()
+
+    if is_not_root_dir and (is_not_one_level_nested_dir or is_not_target_dir):
         logger.info(log_messages.REMOVE_DIR.format(abs_dir_path=abs_dir_path))
         os.rmdir(abs_dir_path)
