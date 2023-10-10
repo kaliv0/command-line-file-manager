@@ -14,37 +14,43 @@ from app.utils.config.file_extensions import TARGET_MAP
 @click.command()
 @click.argument("dir_path", type=click.STRING)
 @click.option(
+    "-x",
     "--exclude",
     type=click.STRING,
     default=None,
     help="Single or multiple file extensions to be skipped separated by comma. "
-    "E.g. --exclude=.pdf,.mp3",
+    "E.g. --exclude .pdf,.mp3",
 )
 @click.option(
+    "-h",
     "--hidden",
     type=click.BOOL,
     default=False,
     help="Boolean flag to include hidden files and folders. Defaults to 'false'",
 )
 @click.option(
+    "-b",
     "--backup",
     type=click.BOOL,
     default=False,
     help="Boolean flag to create an archived file of the given directory before re-organizing it. Defaults to 'false'",
 )
 @click.option(
+    "-f",
     "--archive-format",
     type=click.STRING,
     default=None,
     help="Archive format for backup file. Choose between zip and tar",
 )
 @click.option(
+    "-s",
     "--save",
     type=click.BOOL,
     default=False,
     help="Boolean flag to save log message to file. Defaults to 'false'",
 )
 @click.option(
+    "-o",
     "--output",
     type=click.STRING,
     default=None,
@@ -107,18 +113,19 @@ def organize_files(
 @click.command()
 @click.argument("dir_path", type=click.STRING)
 @click.option(
+    "-x",
     "--exclude",
     type=click.STRING,
     default=None,
     help="Single or multiple file extensions to be skipped separated by comma. "
-    "E.g. --exclude=.pdf,.mp3",
+    "E.g. --exclude .pdf,.mp3",
 )
 @click.option(
     "--exclude-dir",
     type=click.STRING,
     default=None,
     help="Single or multiple directory names to be skipped separated by comma. "
-    "E.g. --exclude-dir=audio,video",
+    "E.g. --exclude-dir audio,video",
 )
 @click.option(
     "--flat",
@@ -127,30 +134,35 @@ def organize_files(
     help="Boolean flag to move all files to target directories inside parent folder. Defaults to 'false'",
 )
 @click.option(
+    "-h",
     "--hidden",
     type=click.BOOL,
     default=False,
     help="Boolean flag to include hidden files and folders. Defaults to 'false'",
 )
 @click.option(
+    "-b",
     "--backup",
     type=click.BOOL,
     default=False,
     help="Boolean flag to create an archived file of the given directory before re-organizing it. Defaults to 'false'",
 )
 @click.option(
+    "-f",
     "--archive-format",
     type=click.STRING,
     default=None,
     help="Archive format for backup file. Choose between zip and tar",
 )
 @click.option(
+    "-s",
     "--save",
     type=click.BOOL,
     default=False,
     help="Boolean flag to save log message to file. Defaults to 'false'",
 )
 @click.option(
+    "-o",
     "--output",
     type=click.STRING,
     default=None,
