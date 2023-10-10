@@ -21,6 +21,12 @@ from app.utils.config.file_extensions import TARGET_MAP
     "E.g. --exclude=.pdf,.mp3",
 )
 @click.option(
+    "--hidden",
+    type=click.BOOL,
+    default=False,
+    help="Boolean flag to include hidden files and folders. Defaults to 'false'",
+)
+@click.option(
     "--backup",
     type=click.BOOL,
     default=False,
@@ -45,7 +51,13 @@ from app.utils.config.file_extensions import TARGET_MAP
     help="Path to output directory for the saved log file",
 )
 def organize_files(
-    dir_path: str, exclude: str, backup: bool, archive_format: str, save: bool, output: str
+    dir_path: str,
+    exclude: str,
+    hidden: bool,
+    backup: bool,
+    archive_format: str,
+    save: bool,
+    output: str,
 ) -> None:
     """
     Search recursively by NAME keyword inside given DIR_PATH
@@ -75,11 +87,15 @@ def organize_files(
         abs_entry_path = os.path.join(abs_dir_path, entry)
         if os.path.isfile(abs_entry_path):
             file_extension = os.path.splitext(entry)[1]
-            if file_extension in exclude_list:
+            if (not hidden and entry.startswith(".")) or file_extension in exclude_list:
                 logger.info(log_messages.SKIP_FILE.format(entry=entry))
                 continue
 
-            target_dir_name = TARGET_MAP.get(file_extension, TARGET_MAP["default"])
+            if entry.startswith("."):
+                target_dir_name = TARGET_MAP["hidden"]
+            else:
+                target_dir_name = TARGET_MAP.get(file_extension, TARGET_MAP["default"])
+
             target_dir = os.path.join(abs_dir_path, target_dir_name)
             if not os.path.exists(target_dir):
                 logger.info(log_messages.CREATE_FOLDER.format(target_dir=target_dir))
@@ -111,6 +127,12 @@ def organize_files(
     help="Boolean flag to move all files to target directories inside parent folder. Defaults to 'false'",
 )
 @click.option(
+    "--hidden",
+    type=click.BOOL,
+    default=False,
+    help="Boolean flag to include hidden files and folders. Defaults to 'false'",
+)
+@click.option(
     "--backup",
     type=click.BOOL,
     default=False,
@@ -139,6 +161,7 @@ def organize_files_recursively(
     exclude: str,
     exclude_dir: str,
     flat: bool,
+    hidden: bool,
     backup: bool,
     archive_format: str,
     save: bool,
@@ -169,11 +192,11 @@ def organize_files_recursively(
 
     if flat:
         root_dir = os.path.join(abs_dir_path, "")
-        handle_files_by_flattening_subdirs(
-            abs_dir_path, "", root_dir, exclude_list, exclude_dir_list, logger
+        _handle_files_by_flattening_subdirs(
+            abs_dir_path, "", root_dir, exclude_list, exclude_dir_list, hidden, logger
         )
     else:
-        _handle_files(abs_dir_path, "", exclude_list, exclude_dir_list, logger)
+        _handle_files(abs_dir_path, "", exclude_list, exclude_dir_list, hidden, logger)
 
 
 def _handle_files(
@@ -181,6 +204,7 @@ def _handle_files(
     subdir_path: str,
     exclude_list: List[str],
     exclude_dir_list: List[str],
+    hidden: bool,
     logger: logging.Logger,
 ) -> None:
     abs_dir_path = os.path.join(parent_dir, subdir_path)
@@ -195,13 +219,16 @@ def _handle_files(
                 continue
 
             file_extension = os.path.splitext(entry)[1]
-            if file_extension in exclude_list:
+            if not hidden and entry.startswith(".") or file_extension in exclude_list:
                 logger.info(log_messages.SKIP_FILE.format(entry=entry))
                 continue
 
-            target_dir_name = TARGET_MAP.get(file_extension, TARGET_MAP["default"])
-            target_dir = os.path.join(abs_dir_path, target_dir_name)
+            if entry.startswith("."):
+                target_dir_name = TARGET_MAP["hidden"]
+            else:
+                target_dir_name = TARGET_MAP.get(file_extension, TARGET_MAP["default"])
 
+            target_dir = os.path.join(abs_dir_path, target_dir_name)
             if not os.path.exists(target_dir):
                 logger.info(log_messages.CREATE_FOLDER.format(target_dir=target_dir))
                 os.makedirs(target_dir)
@@ -209,21 +236,22 @@ def _handle_files(
             logger.info(log_messages.MOVE_FILE.format(entry=entry, target_dir=target_dir))
             shutil.move(abs_entry_path, os.path.join(target_dir, entry))
         elif os.path.isdir(abs_entry_path):
-            if entry in exclude_dir_list:
+            if entry.startswith(".") or entry in exclude_dir_list:
                 logger.info(log_messages.SKIP_DIR.format(entry=entry))
                 continue
             nested_dirs.append(abs_entry_path)
 
     for nested_dir in nested_dirs:
-        _handle_files(abs_dir_path, nested_dir, exclude_list, exclude_dir_list, logger)
+        _handle_files(abs_dir_path, nested_dir, exclude_list, exclude_dir_list, hidden, logger)
 
 
-def handle_files_by_flattening_subdirs(
+def _handle_files_by_flattening_subdirs(
     parent_dir: str,
     subdir_path: str,
     root_dir: str,
     exclude_list: List[str],
     exclude_dir_list: List[str],
+    hidden: bool,
     logger: logging.Logger,
 ) -> None:
     abs_dir_path = os.path.join(parent_dir, subdir_path)
@@ -238,13 +266,17 @@ def handle_files_by_flattening_subdirs(
                 continue
 
             file_extension = os.path.splitext(entry)[1]
-            if file_extension in exclude_list:
-                logger.info(log_messages.SKIP_FILE.format(entry=entry))
+            if not hidden and entry.startswith(".") or file_extension in exclude_list:
+                logger.info(log_messages.MOVE_FILE_TO_ROOT_DIR.format(entry=entry))
+                shutil.move(abs_entry_path, os.path.join(root_dir, entry))
                 continue
 
-            target_dir_name = TARGET_MAP.get(file_extension, TARGET_MAP["default"])
-            target_dir = os.path.join(root_dir, target_dir_name)
+            if entry.startswith("."):
+                target_dir_name = TARGET_MAP["hidden"]
+            else:
+                target_dir_name = TARGET_MAP.get(file_extension, TARGET_MAP["default"])
 
+            target_dir = os.path.join(root_dir, target_dir_name)
             if not os.path.exists(target_dir):
                 logger.info(log_messages.CREATE_FOLDER.format(target_dir=target_dir))
                 os.makedirs(target_dir)
@@ -252,15 +284,15 @@ def handle_files_by_flattening_subdirs(
             logger.info(log_messages.MOVE_FILE.format(entry=entry, target_dir=target_dir))
             shutil.move(abs_entry_path, os.path.join(target_dir, entry))
         elif os.path.isdir(abs_entry_path):
-            if entry in exclude_dir_list:
+            if entry.startswith(".") or entry in exclude_dir_list:
                 logger.info(log_messages.SKIP_DIR_AND_MOVE.format(entry=entry))
                 shutil.move(abs_entry_path, os.path.join(root_dir, entry))
                 continue
             nested_dirs.append(abs_entry_path)
 
     for nested_dir in nested_dirs:
-        handle_files_by_flattening_subdirs(
-            abs_dir_path, nested_dir, root_dir, exclude_list, exclude_dir_list, logger
+        _handle_files_by_flattening_subdirs(
+            abs_dir_path, nested_dir, root_dir, exclude_list, exclude_dir_list, hidden, logger
         )
 
     if abs_dir_path != root_dir:

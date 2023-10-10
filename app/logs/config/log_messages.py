@@ -30,6 +30,7 @@ INSIDE_DIR = "----- Inside {abs_dir_path} -----"
 
 SKIP_FILE = "Skipping {entry}"
 SKIP_DIR = "Skipping {entry} directory"
+MOVE_FILE_TO_ROOT_DIR = "Moving {entry} to root directory"
 SKIP_DIR_AND_MOVE = "Moving {entry} directory without stepping inside"
 
 REMOVE_DIR = "Removing {abs_dir_path}"

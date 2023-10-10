@@ -42,5 +42,7 @@ TARGET_MAP = {
     ".tar": "archive",
     # torrent
     ".torrent": "torrent",
+    ####
     "default": "other",
+    "hidden": ".hidden",
 }
