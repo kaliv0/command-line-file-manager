@@ -7,6 +7,7 @@ from directory_tree import display_tree
 
 from app.logs.config import log_messages, logger_types
 from app.utils.common import save_logs_to_file
+from app.utils.config import error_messages
 
 
 @click.command()
@@ -112,7 +113,7 @@ def _sort_entries_list(dir_path: str, entries_list: List[str], criteria: str, de
         case "type":
             sort_func = lambda file: os.path.splitext(os.path.join(dir_path, file))[1]
         case _:
-            raise ValueError("Invalid sort criteria!")
+            raise ValueError(error_messages.INVALID_CRITERIA)
     entries_list.sort(key=sort_func, reverse=desc)
 
 

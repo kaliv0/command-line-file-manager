@@ -7,6 +7,7 @@ import click
 
 from app.logs.config import log_messages, logger_types, log_output
 from app.logs.logger_factory import LoggerFactory
+from app.utils.config import archive, error_messages
 from app.utils.config.file_extensions import TARGET_MAP
 
 
@@ -20,6 +21,18 @@ from app.utils.config.file_extensions import TARGET_MAP
     "E.g. --exclude=.pdf,.mp3",
 )
 @click.option(
+    "--backup",
+    type=click.BOOL,
+    default=False,
+    help="Boolean flag to create an archived file of the given directory before re-organizing it. Defaults to 'false'",
+)
+@click.option(
+    "--archive-format",
+    type=click.STRING,
+    default=None,
+    help="Archive format for backup file. Choose between zip and tar",
+)
+@click.option(
     "--save",
     type=click.BOOL,
     default=False,
@@ -31,7 +44,9 @@ from app.utils.config.file_extensions import TARGET_MAP
     default=None,
     help="Path to output directory for the saved log file",
 )
-def organize_files(dir_path: str, exclude: str, save: bool, output: str) -> None:
+def organize_files(
+    dir_path: str, exclude: str, backup: bool, archive_format: str, save: bool, output: str
+) -> None:
     """
     Search recursively by NAME keyword inside given DIR_PATH
     """
@@ -44,6 +59,17 @@ def organize_files(dir_path: str, exclude: str, save: bool, output: str) -> None
     if not output:
         output = dir_path
     logger = LoggerFactory.get_logger(logger_types.ORGANIZE, output, save)
+
+    if backup:
+        if archive_format not in archive.SUPPORTED_FORMATS:
+            raise ValueError(error_messages.UNSUPPORTED_FILE_FORMATS)
+        shutil.make_archive(
+            base_name=os.path.join(abs_dir_path, archive.FILE_NAME),
+            format=archive_format,
+            root_dir=os.path.dirname(abs_dir_path),
+            base_dir=os.path.basename(abs_dir_path),
+            verbose=True,
+        )
 
     for entry in dir_list:
         abs_entry_path = os.path.join(abs_dir_path, entry)
@@ -72,10 +98,29 @@ def organize_files(dir_path: str, exclude: str, save: bool, output: str) -> None
     "E.g. --exclude=.pdf,.mp3",
 )
 @click.option(
+    "--exclude-dir",
+    type=click.STRING,
+    default=None,
+    help="Single or multiple directory names to be skipped separated by comma. "
+    "E.g. --exclude-dir=audio,video",
+)
+@click.option(
     "--flat",
     type=click.BOOL,
     default=False,
     help="Boolean flag to move all files to target directories inside parent folder. Defaults to 'false'",
+)
+@click.option(
+    "--backup",
+    type=click.BOOL,
+    default=False,
+    help="Boolean flag to create an archived file of the given directory before re-organizing it. Defaults to 'false'",
+)
+@click.option(
+    "--archive-format",
+    type=click.STRING,
+    default=None,
+    help="Archive format for backup file. Choose between zip and tar",
 )
 @click.option(
     "--save",
@@ -90,7 +135,14 @@ def organize_files(dir_path: str, exclude: str, save: bool, output: str) -> None
     help="Path to output directory for the saved log file",
 )
 def organize_files_recursively(
-    dir_path: str, exclude: str, flat: bool, save: bool, output: str
+    dir_path: str,
+    exclude: str,
+    exclude_dir: str,
+    flat: bool,
+    backup: bool,
+    archive_format: str,
+    save: bool,
+    output: str,
 ) -> None:
     """
     Search recursively by NAME keyword inside given DIR_PATH
@@ -98,20 +150,38 @@ def organize_files_recursively(
 
     abs_dir_path = os.path.abspath(dir_path)
     exclude_list = exclude.split(",") if exclude else []
+    exclude_dir_list = exclude_dir.split(",") if exclude_dir else []
 
     if not output:
         output = dir_path
     logger = LoggerFactory.get_logger(logger_types.RECURSIVE_ORGANIZE, output, save)
 
+    if backup:
+        if archive_format not in archive.SUPPORTED_FORMATS:
+            raise ValueError(error_messages.UNSUPPORTED_FILE_FORMATS)
+        shutil.make_archive(
+            base_name=os.path.join(abs_dir_path, archive.FILE_NAME),
+            format=archive_format,
+            root_dir=os.path.dirname(abs_dir_path),
+            base_dir=os.path.basename(abs_dir_path),
+            verbose=True,
+        )
+
     if flat:
         root_dir = os.path.join(abs_dir_path, "")
-        handle_files_by_flattening_subdirs(abs_dir_path, "", root_dir, exclude_list, logger)
+        handle_files_by_flattening_subdirs(
+            abs_dir_path, "", root_dir, exclude_list, exclude_dir_list, logger
+        )
     else:
-        _handle_files(abs_dir_path, "", exclude_list, logger)
+        _handle_files(abs_dir_path, "", exclude_list, exclude_dir_list, logger)
 
 
 def _handle_files(
-    parent_dir: str, subdir_path: str, exclude_list: List[str], logger: logging.Logger
+    parent_dir: str,
+    subdir_path: str,
+    exclude_list: List[str],
+    exclude_dir_list: List[str],
+    logger: logging.Logger,
 ) -> None:
     abs_dir_path = os.path.join(parent_dir, subdir_path)
     dir_list = os.listdir(abs_dir_path)
@@ -121,7 +191,7 @@ def _handle_files(
     for entry in dir_list:
         abs_entry_path = os.path.join(abs_dir_path, entry)
         if os.path.isfile(abs_entry_path):
-            if entry == log_output.RECURSIVE_ORGANIZE_BASE:
+            if entry == log_output.RECURSIVE_ORGANIZE_BASE or entry in archive.SKIPPED_BACKUP_FILES:
                 continue
 
             file_extension = os.path.splitext(entry)[1]
@@ -139,10 +209,13 @@ def _handle_files(
             logger.info(log_messages.MOVE_FILE.format(entry=entry, target_dir=target_dir))
             shutil.move(abs_entry_path, os.path.join(target_dir, entry))
         elif os.path.isdir(abs_entry_path):
+            if entry in exclude_dir_list:
+                logger.info(log_messages.SKIP_DIR.format(entry=entry))
+                continue
             nested_dirs.append(abs_entry_path)
 
     for nested_dir in nested_dirs:
-        _handle_files(abs_dir_path, nested_dir, exclude_list, logger)
+        _handle_files(abs_dir_path, nested_dir, exclude_list, exclude_dir_list, logger)
 
 
 def handle_files_by_flattening_subdirs(
@@ -150,6 +223,7 @@ def handle_files_by_flattening_subdirs(
     subdir_path: str,
     root_dir: str,
     exclude_list: List[str],
+    exclude_dir_list: List[str],
     logger: logging.Logger,
 ) -> None:
     abs_dir_path = os.path.join(parent_dir, subdir_path)
@@ -160,7 +234,7 @@ def handle_files_by_flattening_subdirs(
     for entry in dir_list:
         abs_entry_path = os.path.join(abs_dir_path, entry)
         if os.path.isfile(abs_entry_path):
-            if entry == log_output.RECURSIVE_ORGANIZE_BASE:
+            if entry == log_output.RECURSIVE_ORGANIZE_BASE or entry in archive.SKIPPED_BACKUP_FILES:
                 continue
 
             file_extension = os.path.splitext(entry)[1]
@@ -178,10 +252,16 @@ def handle_files_by_flattening_subdirs(
             logger.info(log_messages.MOVE_FILE.format(entry=entry, target_dir=target_dir))
             shutil.move(abs_entry_path, os.path.join(target_dir, entry))
         elif os.path.isdir(abs_entry_path):
+            if entry in exclude_dir_list:
+                logger.info(log_messages.SKIP_DIR_AND_MOVE.format(entry=entry))
+                shutil.move(abs_entry_path, os.path.join(root_dir, entry))
+                continue
             nested_dirs.append(abs_entry_path)
 
     for nested_dir in nested_dirs:
-        handle_files_by_flattening_subdirs(abs_dir_path, nested_dir, root_dir, exclude_list, logger)
+        handle_files_by_flattening_subdirs(
+            abs_dir_path, nested_dir, root_dir, exclude_list, exclude_dir_list, logger
+        )
 
     if abs_dir_path != root_dir:
         logger.info(log_messages.REMOVE_DIR.format(abs_dir_path=abs_dir_path))
