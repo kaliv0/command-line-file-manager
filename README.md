@@ -2,9 +2,7 @@
 
 Python CLI tool for scanning and organizing local folders and files.
 
-## Requirements
-
-Python 3.11+
+#### Requires Python 3.11+
 
 ## Installation
 
@@ -34,13 +32,17 @@ Add --help after the <i>fm</i> command or any of the subcommands to get more inf
 $ fm scan-files --help
 ```
 
-Usage: main.py [OPTIONS] NAME
-
 ```console
-╭─ Arguments ───────────────────────────────────────╮
-│ *    name      TEXT  [default: None] [required]   |
-╰───────────────────────────────────────────────────╯
-╭─ Options ─────────────────────────────────────────╮
-│ --help          Show this message and exit.       │
-╰───────────────────────────────────────────────────╯
+Usage: fm scan-files [OPTIONS] DIR_PATH
+
+  DIR_PATH: Path to directory to be scanned
+
+Options:
+  --sort [name|size|date|modified|type]   Sorting criteria.  [default: name]
+  --desc BOOLEAN                          Boolean flag to display result in descending order.
+                                          [default: False]
+  -s, --save BOOLEAN                      Boolean flag to save log message to file.
+                                          [default: False]
+  -o, --output TEXT                       Path to output directory for the saved log file.
+  --help                                  Show this message and exit.
 ```
