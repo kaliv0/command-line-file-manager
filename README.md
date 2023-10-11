@@ -30,9 +30,7 @@ $ fm scan-files ../test --save=true --output=./ --sort=type
 Add --help after the <i>fm</i> command or any of the subcommands to get more information
 ```console
 $ fm scan-files --help
-```
 
-```console
 Usage: fm scan-files [OPTIONS] DIR_PATH
 
   DIR_PATH: Path to directory to be scanned
