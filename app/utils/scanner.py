@@ -323,7 +323,7 @@ def build_pretty_tree(dir_path: str, hidden: bool, save: bool, output: str) -> N
 )
 def search_by_name(dir_path: str, name: str, save: bool, output: str) -> None:
     """
-    Search by NAME keyword inside given DIR_PATH
+    Search by NAME inside DIR_PATH
     """
 
     dir_list = os.listdir(dir_path)
@@ -374,7 +374,7 @@ def search_by_name(dir_path: str, name: str, save: bool, output: str) -> None:
 )
 def search_by_name_recursively(dir_path: str, name: str, save: bool, output: str) -> None:
     """
-    Search recursively by NAME keyword inside given DIR_PATH
+    Search recursively by NAME inside DIR_PATH
     """
 
     log_msg = _get_search_result(dir_path, None, name)

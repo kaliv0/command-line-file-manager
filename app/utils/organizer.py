@@ -72,7 +72,7 @@ def organize_files(
     output: str,
 ) -> None:
     """
-    Search recursively by NAME keyword inside given DIR_PATH
+    Search recursively by NAME inside DIR_PATH
     """
 
     exclude_list = exclude.split(",") if exclude else []
@@ -192,7 +192,7 @@ def organize_files_recursively(
     output: str,
 ) -> None:
     """
-    Search recursively by NAME keyword inside given DIR_PATH
+    Search recursively by NAME inside DIR_PATH
     """
 
     abs_dir_path = os.path.abspath(dir_path)
