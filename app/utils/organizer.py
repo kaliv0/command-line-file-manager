@@ -25,18 +25,14 @@ from app.utils.config.constants import TARGET_MAP
 @click.option(
     "-h",
     "--hidden",
-    type=click.BOOL,
-    default=False,
-    show_default=True,
-    help="Boolean flag to include hidden files.",
+    is_flag=True,
+    help="Include hidden files.",
 )
 @click.option(
     "-b",
     "--backup",
-    type=click.BOOL,
-    default=False,
-    show_default=True,
-    help="Boolean flag to create an archived file of the given directory before re-organizing it.",
+    is_flag=True,
+    help="Create an archived file of the given directory before re-organizing it.",
 )
 @click.option(
     "-f",
@@ -49,10 +45,8 @@ from app.utils.config.constants import TARGET_MAP
 @click.option(
     "-s",
     "--save",
-    type=click.BOOL,
-    default=False,
-    show_default=True,
-    help="Boolean flag to save log message to file.",
+    is_flag=True,
+    help="Save log message to file.",
 )
 @click.option(
     "-o",
@@ -135,26 +129,20 @@ def organize_files(
 )
 @click.option(
     "--flat",
-    type=click.BOOL,
-    default=False,
-    show_default=True,
-    help="Boolean flag to move all files to target directories inside parent folder.",
+    is_flag=True,
+    help="Move all files to target directories inside parent folder.",
 )
 @click.option(
     "-h",
     "--hidden",
-    type=click.BOOL,
-    default=False,
-    show_default=True,
-    help="Boolean flag to include hidden files and folders.",
+    is_flag=True,
+    help="Include hidden files and folders.",
 )
 @click.option(
     "-b",
     "--backup",
-    type=click.BOOL,
-    default=False,
-    show_default=True,
-    help="Boolean flag to create an archived file of the given directory before re-organizing it.",
+    is_flag=True,
+    help="Create an archived file of the given directory before re-organizing it.",
 )
 @click.option(
     "-f",
@@ -167,10 +155,8 @@ def organize_files(
 @click.option(
     "-s",
     "--save",
-    type=click.BOOL,
-    default=False,
-    show_default=True,
-    help="Boolean flag to save log message to file.",
+    is_flag=True,
+    help="Save log message to file.",
 )
 @click.option(
     "-o",
@@ -237,7 +223,10 @@ def _handle_files(
     for entry in dir_list:
         abs_entry_path = os.path.join(abs_dir_path, entry)
         if os.path.isfile(abs_entry_path):
-            if entry == log_output.RECURSIVE_ORGANIZE_BASE or entry in app.utils.config.constants.SKIPPED_BACKUP_FILES:
+            if (
+                entry == log_output.RECURSIVE_ORGANIZE_BASE
+                or entry in app.utils.config.constants.SKIPPED_BACKUP_FILES
+            ):
                 continue
 
             file_extension = os.path.splitext(entry)[1]
@@ -284,7 +273,10 @@ def _handle_files_by_flattening_subdirs(
     for entry in dir_list:
         abs_entry_path = os.path.join(abs_dir_path, entry)
         if os.path.isfile(abs_entry_path):
-            if entry == log_output.RECURSIVE_ORGANIZE_BASE or entry in app.utils.config.constants.SKIPPED_BACKUP_FILES:
+            if (
+                entry == log_output.RECURSIVE_ORGANIZE_BASE
+                or entry in app.utils.config.constants.SKIPPED_BACKUP_FILES
+            ):
                 continue
 
             file_extension = os.path.splitext(entry)[1]

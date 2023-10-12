@@ -20,18 +20,14 @@ from app.utils.common import save_logs_to_file
 )
 @click.option(
     "--desc",
-    type=click.BOOL,
-    default=False,
-    show_default=True,
-    help="Boolean flag to display result in descending order.",
+    is_flag=True,
+    help="Display result in descending order.",
 )
 @click.option(
     "-s",
     "--save",
-    type=click.BOOL,
-    default=False,
-    show_default=True,
-    help="Boolean flag to save log message to file.",
+    is_flag=True,
+    help="Save log message to file.",
 )
 @click.option(
     "-o",
@@ -70,18 +66,14 @@ def scan_files(dir_path: str, sort: str, desc: bool, save: bool, output: str) ->
 )
 @click.option(
     "--desc",
-    type=click.BOOL,
-    default=False,
-    show_default=True,
-    help="Boolean flag to display result in descending order.",
+    is_flag=True,
+    help="Display result in descending order.",
 )
 @click.option(
     "-s",
     "--save",
-    type=click.BOOL,
-    default=False,
-    show_default=True,
-    help="Boolean flag to save log message to file.",
+    is_flag=True,
+    help="Save log message to file.",
 )
 @click.option(
     "-o",
@@ -132,10 +124,8 @@ def _sort_entries_list(dir_path: str, entries_list: List[str], criteria: str, de
 @click.option(
     "-s",
     "--save",
-    type=click.BOOL,
-    default=False,
-    show_default=True,
-    help="Boolean flag to save log message to file.",
+    is_flag=True,
+    help="Save log message to file.",
 )
 @click.option(
     "-o",
@@ -168,10 +158,8 @@ def build_catalog(dir_path: str, save: bool, output: str):
 @click.option(
     "-s",
     "--save",
-    type=click.BOOL,
-    default=False,
-    show_default=True,
-    help="Boolean flag to save log message to file.",
+    is_flag=True,
+    help="Save log message to file.",
 )
 @click.option(
     "-o",
@@ -233,10 +221,8 @@ def _get_catalog_messages(dir_path: str, files_list: List[str], nested_dirs: Lis
 @click.option(
     "-s",
     "--save",
-    type=click.BOOL,
-    default=False,
-    show_default=True,
-    help="Boolean flag to save log message to file.",
+    is_flag=True,
+    help="Save log message to file.",
 )
 @click.option(
     "-o",
@@ -271,18 +257,14 @@ def build_tree(dir_path: str, save: bool, output: str) -> None:
 @click.option(
     "-h",
     "--hidden",
-    type=click.BOOL,
-    default=False,
-    show_default=True,
-    help="Boolean flag to include hidden files and folders.",
+    is_flag=True,
+    help="Include hidden files and folders.",
 )
 @click.option(
     "-s",
     "--save",
-    type=click.BOOL,
-    default=False,
-    show_default=True,
-    help="Boolean flag to save log message to file.",
+    is_flag=True,
+    help="Save log message to file.",
 )
 @click.option(
     "-o",
@@ -308,10 +290,8 @@ def build_pretty_tree(dir_path: str, hidden: bool, save: bool, output: str) -> N
 @click.option(
     "-s",
     "--save",
-    type=click.BOOL,
-    default=False,
-    show_default=True,
-    help="Boolean flag to save log message to file.",
+    is_flag=True,
+    help="Save log message to file.",
 )
 @click.option(
     "-o",
@@ -359,10 +339,8 @@ def search_by_name(dir_path: str, name: str, save: bool, output: str) -> None:
 @click.option(
     "-s",
     "--save",
-    type=click.BOOL,
-    default=False,
-    show_default=True,
-    help="Boolean flag to save log message to file.",
+    is_flag=True,
+    help="Save log message to file.",
 )
 @click.option(
     "-o",
