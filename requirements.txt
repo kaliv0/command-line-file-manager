@@ -44,4 +44,3 @@ twine==4.0.2
 urllib3==2.0.6
 virtualenv==20.24.5
 zipp==3.17.0
-# pytest==7.4.2

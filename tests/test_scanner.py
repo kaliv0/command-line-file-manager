@@ -22,6 +22,24 @@ def test_scan_files(runner):
         "\n"
     )
 
+    # case 1: test with sort option
+    result = runner.invoke(scanner.scan_files, [RESOURCE_DIR, "--sort=Name", "--desc"])
+    assert result.exit_code == 0
+    assert result.output == (
+        "The given directory 'tests/resources' contains the following files:\n"
+        "\n"
+        "video.mp4\n"
+        "smth.md\n"
+        "pic1.jpg\n"
+        "pic.png\n"
+        "file1.pdf\n"
+        "file.txt\n"
+        "audio1.wav\n"
+        ".hidden_file.md\n"
+        "\n=========================================\n"
+        "\n"
+    )
+
 
 def test_scan_subdirs(runner):
     # case 0: test with default option values
@@ -37,9 +55,20 @@ def test_scan_subdirs(runner):
         "\n"
     )
 
+    # case 1: test with sort option
+    result = runner.invoke(scanner.scan_subdirs, [RESOURCE_DIR, "--sort=date", "--desc"])
+    assert result.exit_code == 0
+    assert result.output == (
+        "The given directory 'tests/resources' contains the following subdirectories:\n"
+        "\n"
+        "inner_test\n"
+        ".hidden_other\n"
+        "\n=========================================\n"
+        "\n"
+    )
+
 
 def test_build_catalog(runner):
-    # case 0: test with default option values
     result = runner.invoke(scanner.build_catalog, [RESOURCE_DIR])
     assert result.exit_code == 0
     assert result.output == (
@@ -66,7 +95,6 @@ def test_build_catalog(runner):
 
 
 def test_build_catalog_recursively(runner):
-    # case 0: test with default option values
     result = runner.invoke(scanner.build_catalog_recursively, [RESOURCE_DIR])
     assert result.exit_code == 0
     assert result.output == (
@@ -165,7 +193,6 @@ def test_build_catalog_recursively(runner):
 
 
 def test_build_tree(runner):
-    # case 0: test with default option values
     result = runner.invoke(scanner.build_tree, [RESOURCE_DIR])
     assert result.exit_code == 0
     assert result.output == (
@@ -211,7 +238,6 @@ def test_build_tree(runner):
 
 
 def test_build_pretty_tree(runner):
-    # case 0: test with default option values
     result = runner.invoke(scanner.build_pretty_tree, [RESOURCE_DIR])
     assert result.exit_code == 0
     assert result.output == (
@@ -246,7 +272,6 @@ def test_build_pretty_tree(runner):
 
 
 def test_search_by_name(runner):
-    # case 0: test with default option values
     keyword = "hidden"
     result = runner.invoke(scanner.search_by_name, [RESOURCE_DIR, keyword])
     assert result.exit_code == 0
@@ -261,7 +286,6 @@ def test_search_by_name(runner):
 
 
 def test_search_by_name_recursively(runner):
-    # case 0: test with default option values
     keyword = "hidden"
     result = runner.invoke(scanner.search_by_name_recursively, [RESOURCE_DIR, keyword])
     assert result.exit_code == 0
