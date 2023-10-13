@@ -24,7 +24,7 @@ $ python -m pip install .
 
 To run the application type <i>fm</i> followed by a sub-command, target directory and options
 ```console
-$ fm scan-files ../test --save=true --output=./ --sort=type
+$ fm scan-files ../test --sort=type --save --output=./
 ```
 
 Add --help after the <i>fm</i> command or any of the subcommands to get more information
