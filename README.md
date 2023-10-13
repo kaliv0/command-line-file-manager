@@ -37,10 +37,8 @@ Usage: fm scan-files [OPTIONS] DIR_PATH
 
 Options:
   --sort [name|size|date|modified|type]   Sorting criteria.  [default: name]
-  --desc BOOLEAN                          Boolean flag to display result in descending order.
-                                          [default: False]
-  -s, --save BOOLEAN                      Boolean flag to save log message to file.
-                                          [default: False]
+  --desc                                  Display result in descending order.
+  -s, --save                              Save log message to file.
   -o, --output TEXT                       Path to output directory for the saved log file.
   --help                                  Show this message and exit.
 ```
