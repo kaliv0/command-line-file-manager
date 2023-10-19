@@ -193,7 +193,7 @@ def test_build_catalog_recursively(runner):
 
 
 def test_build_tree(runner):
-    result = runner.invoke(scanner.build_tree, [RESOURCE_DIR])
+    result = runner.invoke(scanner.build_tree, [RESOURCE_DIR, "--hidden"])
     assert result.exit_code == 0
     assert result.output == (
         "📁 /home/kaliv0/PycharmProjects/Advanced_File_Manager/tests/resources/\n"

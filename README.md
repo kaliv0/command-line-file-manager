@@ -9,14 +9,14 @@ Python CLI tool for scanning and organizing local folders and files.
 
 Via pip:
 ```console
-$ python -m pip install command-line-file-manager
+$ pip install command-line-file-manager
 ```
 
 From master branch:
 ```console
 $ git clone https://github.com/Mithras11/command-line-file-manager.git
 $ cd command-line-file-manager 
-$ python -m pip install .
+$ pip install .
 ```
 
 ## Example

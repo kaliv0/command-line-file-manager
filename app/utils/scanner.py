@@ -219,6 +219,12 @@ def _get_catalog_messages(dir_path: str, files_list: List[str], nested_dirs: Lis
 @click.command()
 @click.argument("dir_path", type=click.STRING)
 @click.option(
+    "-h",
+    "--hidden",
+    is_flag=True,
+    help="Include hidden files and folders.",
+)
+@click.option(
     "-s",
     "--save",
     is_flag=True,
@@ -232,7 +238,7 @@ def _get_catalog_messages(dir_path: str, files_list: List[str], nested_dirs: Lis
     show_default=True,
     help="Path to output directory for the saved log file",
 )
-def build_tree(dir_path: str, save: bool, output: str) -> None:
+def build_tree(dir_path: str, hidden: bool, save: bool, output: str) -> None:
     """DIR_PATH: Path to directory to be scanned"""
 
     folder_emoji = emoji.emojize(":file_folder:")
@@ -240,11 +246,15 @@ def build_tree(dir_path: str, save: bool, output: str) -> None:
 
     tree_msg = ""
     for root, _, files in os.walk(dir_path):
+        if not hidden and root.startswith("."):
+            continue
         level = root.count(os.sep) - 1
         indent = " " * 4 * level
         tree_msg += "{}{} {}/\n".format(indent, folder_emoji, os.path.abspath(root))
         sub_indent = " " * 4 * (level + 1)
         for file in files:
+            if not hidden and file.startswith("."):
+                continue
             tree_msg += "{}{} {}\n".format(sub_indent, file_emoji, file)
 
     click.echo(tree_msg)
