@@ -12,7 +12,7 @@ Via pip:
 $ pip install command-line-file-manager
 ```
 
-From master branch:
+From main branch:
 ```console
 $ git clone https://github.com/Mithras11/command-line-file-manager.git
 $ cd command-line-file-manager 
