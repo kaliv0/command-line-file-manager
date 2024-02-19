@@ -1,6 +1,6 @@
 # command-line-file-manager
 
-Python CLI tool for scanning and organizing local folders and files.
+Python CLI tool for scanning and organizing local directories and files.
 
 #### Requires Python 3.11+
 
