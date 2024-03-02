@@ -1,11 +1,11 @@
 import os
 
-from app.utils import organizer
+from app.cli import commands
 from tests.conftest import RESOURCE_DIR
 
 
 def test_organize_files(runner, mock_organizer):
-    result = runner.invoke(organizer.organize_files, [RESOURCE_DIR])
+    result = runner.invoke(commands.organize_files, [RESOURCE_DIR])
     assert result.exit_code == 0
 
     log_message = _cleanup_abs_paths(result)
@@ -30,7 +30,7 @@ def test_organize_files(runner, mock_organizer):
 
 
 def test_organize_files_recursively(runner, mock_organizer):
-    result = runner.invoke(organizer.organize_files_recursively, [RESOURCE_DIR])
+    result = runner.invoke(commands.organize_files_recursively, [RESOURCE_DIR])
     assert result.exit_code == 0
 
     log_message = _cleanup_abs_paths(result)
@@ -100,7 +100,7 @@ def test_organize_files_recursively(runner, mock_organizer):
 
 
 def test_organize_files_recursively_and_flatten_folder(runner, mock_organizer):
-    result = runner.invoke(organizer.organize_files_recursively, [RESOURCE_DIR, "--flat"])
+    result = runner.invoke(commands.organize_files_recursively, [RESOURCE_DIR, "--flat"])
     assert result.exit_code == 0
 
     log_message = _cleanup_abs_paths(result)

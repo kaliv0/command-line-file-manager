@@ -7,57 +7,11 @@ from typing import List
 
 import click
 
-import app.utils.config.constants
+from app.utils.config import constants
 from app.logs.config import log_messages, log_output, logger_types
 from app.logs.logger_factory import LoggerFactory
-from app.utils.config.constants import TARGET_MAP
 
 
-@click.command()
-@click.argument("dir_path", type=click.STRING)
-@click.option(
-    "-x",
-    "--exclude",
-    type=click.STRING,
-    default=None,
-    show_default=True,
-    help="Single or multiple file extensions to be skipped separated by comma. "
-    "E.g. --exclude .pdf,.mp3",
-)
-@click.option(
-    "-h",
-    "--hidden",
-    is_flag=True,
-    help="Include hidden files.",
-)
-@click.option(
-    "-b",
-    "--backup",
-    is_flag=True,
-    help="Create an archived file of the given directory before re-organizing it.",
-)
-@click.option(
-    "-f",
-    "--archive-format",
-    type=click.Choice(["tar", "zip"], case_sensitive=False),
-    default=None,
-    show_default=True,
-    help="Archive format for backup file.",
-)
-@click.option(
-    "-s",
-    "--save",
-    is_flag=True,
-    help="Save log message to file.",
-)
-@click.option(
-    "-o",
-    "--output",
-    type=click.STRING,
-    default=None,
-    show_default=True,
-    help="Path to output directory for the saved log file",
-)
 def organize_files(
     dir_path: str,
     exclude: str,
@@ -67,10 +21,6 @@ def organize_files(
     save: bool,
     output: str,
 ) -> None:
-    """
-    Search recursively by NAME inside DIR_PATH
-    """
-
     exclude_list = exclude.split(",") if exclude else []
 
     dir_list = os.listdir(dir_path)
@@ -82,7 +32,7 @@ def organize_files(
 
     if backup:
         shutil.make_archive(
-            base_name=os.path.join(abs_dir_path, app.utils.config.constants.BACKUP_FILE_NAME),
+            base_name=os.path.join(abs_dir_path, constants.BACKUP_FILE_NAME),
             format=archive_format,
             root_dir=os.path.dirname(abs_dir_path),
             base_dir=os.path.basename(abs_dir_path),
@@ -98,9 +48,11 @@ def organize_files(
                 continue
 
             if entry.startswith("."):
-                target_dir_name = TARGET_MAP["hidden"]
+                target_dir_name = constants.TARGET_MAP["hidden"]
             else:
-                target_dir_name = TARGET_MAP.get(file_extension, TARGET_MAP["default"])
+                target_dir_name = constants.TARGET_MAP.get(
+                    file_extension, constants.TARGET_MAP["default"]
+                )
 
             target_dir = os.path.join(abs_dir_path, target_dir_name)
             if not os.path.exists(target_dir):
@@ -110,64 +62,6 @@ def organize_files(
             shutil.move(abs_entry_path, os.path.join(target_dir, entry))
 
 
-@click.command()
-@click.argument("dir_path", type=click.STRING)
-@click.option(
-    "-x",
-    "--exclude",
-    type=click.STRING,
-    default=None,
-    show_default=True,
-    help="Single or multiple file extensions to be skipped separated by comma. "
-    "E.g. --exclude .pdf,.mp3",
-)
-@click.option(
-    "--exclude-dir",
-    type=click.STRING,
-    default=None,
-    show_default=True,
-    help="Single or multiple directory names to be skipped separated by comma. "
-    "E.g. --exclude-dir audio,video",
-)
-@click.option(
-    "--flat",
-    is_flag=True,
-    help="Move all files to target directories inside parent folder.",
-)
-@click.option(
-    "-h",
-    "--hidden",
-    is_flag=True,
-    help="Include hidden files and folders.",
-)
-@click.option(
-    "-b",
-    "--backup",
-    is_flag=True,
-    help="Create an archived file of the given directory before re-organizing it.",
-)
-@click.option(
-    "-f",
-    "--archive-format",
-    type=click.Choice(["tar", "zip"], case_sensitive=False),
-    default=None,
-    show_default=True,
-    help="Archive format for backup file.",
-)
-@click.option(
-    "-s",
-    "--save",
-    is_flag=True,
-    help="Save log message to file.",
-)
-@click.option(
-    "-o",
-    "--output",
-    type=click.STRING,
-    default=None,
-    show_default=True,
-    help="Path to output directory for the saved log file",
-)
 def organize_files_recursively(
     dir_path: str,
     exclude: str,
@@ -179,10 +73,6 @@ def organize_files_recursively(
     save: bool,
     output: str,
 ) -> None:
-    """
-    Search recursively by NAME inside DIR_PATH
-    """
-
     abs_dir_path = os.path.abspath(dir_path)
     exclude_list = exclude.split(",") if exclude else []
     exclude_dir_list = exclude_dir.split(",") if exclude_dir else []
@@ -193,7 +83,7 @@ def organize_files_recursively(
 
     if backup:
         shutil.make_archive(
-            base_name=os.path.join(abs_dir_path, app.utils.config.constants.BACKUP_FILE_NAME),
+            base_name=os.path.join(abs_dir_path, constants.BACKUP_FILE_NAME),
             format=archive_format,
             root_dir=os.path.dirname(abs_dir_path),
             base_dir=os.path.basename(abs_dir_path),
@@ -227,7 +117,7 @@ def _handle_files(
         if os.path.isfile(abs_entry_path):
             if (
                 entry == log_output.RECURSIVE_ORGANIZE_BASE
-                or entry in app.utils.config.constants.SKIPPED_BACKUP_FILES
+                or entry in constants.SKIPPED_BACKUP_FILES
             ):
                 continue
 
@@ -237,9 +127,11 @@ def _handle_files(
                 continue
 
             if entry.startswith("."):
-                target_dir_name = TARGET_MAP["hidden"]
+                target_dir_name = constants.TARGET_MAP["hidden"]
             else:
-                target_dir_name = TARGET_MAP.get(file_extension, TARGET_MAP["default"])
+                target_dir_name = constants.TARGET_MAP.get(
+                    file_extension, constants.TARGET_MAP["default"]
+                )
 
             target_dir = os.path.join(abs_dir_path, target_dir_name)
             if not os.path.exists(target_dir):
@@ -277,7 +169,7 @@ def _handle_files_by_flattening_subdirs(
         if os.path.isfile(abs_entry_path):
             if (
                 entry == log_output.RECURSIVE_ORGANIZE_BASE
-                or entry in app.utils.config.constants.SKIPPED_BACKUP_FILES
+                or entry in constants.SKIPPED_BACKUP_FILES
             ):
                 continue
 
@@ -288,9 +180,11 @@ def _handle_files_by_flattening_subdirs(
                 continue
 
             if entry.startswith("."):
-                target_dir_name = TARGET_MAP["hidden"]
+                target_dir_name = constants.TARGET_MAP["hidden"]
             else:
-                target_dir_name = TARGET_MAP.get(file_extension, TARGET_MAP["default"])
+                target_dir_name = constants.TARGET_MAP.get(
+                    file_extension, constants.TARGET_MAP["default"]
+                )
 
             target_dir = os.path.join(root_dir, target_dir_name)
             if not os.path.exists(target_dir):
@@ -313,7 +207,7 @@ def _handle_files_by_flattening_subdirs(
 
     is_not_root_dir = abs_dir_path != root_dir
     is_not_one_level_nested_dir = not os.path.join(os.path.dirname(abs_dir_path), "") == root_dir
-    is_not_target_dir = os.path.basename(subdir_path) not in TARGET_MAP.values()
+    is_not_target_dir = os.path.basename(subdir_path) not in constants.TARGET_MAP.values()
 
     if is_not_root_dir and (is_not_one_level_nested_dir or is_not_target_dir):
         logger.info(log_messages.REMOVE_DIR.format(abs_dir_path=abs_dir_path))
@@ -323,48 +217,6 @@ def _handle_files_by_flattening_subdirs(
 #####################################
 
 
-@click.command()
-@click.argument("dir_path", type=click.STRING)
-@click.option(
-    "-i",
-    "--interactive",
-    is_flag=True,
-    help="Prompt for destination file name before merging duplicates",
-)
-@click.option(
-    "-h",
-    "--hidden",
-    is_flag=True,
-    help="Include hidden files.",
-)
-@click.option(
-    "-b",
-    "--backup",
-    is_flag=True,
-    help="Create an archived file of the given directory before re-organizing it.",
-)
-@click.option(
-    "-f",
-    "--archive-format",
-    type=click.Choice(["tar", "zip"], case_sensitive=False),
-    default=None,
-    show_default=True,
-    help="Archive format for backup file.",
-)
-@click.option(
-    "-s",
-    "--save",
-    is_flag=True,
-    help="Save log message to file.",
-)
-@click.option(
-    "-o",
-    "--output",
-    type=click.STRING,
-    default=None,
-    show_default=True,
-    help="Path to output directory for the saved log file",
-)
 def handle_duplicate_files(
     dir_path: str,
     interactive: bool,
@@ -388,7 +240,7 @@ def handle_duplicate_files(
     # create backup archive
     if backup:
         shutil.make_archive(
-            base_name=os.path.join(abs_dir_path, app.utils.config.constants.BACKUP_FILE_NAME),
+            base_name=os.path.join(abs_dir_path, constants.BACKUP_FILE_NAME),
             format=archive_format,
             root_dir=os.path.dirname(abs_dir_path),
             base_dir=os.path.basename(abs_dir_path),

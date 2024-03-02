@@ -2,7 +2,7 @@ import click
 from directory_tree import display_tree
 
 from app.logs.config import log_messages, logger_types
-from app.utils import scanner
+from app.utils import scanner, organizer
 from app.utils.common import save_logs_to_file
 
 
@@ -256,3 +256,205 @@ def search_by_name_recursively(dir_path: str, name: str, save: bool, output: str
 #############################################################
 
 # ### organize ###
+
+
+@click.command()
+@click.argument("dir_path", type=click.STRING)
+@click.option(
+    "-x",
+    "--exclude",
+    type=click.STRING,
+    default=None,
+    show_default=True,
+    help="Single or multiple file extensions to be skipped separated by comma. "
+    "E.g. --exclude .pdf,.mp3",
+)
+@click.option(
+    "-h",
+    "--hidden",
+    is_flag=True,
+    help="Include hidden files.",
+)
+@click.option(
+    "-b",
+    "--backup",
+    is_flag=True,
+    help="Create an archived file of the given directory before re-organizing it.",
+)
+@click.option(
+    "-f",
+    "--archive-format",
+    type=click.Choice(["tar", "zip"], case_sensitive=False),
+    default=None,
+    show_default=True,
+    help="Archive format for backup file.",
+)
+@click.option(
+    "-s",
+    "--save",
+    is_flag=True,
+    help="Save log message to file.",
+)
+@click.option(
+    "-o",
+    "--output",
+    type=click.STRING,
+    default=None,
+    show_default=True,
+    help="Path to output directory for the saved log file",
+)
+def organize_files(
+    dir_path: str,
+    exclude: str,
+    hidden: bool,
+    backup: bool,
+    archive_format: str,
+    save: bool,
+    output: str,
+) -> None:
+    """
+    Search recursively by NAME inside DIR_PATH
+    """
+
+    organizer.organize_files(dir_path, exclude, hidden, backup, archive_format, save, output)
+
+
+@click.command()
+@click.argument("dir_path", type=click.STRING)
+@click.option(
+    "-x",
+    "--exclude",
+    type=click.STRING,
+    default=None,
+    show_default=True,
+    help="Single or multiple file extensions to be skipped separated by comma. "
+    "E.g. --exclude .pdf,.mp3",
+)
+@click.option(
+    "--exclude-dir",
+    type=click.STRING,
+    default=None,
+    show_default=True,
+    help="Single or multiple directory names to be skipped separated by comma. "
+    "E.g. --exclude-dir audio,video",
+)
+@click.option(
+    "--flat",
+    is_flag=True,
+    help="Move all files to target directories inside parent folder.",
+)
+@click.option(
+    "-h",
+    "--hidden",
+    is_flag=True,
+    help="Include hidden files and folders.",
+)
+@click.option(
+    "-b",
+    "--backup",
+    is_flag=True,
+    help="Create an archived file of the given directory before re-organizing it.",
+)
+@click.option(
+    "-f",
+    "--archive-format",
+    type=click.Choice(["tar", "zip"], case_sensitive=False),
+    default=None,
+    show_default=True,
+    help="Archive format for backup file.",
+)
+@click.option(
+    "-s",
+    "--save",
+    is_flag=True,
+    help="Save log message to file.",
+)
+@click.option(
+    "-o",
+    "--output",
+    type=click.STRING,
+    default=None,
+    show_default=True,
+    help="Path to output directory for the saved log file",
+)
+def organize_files_recursively(
+    dir_path: str,
+    exclude: str,
+    exclude_dir: str,
+    flat: bool,
+    hidden: bool,
+    backup: bool,
+    archive_format: str,
+    save: bool,
+    output: str,
+) -> None:
+    """
+    Search recursively by NAME inside DIR_PATH
+    """
+
+    organizer.organize_files_recursively(
+        dir_path, exclude, exclude_dir, flat, hidden, backup, archive_format, save, output
+    )
+
+
+#####################################
+
+
+@click.command()
+@click.argument("dir_path", type=click.STRING)
+@click.option(
+    "-i",
+    "--interactive",
+    is_flag=True,
+    help="Prompt for destination file name before merging duplicates",
+)
+@click.option(
+    "-h",
+    "--hidden",
+    is_flag=True,
+    help="Include hidden files.",
+)
+@click.option(
+    "-b",
+    "--backup",
+    is_flag=True,
+    help="Create an archived file of the given directory before re-organizing it.",
+)
+@click.option(
+    "-f",
+    "--archive-format",
+    type=click.Choice(["tar", "zip"], case_sensitive=False),
+    default=None,
+    show_default=True,
+    help="Archive format for backup file.",
+)
+@click.option(
+    "-s",
+    "--save",
+    is_flag=True,
+    help="Save log message to file.",
+)
+@click.option(
+    "-o",
+    "--output",
+    type=click.STRING,
+    default=None,
+    show_default=True,
+    help="Path to output directory for the saved log file",
+)
+def handle_duplicate_files(
+    dir_path: str,
+    interactive: bool,
+    hidden: bool,
+    backup: bool,
+    archive_format: str,
+    save: bool,
+    output: str,
+) -> None:
+    """
+    Find and clean-up duplicate files inside a PATH
+    """
+
+    organizer.handle_duplicate_files(
+        dir_path, interactive, hidden, backup, archive_format, save, output
+    )
