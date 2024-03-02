@@ -427,7 +427,6 @@ def handle_duplicate_files(
 
     # remove/'merge' duplicates
     for entry in duplicate_list:
-        target_name = ""
         for idx, file in enumerate(entry):
             abs_file_path = os.path.join(abs_dir_path, file)
             if idx == 0:
