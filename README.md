@@ -42,11 +42,3 @@ Options:
   -o, --output TEXT                       Path to output directory for the saved log file.
   --help                                  Show this message and exit.
 ```
-
-## NB
-
-
-To enable fm autocompletion after installing run
-```console
-$ _FM_COMPLETE=bash_source fm > ~/.fm-complete.bash && . ~/.fm-complete.bash
-```

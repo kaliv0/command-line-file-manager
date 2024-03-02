@@ -1,7 +1,6 @@
 import hashlib
 import logging
 import os
-import pprint
 import shutil
 from collections import defaultdict
 from typing import List
@@ -322,18 +321,111 @@ def _handle_files_by_flattening_subdirs(
 
 
 #####################################
+
+
 @click.command()
 @click.argument("dir_path", type=click.STRING)
-def handle_duplicate_files(dir_path: str) -> None:
+@click.option(
+    "-h",
+    "--hidden",
+    is_flag=True,
+    help="Include hidden files.",
+)
+@click.option(
+    "-b",
+    "--backup",
+    is_flag=True,
+    help="Create an archived file of the given directory before re-organizing it.",
+)
+@click.option(
+    "-f",
+    "--archive-format",
+    type=click.Choice(["tar", "zip"], case_sensitive=False),
+    default=None,
+    show_default=True,
+    help="Archive format for backup file.",
+)
+@click.option(
+    "-s",
+    "--save",
+    is_flag=True,
+    help="Save log message to file.",
+)
+@click.option(
+    "-o",
+    "--output",
+    type=click.STRING,
+    default=None,
+    show_default=True,
+    help="Path to output directory for the saved log file",
+)
+def handle_duplicate_files(
+    dir_path: str,
+    # exclude: str,
+    hidden: bool,
+    backup: bool,
+    archive_format: str,
+    save: bool,
+    output: str,
+) -> None:
+    """
+    Find and clean-up duplicate files inside a PATH
+    """
     dir_list = os.listdir(dir_path)
     abs_dir_path = os.path.abspath(dir_path)
 
+    # configure logger
+    if not output:
+        output = dir_path
+    logger = LoggerFactory.get_logger(logger_types.ORGANIZE, output, save)
+
+    # create backup archive
+    if backup:
+        shutil.make_archive(
+            base_name=os.path.join(abs_dir_path, app.utils.config.constants.BACKUP_FILE_NAME),
+            format=archive_format,
+            root_dir=os.path.dirname(abs_dir_path),
+            base_dir=os.path.basename(abs_dir_path),
+            verbose=True,
+        )
+
+    # create map of duplicate files
     content_map = defaultdict(list)
     for entry in dir_list:
         abs_entry_path = os.path.join(abs_dir_path, entry)
         if os.path.isfile(abs_entry_path):
+            if not hidden and entry.startswith("."):
+                logger.info(log_messages.SKIP_FILE.format(entry=entry))
+                continue
+
             with open(abs_entry_path, "rb") as f:
                 sha = hashlib.sha1(f.read()).hexdigest()
             content_map[sha].append(entry)
 
-    pprint.pprint(content_map)
+    # transform content_map
+    duplicate_list = [sorted(file_list) for file_list in content_map.values() if len(file_list) > 1]
+
+    # display sorted map entries
+    if not duplicate_list:
+        logger.info(log_messages.NO_DUPLICATE_FILES.format(dir_path=dir_path))
+        return
+
+    display_list = ""
+    for file_list in duplicate_list:
+        for file in sorted(file_list):
+            display_list += file + "\n"
+        display_list += log_messages.DUPLICATE_DELIMITER
+    logger.info(
+        log_messages.LISTED_DUPLICATE_FILES.format(dir_path=abs_dir_path, display_list=display_list)
+    )
+
+    # remove duplicates and keep first file in each sublist (default behavior)
+    for entry in duplicate_list:
+        for file in entry[1:]:
+            logger.info(log_messages.REMOVE_FILE.format(file=file))
+            os.remove(file)
+        # target_path = os.path.join(abs_dir_path, target_file_name)
+        # if not os.path.exists(target_dir):
+        #     os.makedirs(target_dir)
+        # logger.info(log_messages.MOVE_FILE.format(entry=entry, target_dir=target_dir))
+        # shutil.move(abs_entry_path, os.path.join(target_dir, entry))

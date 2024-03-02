@@ -1,17 +1,23 @@
 LOG_FORMAT = "%(message)s"
 
 DELIMITER = "\n=========================================\n"
-
 NO_FILES = "The given directory '{dir_path}' contains no files\n\n" + DELIMITER
-
 LISTED_FILES = (
     "The given directory '{dir_path}' contains the following files:\n"
     + "\n{files_list}\n"
     + DELIMITER
 )
 
-NO_SUBDIRS = "The given directory '{dir_path}' contains no nested subdirectories\n\n" + DELIMITER
+DUPLICATE_DELIMITER = "-----------------------------------------\n"
+NO_DUPLICATE_FILES = (
+    "The given directory '{dir_path}' contains no duplicate files\n\n" + DUPLICATE_DELIMITER
+)
+LISTED_DUPLICATE_FILES = (
+    "The given directory '{dir_path}' contains the following duclicate files:\n"
+    + "\n{display_list}"
+)
 
+NO_SUBDIRS = "The given directory '{dir_path}' contains no nested subdirectories\n\n" + DELIMITER
 NESTED_SUBDIRS = (
     "The given directory '{dir_path}' contains the following subdirectories:\n"
     + "\n{subdir_list}\n"
@@ -34,3 +40,4 @@ MOVE_FILE_TO_ROOT_DIR = "Moving {entry} to root directory"
 SKIP_DIR_AND_MOVE = "Moving {entry} directory without stepping inside"
 
 REMOVE_DIR = "Removing {abs_dir_path}"
+REMOVE_FILE = "Removing duplicate {file}"
