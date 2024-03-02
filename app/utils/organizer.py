@@ -1,12 +1,15 @@
+import hashlib
 import logging
 import os
+import pprint
 import shutil
+from collections import defaultdict
 from typing import List
 
 import click
 
 import app.utils.config.constants
-from app.logs.config import log_messages, logger_types, log_output
+from app.logs.config import log_messages, log_output, logger_types
 from app.logs.logger_factory import LoggerFactory
 from app.utils.config.constants import TARGET_MAP
 
@@ -311,8 +314,26 @@ def _handle_files_by_flattening_subdirs(
 
     is_not_root_dir = abs_dir_path != root_dir
     is_not_one_level_nested_dir = not os.path.join(os.path.dirname(abs_dir_path), "") == root_dir
-    is_not_target_dir = not os.path.basename(subdir_path) in TARGET_MAP.values()
+    is_not_target_dir = os.path.basename(subdir_path) not in TARGET_MAP.values()
 
     if is_not_root_dir and (is_not_one_level_nested_dir or is_not_target_dir):
         logger.info(log_messages.REMOVE_DIR.format(abs_dir_path=abs_dir_path))
         os.rmdir(abs_dir_path)
+
+
+#####################################
+@click.command()
+@click.argument("dir_path", type=click.STRING)
+def handle_duplicate_files(dir_path: str) -> None:
+    dir_list = os.listdir(dir_path)
+    abs_dir_path = os.path.abspath(dir_path)
+
+    content_map = defaultdict(list)
+    for entry in dir_list:
+        abs_entry_path = os.path.join(abs_dir_path, entry)
+        if os.path.isfile(abs_entry_path):
+            with open(abs_entry_path, "rb") as f:
+                sha = hashlib.sha1(f.read()).hexdigest()
+            content_map[sha].append(entry)
+
+    pprint.pprint(content_map)

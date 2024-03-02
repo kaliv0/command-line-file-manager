@@ -1,10 +1,10 @@
 import click
 
-from app.utils import scanner, organizer
+from app.utils import organizer, scanner
 
 
 @click.group()
-def cli():
+def cli() -> None:
     pass
 
 
@@ -19,3 +19,5 @@ cli.add_command(scanner.search_by_name_recursively)
 
 cli.add_command(organizer.organize_files)
 cli.add_command(organizer.organize_files_recursively)
+
+cli.add_command(organizer.handle_duplicate_files)
