@@ -1,6 +1,6 @@
 import logging
 
-from app.logs.config import logger_types, log_output, log_messages
+from app.logs.config import log_messages, log_output, logger_types
 
 
 class LoggerFactory:
@@ -27,6 +27,8 @@ class LoggerFactory:
                 return cls._configure_organize_logger(
                     logger_types.ORGANIZE, save_output, output_dir + log_output.RECURSIVE_ORGANIZE
                 )
+            case _:
+                return cls._configure_logger(logger_types.BASIC, output_dir + log_output.FILES)
 
     @staticmethod
     def _configure_logger(logger_name: str, output_file_name: str) -> logging.Logger:

@@ -1,16 +1,18 @@
 import click
 
 from app.cli.commands import (
+    build_catalog,
+    build_catalog_recursively,
+    build_pretty_tree,
+    build_tree,
+    handle_duplicate_files,
+    organize_files,
+    organize_files_recursively,
     scan_files,
     scan_subdirs,
-    build_catalog_recursively,
-    build_tree,
-    build_pretty_tree,
     search_by_name,
     search_by_name_recursively,
-    build_catalog,
 )
-from app.utils.organizer import organize_files, organize_files_recursively, handle_duplicate_files
 
 
 @click.group()

@@ -1,9 +1,11 @@
+from typing import Optional
+
 import click
 from directory_tree import display_tree
 
 from app.logs.config import log_messages, logger_types
-from app.utils import scanner, organizer
-from app.utils.common import save_logs_to_file
+from app.logs.logger_factory import LoggerFactory
+from app.utils import organizer, scanner
 
 
 # ### scan ###
@@ -41,7 +43,7 @@ def scan_files(dir_path: str, sort: str, desc: bool, save: bool, output: str) ->
     message = scanner.scan_files(dir_path, sort, desc)
     click.echo(message)
     if save:
-        save_logs_to_file(output, dir_path, message, logger_types.BASIC)
+        _save_logs_to_file(output, dir_path, message, logger_types.BASIC)
 
 
 @click.command()
@@ -78,7 +80,7 @@ def scan_subdirs(dir_path: str, sort: str, desc: bool, save: bool, output: str) 
     message = scanner.scan_subdirs(dir_path, sort, desc)
     click.echo(message)
     if save:
-        save_logs_to_file(output, dir_path, message, logger_types.BASIC)
+        _save_logs_to_file(output, dir_path, message, logger_types.BASIC)
 
 
 #############################################################
@@ -104,7 +106,7 @@ def build_catalog(dir_path: str, save: bool, output: str):
     message = scanner.build_catalog(dir_path, save, output)
     click.echo(message)
     if save:
-        save_logs_to_file(output, dir_path, message, logger_types.CATALOG)
+        _save_logs_to_file(output, dir_path, message, logger_types.CATALOG)
 
 
 @click.command()
@@ -129,7 +131,7 @@ def build_catalog_recursively(dir_path: str, save: bool, output: str) -> None:
     message = scanner.get_recursive_catalog(dir_path, None)
     click.echo(message)
     if save:
-        save_logs_to_file(output, dir_path, message, logger_types.RECURSIVE)
+        _save_logs_to_file(output, dir_path, message, logger_types.RECURSIVE)
 
 
 #############################################################
@@ -161,7 +163,7 @@ def build_tree(dir_path: str, hidden: bool, save: bool, output: str) -> None:
     tree_msg = scanner.build_tree(dir_path, hidden)
     click.echo(tree_msg)
     if save:
-        save_logs_to_file(output, dir_path, tree_msg, logger_types.TREE)
+        _save_logs_to_file(output, dir_path, tree_msg, logger_types.TREE)
 
 
 @click.command()
@@ -192,7 +194,7 @@ def build_pretty_tree(dir_path: str, hidden: bool, save: bool, output: str) -> N
     tree_msg = display_tree(dir_path, string_rep=True, show_hidden=hidden)
     click.echo(tree_msg)
     if save:
-        save_logs_to_file(output, dir_path, tree_msg, logger_types.TREE)
+        _save_logs_to_file(output, dir_path, tree_msg, logger_types.TREE)
 
 
 #############################################################
@@ -220,7 +222,7 @@ def search_by_name(dir_path: str, name: str, save: bool, output: str) -> None:
     log_msg = scanner.search_by_name(dir_path, name)
     click.echo(log_msg)
     if save:
-        save_logs_to_file(output, dir_path, log_msg, logger_types.SEARCH)
+        _save_logs_to_file(output, dir_path, log_msg, logger_types.SEARCH)
 
 
 @click.command()
@@ -250,14 +252,11 @@ def search_by_name_recursively(dir_path: str, name: str, save: bool, output: str
         log_msg = log_messages.NOT_FOUND
     click.echo(log_msg)
     if save:
-        save_logs_to_file(output, dir_path, log_msg, logger_types.SEARCH)
+        _save_logs_to_file(output, dir_path, log_msg, logger_types.SEARCH)
 
 
 #############################################################
-
 # ### organize ###
-
-
 @click.command()
 @click.argument("dir_path", type=click.STRING)
 @click.option(
@@ -319,6 +318,7 @@ def organize_files(
     organizer.organize_files(dir_path, exclude, hidden, backup, archive_format, save, output)
 
 
+#############################################################
 @click.command()
 @click.argument("dir_path", type=click.STRING)
 @click.option(
@@ -398,8 +398,6 @@ def organize_files_recursively(
 
 
 #####################################
-
-
 @click.command()
 @click.argument("dir_path", type=click.STRING)
 @click.option(
@@ -458,3 +456,12 @@ def handle_duplicate_files(
     organizer.handle_duplicate_files(
         dir_path, interactive, hidden, backup, archive_format, save, output
     )
+
+
+#############################################################
+def _save_logs_to_file(
+    output_dir: Optional[str], dir_path: str, message: str, logger_type: str
+) -> None:
+    if not output_dir:
+        output_dir = dir_path
+    LoggerFactory.get_logger(logger_type, output_dir, True).info(message)
