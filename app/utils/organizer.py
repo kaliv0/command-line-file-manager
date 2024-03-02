@@ -326,6 +326,12 @@ def _handle_files_by_flattening_subdirs(
 @click.command()
 @click.argument("dir_path", type=click.STRING)
 @click.option(
+    "-i",
+    "--interactive",
+    is_flag=True,
+    help="Prompt for destination file name before merging duplicates",
+)
+@click.option(
     "-h",
     "--hidden",
     is_flag=True,
@@ -361,7 +367,7 @@ def _handle_files_by_flattening_subdirs(
 )
 def handle_duplicate_files(
     dir_path: str,
-    # exclude: str,
+    interactive: bool,
     hidden: bool,
     backup: bool,
     archive_format: str,
@@ -419,13 +425,21 @@ def handle_duplicate_files(
         log_messages.LISTED_DUPLICATE_FILES.format(dir_path=abs_dir_path, display_list=display_list)
     )
 
-    # remove duplicates and keep first file in each sublist (default behavior)
+    # remove/'merge' duplicates
     for entry in duplicate_list:
-        for file in entry[1:]:
-            logger.info(log_messages.REMOVE_FILE.format(file=file))
-            os.remove(file)
-        # target_path = os.path.join(abs_dir_path, target_file_name)
-        # if not os.path.exists(target_dir):
-        #     os.makedirs(target_dir)
-        # logger.info(log_messages.MOVE_FILE.format(entry=entry, target_dir=target_dir))
-        # shutil.move(abs_entry_path, os.path.join(target_dir, entry))
+        target_name = ""
+        for idx, file in enumerate(entry):
+            abs_file_path = os.path.join(abs_dir_path, file)
+            if idx == 0:
+                if interactive:
+                    target_name = click.prompt(
+                        text=log_messages.PRE_MERGE_PROMPT.format(entry=entry),
+                        type=click.STRING,
+                    )
+                else:
+                    target_name = file
+                abs_target_path = os.path.join(abs_dir_path, target_name)
+                logger.info(log_messages.MERGE_FILES.format(target_name=target_name))
+                shutil.move(abs_file_path, abs_target_path)
+                continue
+            os.remove(abs_file_path)
