@@ -182,11 +182,11 @@ def handle_duplicate_files_recursively(
     dir_path: str,
     interactive: bool,
     hidden: bool,
-    backup: bool,
-    archive_format: str,
     save: bool,
     output: str,
-    logger: Logger = None,
+    backup: bool,
+    archive_format: str,
+    logger: Logger,
 ) -> None:
     abs_dir_path, dir_list = _handle_dir_path(dir_path)
     if not logger:
@@ -214,7 +214,14 @@ def handle_duplicate_files_recursively(
     # ## dive recursively into nested subdirs ##
     for subdir in subdir_list:
         handle_duplicate_files_recursively(
-            subdir, interactive, hidden, backup, False, save, output, logger
+            subdir,
+            interactive,
+            hidden,
+            save,
+            output,
+            backup=False,
+            archive_format=None,
+            logger=logger,
         )
 
 

@@ -474,20 +474,6 @@ def handle_duplicate_files(
     help="Include hidden files.",
 )
 @click.option(
-    "-b",
-    "--backup",
-    is_flag=True,
-    help="Create an archived file of the given directory before re-organizing it.",
-)
-@click.option(
-    "-f",
-    "--archive-format",
-    type=click.Choice(["tar", "zip"], case_sensitive=False),
-    default=None,
-    show_default=True,
-    help="Archive format for backup file.",
-)
-@click.option(
     "-s",
     "--save",
     is_flag=True,
@@ -501,21 +487,41 @@ def handle_duplicate_files(
     show_default=True,
     help="Path to output directory for the saved log file",
 )
+@click.option(
+    "-b",
+    "--backup",
+    is_flag=True,
+    help="Create an archived file of the given directory before re-organizing it.",
+)
+@click.option(
+    "-f",
+    "--archive-format",
+    type=click.Choice(["tar", "zip"], case_sensitive=False),
+    default=None,
+    show_default=True,
+    help="Archive format for backup file.",
+)
 def handle_duplicate_files_recursively(
     dir_path: str,
     interactive: bool,
     hidden: bool,
-    backup: bool,
-    archive_format: str,
     save: bool,
     output: str,
+    backup: bool,
+    archive_format: str,
 ) -> None:
     """
     Find and clean-up duplicate files recursively inside a PATH
     """
 
     organizer.handle_duplicate_files_recursively(
-        dir_path, interactive, hidden, backup, archive_format, save, output
+        dir_path,
+        interactive,
+        hidden,
+        save,
+        output,
+        backup,
+        archive_format,
     )
 
 
