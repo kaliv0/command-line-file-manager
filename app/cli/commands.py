@@ -459,6 +459,67 @@ def handle_duplicate_files(
 
 
 #############################################################
+@click.command()
+@click.argument("dir_path", type=click.STRING)
+@click.option(
+    "-i",
+    "--interactive",
+    is_flag=True,
+    help="Prompt for destination file name before merging duplicates",
+)
+@click.option(
+    "-h",
+    "--hidden",
+    is_flag=True,
+    help="Include hidden files.",
+)
+@click.option(
+    "-b",
+    "--backup",
+    is_flag=True,
+    help="Create an archived file of the given directory before re-organizing it.",
+)
+@click.option(
+    "-f",
+    "--archive-format",
+    type=click.Choice(["tar", "zip"], case_sensitive=False),
+    default=None,
+    show_default=True,
+    help="Archive format for backup file.",
+)
+@click.option(
+    "-s",
+    "--save",
+    is_flag=True,
+    help="Save log message to file.",
+)
+@click.option(
+    "-o",
+    "--output",
+    type=click.STRING,
+    default=None,
+    show_default=True,
+    help="Path to output directory for the saved log file",
+)
+def handle_duplicate_files_recursively(
+    dir_path: str,
+    interactive: bool,
+    hidden: bool,
+    backup: bool,
+    archive_format: str,
+    save: bool,
+    output: str,
+) -> None:
+    """
+    Find and clean-up duplicate files recursively inside a PATH
+    """
+
+    organizer.handle_duplicate_files_recursively(
+        dir_path, interactive, hidden, backup, archive_format, save, output
+    )
+
+
+#############################################################
 def _save_logs_to_file(
     output_dir: Optional[str], dir_path: str, message: str, logger_type: str
 ) -> None:

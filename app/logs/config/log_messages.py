@@ -13,8 +13,15 @@ NO_DUPLICATE_FILES = (
     "The given directory '{dir_path}' contains no duplicate files\n\n" + DUPLICATE_DELIMITER
 )
 LISTED_DUPLICATE_FILES = (
-    "The given directory '{dir_path}' contains the following duclicate files:\n"
+    "The given directory '{dir_path}' contains the following duplicate files:\n"
     + "\n{display_list}"
+)
+
+NO_DUPLICATE_FILES_RECURSIVELY = (
+    "The given directory contains no duplicate files\n\n" + DUPLICATE_DELIMITER
+)
+LISTED_DUPLICATE_FILES_RECURSIVELY = (
+    "The given directory contains the following duplicate files:\n" + "\n{display_list}"
 )
 
 NO_SUBDIRS = "The given directory '{dir_path}' contains no nested subdirectories\n\n" + DELIMITER

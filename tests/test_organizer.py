@@ -174,7 +174,7 @@ def test_handle_duplicate_files(runner, mock_organizer):
         "Skipping .hidden1.txt\n",
         "Skipping .hidden2.txt\n",
         "Skipping .hidden.log\n",
-        "The given directory 'tests/resources/duplicates' contains the following duclicate files:\n\n"
+        "The given directory 'tests/resources/duplicates' contains the following duplicate files:\n\n",
         "log1.md\n",
         "log2.md\n",
         "-----------------------------------------\n",
@@ -196,7 +196,34 @@ def test_handle_duplicate_files_hidden(runner, mock_organizer):
     resources_full_path = os.path.abspath(DUPLICATES_RESOURCE_DIR)
     log_message = result.output.replace(resources_full_path, DUPLICATES_RESOURCE_DIR)
     message_substrings = (
-        "The given directory 'tests/resources/duplicates' contains the following duclicate files:\n\n",
+        "The given directory 'tests/resources/duplicates' contains the following duplicate files:\n\n",
+        ".hidden1.txt\n",
+        ".hidden2.txt\n",
+        "-----------------------------------------\n",
+        "log1.md\n",
+        "log2.md\n",
+        "-----------------------------------------\n",
+        "book1.txt\n",
+        "book2.txt\n",
+        "-----------------------------------------\n\n",
+        "Merging duplicates: ['.hidden1.txt', '.hidden2.txt'] into .hidden1.txt\n",
+        "-----------------------------------------\n\n",
+        "Merging duplicates: ['log1.md', 'log2.md'] into log1.md\n",
+        "-----------------------------------------\n\n",
+        "Merging duplicates: ['book1.txt', 'book2.txt'] into book1.txt\n",
+        "-----------------------------------------\n\n",
+    )
+    assert all(substring in log_message for substring in message_substrings)
+
+
+def test_handle_duplicate_files_recursively(runner, mock_organizer):
+    result = runner.invoke(commands.handle_duplicate_files, ["-h", DUPLICATES_RESOURCE_DIR])
+    assert result.exit_code == 0
+
+    resources_full_path = os.path.abspath(DUPLICATES_RESOURCE_DIR)
+    log_message = result.output.replace(resources_full_path, DUPLICATES_RESOURCE_DIR)
+    message_substrings = (
+        "The given directory 'tests/resources/duplicates' contains the following duplicate files:\n\n",
         ".hidden1.txt\n",
         ".hidden2.txt\n",
         "-----------------------------------------\n",

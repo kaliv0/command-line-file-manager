@@ -6,6 +6,7 @@ from app.cli.commands import (
     build_pretty_tree,
     build_tree,
     handle_duplicate_files,
+    handle_duplicate_files_recursively,
     organize_files,
     organize_files_recursively,
     scan_files,
@@ -31,5 +32,5 @@ cli.add_command(search_by_name_recursively)
 
 cli.add_command(organize_files)
 cli.add_command(organize_files_recursively)
-
 cli.add_command(handle_duplicate_files)
+cli.add_command(handle_duplicate_files_recursively)
