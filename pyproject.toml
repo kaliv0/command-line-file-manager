@@ -1,34 +1,34 @@
 [build-system]
-requires = ["setuptools>=65.5.0", "wheel"]
 build-backend = "setuptools.build_meta"
+requires = ["setuptools>=65.5.0", "wheel"]
 
 [project]
-name = "command-line-file-manager"
-version = "1.0.6"
-description = "CLI tool for managing local file system storage"
-readme = "README.md"
 authors = [
-    { name = "Kaloyan Ivanov", email = "kaloyan.ivanov88@gmail.com" }
+  {name = "Kaloyan Ivanov", email = "kaloyan.ivanov88@gmail.com"},
 ]
+description = "CLI tool for managing local file system storage"
+name = "command-line-file-manager"
+readme = "README.md"
+version = "1.1.2"
 
 requires-python = ">=3.11"
 
 dependencies = [
-    "click == 8.1.7",
-    "emoji == 2.8.0",
-    "directory-tree == 0.0.4",
+  "click == 8.1.7",
+  "emoji == 2.8.0",
+  "directory-tree == 0.0.4",
 ]
 
 [project.optional-dependencies]
 dev = [
-    "tox == 4.11.3",
-    "codespell == 2.2.6",
-    "black == 23.9.1",
-    "pytest == 7.4.2",
-    "coverage == 7.3.2",
-    "pytest-cov == 4.1.0",
-    "build == 1.0.3",
-    "twine == 4.0.2",
+  "tox == 4.11.3",
+  "codespell == 2.2.6",
+  "black == 23.9.1",
+  "pytest == 7.4.2",
+  "coverage == 7.3.2",
+  "pytest-cov == 4.1.0",
+  "build == 1.0.3",
+  "twine == 4.0.2",
 ]
 
 [project.scripts]
