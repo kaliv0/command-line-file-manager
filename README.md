@@ -1,5 +1,7 @@
 # command-line-file-manager
 
+[![PyPI](https://img.shields.io/pypi/v/command-line-file-manager.svg)](https://pypi.org/project/command-line-file-manager/)
+
 Python CLI tool for scanning and organizing local directories and files.
 
 #### Requires Python 3.10+
