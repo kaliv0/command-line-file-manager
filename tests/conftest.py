@@ -1,9 +1,6 @@
 import pytest
 from click.testing import CliRunner
 
-RESOURCE_DIR = "tests/resources/plain"
-DUPLICATES_RESOURCE_DIR = "tests/resources/duplicates"
-
 
 @pytest.fixture(scope="function")
 def runner(request):

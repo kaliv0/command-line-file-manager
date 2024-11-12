@@ -10,7 +10,7 @@ description = "CLI tool for managing local file system storage"
 name = "command-line-file-manager"
 readme = "README.md"
 license = { file = "LICENSE" }
-version = "1.1.6"
+dynamic = ["version"]
 
 requires-python = ">=3.10"
 
@@ -31,4 +31,11 @@ dev = [
 ]
 
 [project.scripts]
-fm = "app.__main__:cli"
+fm = "manager.__main__:cli"
+
+[tool.setuptools.dynamic]
+version = { attr = "manager.__version__" }
+
+[tool.setuptools.packages.find]
+where = ["."]
+exclude = ["tests"]
