@@ -5,4 +5,4 @@ codespell==2.2.6
 directory-tree==0.0.4
 emoji==2.8.0
 tox==4.11.3
-twine==4.0.2
+twine==5.1.1
