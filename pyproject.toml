@@ -8,6 +8,8 @@ authors = [
 ]
 description = "CLI tool for managing local file system storage"
 name = "command-line-file-manager"
+keywords = ["file manager", "cli tool", "command line interface"]
+urls = { repository = "https://github.com/kaliv0/command-line-file-manager.git" }
 readme = "README.md"
 license = { file = "LICENSE" }
 dynamic = ["version"]
@@ -38,4 +40,4 @@ version = { attr = "manager.__version__" }
 
 [tool.setuptools.packages.find]
 where = ["."]
-exclude = ["tests"]
+exclude = ["assets", "tests"]
