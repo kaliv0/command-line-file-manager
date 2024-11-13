@@ -1,6 +1,6 @@
 import click
 
-from app.cli.commands import (
+from manager.cli.commands import (
     build_catalog,
     build_catalog_recursively,
     build_pretty_tree,
@@ -34,3 +34,6 @@ cli.add_command(organize_files)
 cli.add_command(organize_files_recursively)
 cli.add_command(handle_duplicate_files)
 cli.add_command(handle_duplicate_files_recursively)
+
+if __name__ == "__main__":
+    cli()

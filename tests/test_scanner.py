@@ -1,13 +1,13 @@
-from app.cli import commands
-from tests.conftest import RESOURCE_DIR
+from manager.cli import commands
+
+RESOURCE_DIR = "tests/resources/plain"
 
 
 def test_scan_files(runner):
-    # case 0: test with default option values
     result = runner.invoke(commands.scan_files, [RESOURCE_DIR])
     assert result.exit_code == 0
     message_substrings = (
-        "The given directory 'tests/resources/plain' contains the following files:\n",
+        "'tests/resources/plain' contains the following files:\n",
         ".hidden_file.md\n",
         "audio1.wav\n",
         "file.txt\n",
@@ -20,11 +20,12 @@ def test_scan_files(runner):
     )
     assert all(substring in result.output for substring in message_substrings)
 
-    # case 1: test with sort option
+
+def test_scan_files_sorted(runner):
     result = runner.invoke(commands.scan_files, [RESOURCE_DIR, "--sort=name", "--desc"])
     assert result.exit_code == 0
     assert result.output == (
-        "The given directory 'tests/resources/plain' contains the following files:\n"
+        "'tests/resources/plain' contains the following files:\n"
         "\n"
         "video.mp4\n"
         "smth.md\n"
@@ -40,22 +41,22 @@ def test_scan_files(runner):
 
 
 def test_scan_subdirs(runner):
-    # case 0: test with default option values
     result = runner.invoke(commands.scan_subdirs, [RESOURCE_DIR])
     assert result.exit_code == 0
     message_substrings = (
-        "The given directory 'tests/resources/plain' contains the following subdirectories:\n",
+        "'tests/resources/plain' contains the following subdirectories:\n",
         ".hidden_other\n",
         "inner_test\n",
         "=========================================\n",
     )
     assert all(substring in result.output for substring in message_substrings)
 
-    # case 1: test with sort option
+
+def test_scan_subdirs_sorted(runner):
     result = runner.invoke(commands.scan_subdirs, [RESOURCE_DIR, "--sort=size", "--desc"])
     assert result.exit_code == 0
     assert result.output == (
-        "The given directory 'tests/resources/plain' contains the following subdirectories:\n"
+        "'tests/resources/plain' contains the following subdirectories:\n"
         "\n"
         ".hidden_other\n"
         "inner_test\n"
@@ -68,7 +69,7 @@ def test_build_catalog(runner):
     result = runner.invoke(commands.build_catalog, [RESOURCE_DIR])
     assert result.exit_code == 0
     message_substrings = (
-        "The given directory 'tests/resources/plain' contains the following files:\n",
+        "'tests/resources/plain' contains the following files:\n",
         "pic1.jpg\n",
         "pic.png\n",
         ".hidden_file.md\n",
@@ -78,7 +79,7 @@ def test_build_catalog(runner):
         "file.txt\n",
         "file1.pdf\n",
         "=========================================\n",
-        "The given directory 'tests/resources/plain' contains the following subdirectories:\n",
+        "'tests/resources/plain' contains the following subdirectories:\n",
         "inner_test\n",
         ".hidden_other\n",
         "=========================================\n",

@@ -3,9 +3,9 @@ from typing import Optional
 import click
 from directory_tree import display_tree
 
-from app.logs.config import log_messages, logger_types
-from app.logs.logger_factory import LoggerFactory
-from app.utils import organizer, scanner
+from manager.logs.config import log_messages, logger_types
+from manager.logs.logger_factory import LoggerFactory
+from manager.utils import organizer, scanner
 
 
 # ### scan ###
@@ -16,18 +16,18 @@ from app.utils import organizer, scanner
     type=click.Choice(["name", "size", "date", "modified", "type"], case_sensitive=False),
     default="name",
     show_default=True,
-    help="Sorting criteria.",
+    help="Sorting criteria",
 )
 @click.option(
     "--desc",
     is_flag=True,
-    help="Display result in descending order.",
+    help="Display result in descending order",
 )
 @click.option(
     "-s",
     "--save",
     is_flag=True,
-    help="Save log message to file.",
+    help="Save log message to file",
 )
 @click.option(
     "-o",
@@ -53,18 +53,18 @@ def scan_files(dir_path: str, sort: str, desc: bool, save: bool, output: str) ->
     type=click.Choice(["name", "size", "date", "modified"], case_sensitive=False),
     default="name",
     show_default=True,
-    help="Sorting criteria.",
+    help="Sorting criteria",
 )
 @click.option(
     "--desc",
     is_flag=True,
-    help="Display result in descending order.",
+    help="Display result in descending order",
 )
 @click.option(
     "-s",
     "--save",
     is_flag=True,
-    help="Save log message to file.",
+    help="Save log message to file",
 )
 @click.option(
     "-o",
@@ -90,7 +90,7 @@ def scan_subdirs(dir_path: str, sort: str, desc: bool, save: bool, output: str) 
     "-s",
     "--save",
     is_flag=True,
-    help="Save log message to file.",
+    help="Save log message to file",
 )
 @click.option(
     "-o",
@@ -103,7 +103,7 @@ def scan_subdirs(dir_path: str, sort: str, desc: bool, save: bool, output: str) 
 def build_catalog(dir_path: str, save: bool, output: str):
     """DIR_PATH: Path to directory to be scanned"""
 
-    message = scanner.build_catalog(dir_path, save, output)
+    message = scanner.build_catalog(dir_path)
     click.echo(message)
     if save:
         _save_logs_to_file(output, dir_path, message, logger_types.CATALOG)
@@ -115,7 +115,7 @@ def build_catalog(dir_path: str, save: bool, output: str):
     "-s",
     "--save",
     is_flag=True,
-    help="Save log message to file.",
+    help="Save log message to file",
 )
 @click.option(
     "-o",
@@ -128,7 +128,7 @@ def build_catalog(dir_path: str, save: bool, output: str):
 def build_catalog_recursively(dir_path: str, save: bool, output: str) -> None:
     """DIR_PATH: Path to directory to be scanned"""
 
-    message = scanner.get_recursive_catalog(dir_path, None)
+    message = scanner.get_recursive_catalog(dir_path)
     click.echo(message)
     if save:
         _save_logs_to_file(output, dir_path, message, logger_types.RECURSIVE)
@@ -140,14 +140,15 @@ def build_catalog_recursively(dir_path: str, save: bool, output: str) -> None:
 @click.option(
     "-h",
     "--hidden",
+    "show_hidden",
     is_flag=True,
-    help="Include hidden files and folders.",
+    help="Include hidden files and folders",
 )
 @click.option(
     "-s",
     "--save",
     is_flag=True,
-    help="Save log message to file.",
+    help="Save log message to file",
 )
 @click.option(
     "-o",
@@ -157,10 +158,10 @@ def build_catalog_recursively(dir_path: str, save: bool, output: str) -> None:
     show_default=True,
     help="Path to output directory for the saved log file",
 )
-def build_tree(dir_path: str, hidden: bool, save: bool, output: str) -> None:
+def build_tree(dir_path: str, show_hidden: bool, save: bool, output: str) -> None:
     """DIR_PATH: Path to directory to be scanned"""
 
-    tree_msg = scanner.build_tree(dir_path, hidden)
+    tree_msg = scanner.build_tree(dir_path, show_hidden)
     click.echo(tree_msg)
     if save:
         _save_logs_to_file(output, dir_path, tree_msg, logger_types.TREE)
@@ -171,14 +172,15 @@ def build_tree(dir_path: str, hidden: bool, save: bool, output: str) -> None:
 @click.option(
     "-h",
     "--hidden",
+    "show_hidden",
     is_flag=True,
-    help="Include hidden files and folders.",
+    help="Include hidden files and folders",
 )
 @click.option(
     "-s",
     "--save",
     is_flag=True,
-    help="Save log message to file.",
+    help="Save log message to file",
 )
 @click.option(
     "-o",
@@ -188,10 +190,10 @@ def build_tree(dir_path: str, hidden: bool, save: bool, output: str) -> None:
     show_default=True,
     help="Path to output directory for the saved log file",
 )
-def build_pretty_tree(dir_path: str, hidden: bool, save: bool, output: str) -> None:
+def build_pretty_tree(dir_path: str, show_hidden: bool, save: bool, output: str) -> None:
     """DIR_PATH: Path to directory to be scanned"""
 
-    tree_msg = display_tree(dir_path, string_rep=True, show_hidden=hidden)
+    tree_msg = display_tree(dir_path, string_rep=True, show_hidden=show_hidden)
     click.echo(tree_msg)
     if save:
         _save_logs_to_file(output, dir_path, tree_msg, logger_types.TREE)
@@ -205,7 +207,7 @@ def build_pretty_tree(dir_path: str, hidden: bool, save: bool, output: str) -> N
     "-s",
     "--save",
     is_flag=True,
-    help="Save log message to file.",
+    help="Save log message to file",
 )
 @click.option(
     "-o",
@@ -232,7 +234,7 @@ def search_by_name(dir_path: str, name: str, save: bool, output: str) -> None:
     "-s",
     "--save",
     is_flag=True,
-    help="Save log message to file.",
+    help="Save log message to file",
 )
 @click.option(
     "-o",
@@ -247,7 +249,7 @@ def search_by_name_recursively(dir_path: str, name: str, save: bool, output: str
     Search recursively by NAME inside DIR_PATH
     """
 
-    log_msg = scanner.get_search_result(dir_path, None, name)
+    log_msg = scanner.get_search_result(dir_path, name)
     if not log_msg:
         log_msg = log_messages.NOT_FOUND
     click.echo(log_msg)
@@ -265,20 +267,21 @@ def search_by_name_recursively(dir_path: str, name: str, save: bool, output: str
     type=click.STRING,
     default=None,
     show_default=True,
-    help="Single or multiple file extensions to be skipped separated by comma. "
+    help="Single or multiple file extensions to be skipped separated by comma"
     "E.g. --exclude .pdf,.mp3",
 )
 @click.option(
     "-h",
     "--hidden",
+    "show_hidden",
     is_flag=True,
-    help="Include hidden files.",
+    help="Include hidden files",
 )
 @click.option(
     "-b",
     "--backup",
     is_flag=True,
-    help="Create an archived file of the given directory before re-organizing it.",
+    help="Create an archived file of the given directory before re-organizing it",
 )
 @click.option(
     "-f",
@@ -286,13 +289,13 @@ def search_by_name_recursively(dir_path: str, name: str, save: bool, output: str
     type=click.Choice(["tar", "zip"], case_sensitive=False),
     default=None,
     show_default=True,
-    help="Archive format for backup file.",
+    help="Archive format for backup file",
 )
 @click.option(
     "-s",
     "--save",
     is_flag=True,
-    help="Save log message to file.",
+    help="Save log message to file",
 )
 @click.option(
     "-o",
@@ -305,17 +308,17 @@ def search_by_name_recursively(dir_path: str, name: str, save: bool, output: str
 def organize_files(
     dir_path: str,
     exclude: str,
-    hidden: bool,
+    show_hidden: bool,
     backup: bool,
     archive_format: str,
     save: bool,
     output: str,
 ) -> None:
     """
-    Search recursively by NAME inside DIR_PATH
+    Organize files by extension/type inside DIR_PATH
     """
 
-    organizer.organize_files(dir_path, exclude, hidden, backup, archive_format, save, output)
+    organizer.organize_files(dir_path, exclude, show_hidden, backup, archive_format, save, output)
 
 
 #############################################################
@@ -341,19 +344,20 @@ def organize_files(
 @click.option(
     "--flat",
     is_flag=True,
-    help="Move all files to target directories inside parent folder.",
+    help="Move all files to target directories inside parent folder",
 )
 @click.option(
     "-h",
     "--hidden",
+    "show_hidden",
     is_flag=True,
-    help="Include hidden files and folders.",
+    help="Include hidden files and folders",
 )
 @click.option(
     "-b",
     "--backup",
     is_flag=True,
-    help="Create an archived file of the given directory before re-organizing it.",
+    help="Create an archived file of the given directory before re-organizing it",
 )
 @click.option(
     "-f",
@@ -361,13 +365,13 @@ def organize_files(
     type=click.Choice(["tar", "zip"], case_sensitive=False),
     default=None,
     show_default=True,
-    help="Archive format for backup file.",
+    help="Archive format for backup file",
 )
 @click.option(
     "-s",
     "--save",
     is_flag=True,
-    help="Save log message to file.",
+    help="Save log message to file",
 )
 @click.option(
     "-o",
@@ -382,18 +386,18 @@ def organize_files_recursively(
     exclude: str,
     exclude_dir: str,
     flat: bool,
-    hidden: bool,
+    show_hidden: bool,
     backup: bool,
     archive_format: str,
     save: bool,
     output: str,
 ) -> None:
     """
-    Search recursively by NAME inside DIR_PATH
+    Organize files recursively by extension/type inside DIR_PATH
     """
 
     organizer.organize_files_recursively(
-        dir_path, exclude, exclude_dir, flat, hidden, backup, archive_format, save, output
+        dir_path, exclude, exclude_dir, flat, show_hidden, backup, archive_format, save, output
     )
 
 
@@ -409,14 +413,15 @@ def organize_files_recursively(
 @click.option(
     "-h",
     "--hidden",
+    "show_hidden",
     is_flag=True,
-    help="Include hidden files.",
+    help="Include hidden files",
 )
 @click.option(
     "-b",
     "--backup",
     is_flag=True,
-    help="Create an archived file of the given directory before re-organizing it.",
+    help="Create an archived file of the given directory before re-organizing it",
 )
 @click.option(
     "-f",
@@ -424,13 +429,13 @@ def organize_files_recursively(
     type=click.Choice(["tar", "zip"], case_sensitive=False),
     default=None,
     show_default=True,
-    help="Archive format for backup file.",
+    help="Archive format for backup file",
 )
 @click.option(
     "-s",
     "--save",
     is_flag=True,
-    help="Save log message to file.",
+    help="Save log message to file",
 )
 @click.option(
     "-o",
@@ -443,7 +448,7 @@ def organize_files_recursively(
 def handle_duplicate_files(
     dir_path: str,
     interactive: bool,
-    hidden: bool,
+    show_hidden: bool,
     backup: bool,
     archive_format: str,
     save: bool,
@@ -454,7 +459,7 @@ def handle_duplicate_files(
     """
 
     organizer.handle_duplicate_files(
-        dir_path, interactive, hidden, backup, archive_format, save, output
+        dir_path, interactive, show_hidden, backup, archive_format, save, output
     )
 
 
@@ -470,14 +475,15 @@ def handle_duplicate_files(
 @click.option(
     "-h",
     "--hidden",
+    "show_hidden",
     is_flag=True,
-    help="Include hidden files.",
+    help="Include hidden files",
 )
 @click.option(
     "-s",
     "--save",
     is_flag=True,
-    help="Save log message to file.",
+    help="Save log message to file",
 )
 @click.option(
     "-o",
@@ -491,7 +497,7 @@ def handle_duplicate_files(
     "-b",
     "--backup",
     is_flag=True,
-    help="Create an archived file of the given directory before re-organizing it.",
+    help="Create an archived file of the given directory before re-organizing it",
 )
 @click.option(
     "-f",
@@ -499,12 +505,12 @@ def handle_duplicate_files(
     type=click.Choice(["tar", "zip"], case_sensitive=False),
     default=None,
     show_default=True,
-    help="Archive format for backup file.",
+    help="Archive format for backup file",
 )
 def handle_duplicate_files_recursively(
     dir_path: str,
     interactive: bool,
-    hidden: bool,
+    show_hidden: bool,
     save: bool,
     output: str,
     backup: bool,
@@ -517,7 +523,7 @@ def handle_duplicate_files_recursively(
     organizer.handle_duplicate_files_recursively(
         dir_path,
         interactive,
-        hidden,
+        show_hidden,
         save,
         output,
         backup,

@@ -3,19 +3,18 @@ import os
 import shutil
 from collections import defaultdict
 from logging import Logger
-from typing import List, Tuple
 
 import click
 
-from app.logs.config import log_messages, log_output, logger_types
-from app.logs.logger_factory import LoggerFactory
-from app.utils.config import constants
+from manager.logs.config import log_messages, log_output, logger_types
+from manager.logs.logger_factory import LoggerFactory
+from manager.utils.config import constants
 
 
 def organize_files(
     dir_path: str,
     exclude: str,
-    hidden: bool,
+    show_hidden: bool,
     backup: bool,
     archive_format: str,
     save: bool,
@@ -30,7 +29,7 @@ def organize_files(
         abs_entry_path = os.path.join(abs_dir_path, entry)
         if os.path.isfile(abs_entry_path):
             file_extension = os.path.splitext(entry)[1]
-            if (not hidden and entry.startswith(".")) or file_extension in exclude_list:
+            if (not show_hidden and entry.startswith(".")) or file_extension in exclude_list:
                 logger.info(log_messages.SKIP_FILE.format(entry=entry))
             else:
                 _handle_entries(abs_dir_path, abs_entry_path, entry, file_extension, logger)
@@ -41,7 +40,7 @@ def organize_files_recursively(
     exclude: str,
     exclude_dir: str,
     flat: bool,
-    hidden: bool,
+    show_hidden: bool,
     backup: bool,
     archive_format: str,
     save: bool,
@@ -56,18 +55,18 @@ def organize_files_recursively(
     if flat:
         root_dir = os.path.join(abs_dir_path, "")
         _handle_files_by_flattening_subdirs(
-            abs_dir_path, "", root_dir, exclude_list, exclude_dir_list, hidden, logger
+            abs_dir_path, "", root_dir, exclude_list, exclude_dir_list, show_hidden, logger
         )
     else:
-        _handle_files(abs_dir_path, "", exclude_list, exclude_dir_list, hidden, logger)
+        _handle_files(abs_dir_path, "", exclude_list, exclude_dir_list, show_hidden, logger)
 
 
 def _handle_files(
     parent_dir: str,
     subdir_path: str,
-    exclude_list: List[str],
-    exclude_dir_list: List[str],
-    hidden: bool,
+    exclude_list: list[str],
+    exclude_dir_list: list[str],
+    show_hidden: bool,
     logger: Logger,
 ) -> None:
     abs_dir_path = os.path.join(parent_dir, subdir_path)
@@ -85,7 +84,7 @@ def _handle_files(
             ):
                 continue
             file_extension = os.path.splitext(entry)[1]
-            if not hidden and entry.startswith(".") or file_extension in exclude_list:
+            if not show_hidden and entry.startswith(".") or file_extension in exclude_list:
                 logger.info(log_messages.SKIP_FILE.format(entry=entry))
             else:
                 _handle_entries(abs_dir_path, abs_entry_path, entry, file_extension, logger)
@@ -97,16 +96,16 @@ def _handle_files(
             nested_dirs.append(abs_entry_path)
     # dive recursively to handle nested dirs
     for nested_dir in nested_dirs:
-        _handle_files(abs_dir_path, nested_dir, exclude_list, exclude_dir_list, hidden, logger)
+        _handle_files(abs_dir_path, nested_dir, exclude_list, exclude_dir_list, show_hidden, logger)
 
 
 def _handle_files_by_flattening_subdirs(
     parent_dir: str,
     subdir_path: str,
     root_dir: str,
-    exclude_list: List[str],
-    exclude_dir_list: List[str],
-    hidden: bool,
+    exclude_list: list[str],
+    exclude_dir_list: list[str],
+    show_hidden: bool,
     logger: Logger,
 ) -> None:
     abs_dir_path = os.path.join(parent_dir, subdir_path)
@@ -124,7 +123,7 @@ def _handle_files_by_flattening_subdirs(
             ):
                 continue
             file_extension = os.path.splitext(entry)[1]
-            if not hidden and entry.startswith(".") or file_extension in exclude_list:
+            if not show_hidden and entry.startswith(".") or file_extension in exclude_list:
                 logger.info(log_messages.MOVE_FILE_TO_ROOT_DIR.format(entry=entry))
                 shutil.move(abs_entry_path, os.path.join(root_dir, entry))
             else:
@@ -139,7 +138,7 @@ def _handle_files_by_flattening_subdirs(
     # dive recursively to handle nested dirs
     for nested_dir in nested_dirs:
         _handle_files_by_flattening_subdirs(
-            abs_dir_path, nested_dir, root_dir, exclude_list, exclude_dir_list, hidden, logger
+            abs_dir_path, nested_dir, root_dir, exclude_list, exclude_dir_list, show_hidden, logger
         )
     # flatten dir
     is_not_root_dir = abs_dir_path != root_dir
@@ -154,7 +153,7 @@ def _handle_files_by_flattening_subdirs(
 def handle_duplicate_files(
     dir_path: str,
     interactive: bool,
-    hidden: bool,
+    show_hidden: bool,
     backup: bool,
     archive_format: str,
     save: bool,
@@ -164,7 +163,7 @@ def handle_duplicate_files(
     logger = _configure_logger(dir_path, logger_types.ORGANIZE, output, save)
     _create_archive(abs_dir_path, archive_format, backup)
 
-    content_map = _create_duplicate_map(abs_dir_path, dir_list, hidden, logger)
+    content_map = _create_duplicate_map(abs_dir_path, dir_list, show_hidden, logger)
     duplicate_list = _transform_content_map(content_map)
     # display sorted map entries
     if not duplicate_list:
@@ -181,12 +180,12 @@ def handle_duplicate_files(
 def handle_duplicate_files_recursively(
     dir_path: str,
     interactive: bool,
-    hidden: bool,
+    show_hidden: bool,
     save: bool,
     output: str,
     backup: bool,
-    archive_format: str,
-    logger: Logger,
+    archive_format: str | None = None,
+    logger: Logger | None = None,
 ) -> None:
     abs_dir_path, dir_list = _handle_dir_path(dir_path)
     if not logger:
@@ -194,7 +193,7 @@ def handle_duplicate_files_recursively(
     _create_archive(abs_dir_path, archive_format, backup)
 
     content_map, subdir_list = _create_duplicate_map_and_subdir_list(
-        abs_dir_path, dir_list, hidden, logger
+        abs_dir_path, dir_list, show_hidden, logger
     )
     # ## handle duplicates in current dir ##
     logger.info(log_messages.INSIDE_DIR.format(abs_dir_path=abs_dir_path))
@@ -216,7 +215,7 @@ def handle_duplicate_files_recursively(
         handle_duplicate_files_recursively(
             subdir,
             interactive,
-            hidden,
+            show_hidden,
             save,
             output,
             backup=False,
@@ -226,13 +225,13 @@ def handle_duplicate_files_recursively(
 
 
 def _create_duplicate_map(
-    abs_dir_path: str, dir_list: str, hidden: bool, logger: Logger
+    abs_dir_path: str, dir_list: list[str], show_hidden: bool, logger: Logger
 ) -> defaultdict[str, list[str]]:
     content_map = defaultdict(list[str])
     for entry in dir_list:
         abs_entry_path = os.path.join(abs_dir_path, entry)
         if os.path.isfile(abs_entry_path):
-            if not hidden and entry.startswith("."):
+            if not show_hidden and entry.startswith("."):
                 logger.info(log_messages.SKIP_FILE.format(entry=entry))
                 continue
 
@@ -243,14 +242,14 @@ def _create_duplicate_map(
 
 
 def _create_duplicate_map_and_subdir_list(
-    abs_dir_path: str, dir_list: str, hidden: bool, logger: Logger
-) -> Tuple[defaultdict[str, list[str]], list[str]]:
+    abs_dir_path: str, dir_list: list[str], show_hidden: bool, logger: Logger
+) -> tuple[defaultdict[str, list[str]], list[str]]:
     content_map = defaultdict(list[str])
     subdir_list = []
     for entry in dir_list:
         abs_entry_path = os.path.join(abs_dir_path, entry)
         if os.path.isfile(abs_entry_path):
-            if not hidden and entry.startswith("."):
+            if not show_hidden and entry.startswith("."):
                 logger.info(log_messages.SKIP_FILE.format(entry=entry))
                 continue
 
@@ -297,7 +296,7 @@ def _merge_duplicates(
 
 
 # ### helpers ###
-def _handle_dir_path(dir_path: str) -> Tuple[str, list[str]]:
+def _handle_dir_path(dir_path: str) -> tuple[str, list[str]]:
     abs_dir_path = os.path.abspath(dir_path)
     dir_list = os.listdir(dir_path)
     return abs_dir_path, dir_list

@@ -1,12 +1,9 @@
 import os
-from typing import List, Optional
-
 import emoji
+from manager.logs.config import log_messages
 
-from app.logs.config import log_messages
 
-
-def sort_entries_list(dir_path: str, entries_list: List[str], criteria: str, desc: bool) -> None:
+def sort_entries_list(dir_path: str, entries_list: list[str], criteria: str, desc: bool) -> None:
     match criteria:
         case "name":
             sort_func = None
@@ -50,7 +47,7 @@ def scan_subdirs(dir_path: str, sort: str, desc: bool) -> str:
 
 
 #############################################################
-def build_catalog(dir_path: str, save: bool, output: str) -> str:
+def build_catalog(dir_path: str) -> str:
     dir_list = os.listdir(dir_path)
     files_list = []
     nested_dirs = []
@@ -62,7 +59,7 @@ def build_catalog(dir_path: str, save: bool, output: str) -> str:
     return _get_catalog_messages(dir_path, files_list, nested_dirs)
 
 
-def get_recursive_catalog(root_dir: str, subdir_path: Optional[str]) -> str:
+def get_recursive_catalog(root_dir: str, subdir_path: str | None = None) -> str:
     if subdir_path is None:
         subdir_path = root_dir
     subdir_list = os.listdir(subdir_path)
@@ -82,7 +79,7 @@ def get_recursive_catalog(root_dir: str, subdir_path: Optional[str]) -> str:
     return message + inner_msg
 
 
-def _get_catalog_messages(dir_path: str, files_list: List[str], nested_dirs: List[str]) -> str:
+def _get_catalog_messages(dir_path: str, files_list: list[str], nested_dirs: list[str]) -> str:
     if not files_list:
         files_msg = log_messages.NO_FILES.format(dir_path=dir_path)
     else:
@@ -100,20 +97,20 @@ def _get_catalog_messages(dir_path: str, files_list: List[str], nested_dirs: Lis
 
 
 #############################################################
-def build_tree(dir_path: str, hidden: bool) -> str:
+def build_tree(dir_path: str, show_hidden: bool) -> str:
     folder_emoji = emoji.emojize(":file_folder:")
     file_emoji = emoji.emojize(":page_with_curl:")
 
     tree_msg = ""
-    for root, _, files in os.walk(dir_path):
-        if not hidden and root.startswith("."):
+    for root, dirs, files in os.walk(dir_path):
+        if not show_hidden and os.path.basename(root).startswith("."):
             continue
         level = root.count(os.sep) - 1
         indent = " " * 4 * level
         tree_msg += "{}{} {}/\n".format(indent, folder_emoji, os.path.abspath(root))
         sub_indent = " " * 4 * (level + 1)
         for file in files:
-            if not hidden and file.startswith("."):
+            if not show_hidden and file.startswith("."):
                 continue
             tree_msg += "{}{} {}\n".format(sub_indent, file_emoji, file)
     return tree_msg
@@ -146,7 +143,7 @@ def search_by_name(dir_path: str, name: str) -> str:
     return log_msg
 
 
-def get_search_result(root_dir: str, subdir_path: Optional[str], name: str) -> str:
+def get_search_result(root_dir: str, name: str, subdir_path: str | None = None) -> str:
     if subdir_path is None:
         subdir_path = root_dir
     subdir_list = os.listdir(subdir_path)
@@ -163,7 +160,7 @@ def get_search_result(root_dir: str, subdir_path: Optional[str], name: str) -> s
             if name in entry:
                 valid_dirs.append(entry)
             nested_dirs.append(entry)
-            inner_msg += get_search_result(root_dir, entry_path, name)
+            inner_msg += get_search_result(root_dir, name, entry_path)
 
     if not files_list and not valid_dirs:
         return ""

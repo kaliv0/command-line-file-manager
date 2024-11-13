@@ -1,20 +1,13 @@
 LOG_FORMAT = "%(message)s"
 
 DELIMITER = "\n=========================================\n"
-NO_FILES = "The given directory '{dir_path}' contains no files\n\n" + DELIMITER
-LISTED_FILES = (
-    "The given directory '{dir_path}' contains the following files:\n"
-    + "\n{files_list}\n"
-    + DELIMITER
-)
+NO_FILES = "'{dir_path}' contains no files\n\n" + DELIMITER
+LISTED_FILES = "'{dir_path}' contains the following files:\n" + "\n{files_list}\n" + DELIMITER
 
 DUPLICATE_DELIMITER = "-----------------------------------------\n"
-NO_DUPLICATE_FILES = (
-    "The given directory '{dir_path}' contains no duplicate files\n\n" + DUPLICATE_DELIMITER
-)
+NO_DUPLICATE_FILES = "'{dir_path}' contains no duplicate files\n\n" + DUPLICATE_DELIMITER
 LISTED_DUPLICATE_FILES = (
-    "The given directory '{dir_path}' contains the following duplicate files:\n"
-    + "\n{display_list}"
+    "'{dir_path}' contains the following duplicate files:\n" + "\n{display_list}"
 )
 
 NO_DUPLICATE_FILES_RECURSIVELY = (
@@ -24,11 +17,9 @@ LISTED_DUPLICATE_FILES_RECURSIVELY = (
     "The given directory contains the following duplicate files:\n" + "\n{display_list}"
 )
 
-NO_SUBDIRS = "The given directory '{dir_path}' contains no nested subdirectories\n\n" + DELIMITER
+NO_SUBDIRS = "'{dir_path}' contains no nested subdirectories\n\n" + DELIMITER
 NESTED_SUBDIRS = (
-    "The given directory '{dir_path}' contains the following subdirectories:\n"
-    + "\n{subdir_list}\n"
-    + DELIMITER
+    "'{dir_path}' contains the following subdirectories:\n" + "\n{subdir_list}\n" + DELIMITER
 )
 
 NOT_FOUND = "Nothing found.\n"
