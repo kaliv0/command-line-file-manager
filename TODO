@@ -1,0 +1,11 @@
+- test organize plain,
+    recursively,
+    recursively-flatten,
+    archive(?),
+    with/without 'hidden'
+- add dir_diff as separate feature
+    -> flags skip-nested-dirs, skip-hidden
+    -> re-use for checking previous task?
+- expand readme / add docs?
+
+- refactor scanner save logs -> unify with organizer (?!)

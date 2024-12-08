@@ -1,7 +1,17 @@
 import os
-from manager.cli import commands
 
+from manager.cli import commands
+from tests.util import compare
+
+RESOURCE_DIR = "tests/resources/plain"
 DUPLICATES_RESOURCE_DIR = "tests/resources/duplicates"
+
+
+def test_organize_files(runner, tmp_dirs):
+    source, target = tmp_dirs
+    result = runner.invoke(commands.organize_files, ["-h", source])
+    assert result.exit_code == 0
+    assert compare(source, target) == (0, 0, 0)
 
 
 def test_handle_duplicate_files(runner, mock_organizer):
