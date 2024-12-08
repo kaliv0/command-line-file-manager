@@ -221,6 +221,7 @@ def search_by_name(dir_path: str, name: str, save: bool, output: str) -> None:
     """
     Search by NAME inside DIR_PATH
     """
+
     log_msg = scanner.search_by_name(dir_path, name)
     click.echo(log_msg)
     if save:
@@ -256,6 +257,28 @@ def search_by_name_recursively(dir_path: str, name: str, save: bool, output: str
     if save:
         _save_logs_to_file(output, dir_path, log_msg, logger_types.SEARCH)
 
+
+@click.command()
+@click.argument("dir_path", type=click.STRING)
+@click.argument("other_path", type=click.STRING)
+@click.option(
+    "-s",
+    "--save",
+    is_flag=True,
+    help="Save log message to file",
+)
+@click.option(
+    "-o",
+    "--output",
+    type=click.STRING,
+    default=None,
+    show_default=True,
+    help="Path to output directory for the saved log file",
+)
+def compare_directories(dir_path: str, other_path: str, save: bool, output: str) -> None:...
+
+
+#############################################################
 
 #############################################################
 # ### organize ###
