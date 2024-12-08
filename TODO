@@ -1,0 +1,9 @@
+- test organize plain,
+    recursively,
+    recursively-flatten,
+    archive(?),
+    with/without 'hidden'
+- add dir_diff as separate feature
+    -> re-use for checking previous task?
+- expand readme / add docs?
+- add mypy??

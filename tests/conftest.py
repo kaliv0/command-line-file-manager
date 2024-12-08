@@ -1,3 +1,5 @@
+import shutil
+
 import pytest
 from click.testing import CliRunner
 
@@ -5,6 +7,14 @@ from click.testing import CliRunner
 @pytest.fixture(scope="function")
 def runner(request):
     return CliRunner()
+
+
+@pytest.fixture(scope="session")
+def tmp_dirs(tmp_path_factory):
+    path = tmp_path_factory.mktemp("file-manager")
+    shutil.copytree("./tests/resources/plain", path / "plain")
+    shutil.copytree("./tests/resources/results/plain", path / "results/plain")
+    return str(path / "plain"), str(path / "results/plain")
 
 
 @pytest.fixture(scope="function")
