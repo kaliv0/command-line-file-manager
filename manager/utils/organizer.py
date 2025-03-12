@@ -21,7 +21,7 @@ def organize_files(
     output: str,
 ) -> None:
     abs_dir_path, dir_list = _handle_dir_path(dir_path)
-    logger = _configure_logger(dir_path, logger_types.ORGANIZE, output, save)
+    logger = LoggerFactory.get_logger(dir_path, logger_types.ORGANIZE, output, save)
     _create_archive(abs_dir_path, archive_format, backup)
 
     exclude_list = exclude.split(",") if exclude else []
@@ -47,7 +47,7 @@ def organize_files_recursively(
     output: str,
 ) -> None:
     abs_dir_path = os.path.abspath(dir_path)
-    logger = _configure_logger(dir_path, logger_types.RECURSIVE_ORGANIZE, output, save)
+    logger = LoggerFactory.get_logger(dir_path, logger_types.RECURSIVE_ORGANIZE, output, save)
     _create_archive(abs_dir_path, archive_format, backup)
 
     exclude_list = exclude.split(",") if exclude else []
@@ -160,7 +160,7 @@ def handle_duplicate_files(
     output: str,
 ) -> None:
     abs_dir_path, dir_list = _handle_dir_path(dir_path)
-    logger = _configure_logger(dir_path, logger_types.ORGANIZE, output, save)
+    logger = LoggerFactory.get_logger(dir_path, logger_types.ORGANIZE, output, save)
     _create_archive(abs_dir_path, archive_format, backup)
 
     content_map = _create_duplicate_map(abs_dir_path, dir_list, show_hidden, logger)
@@ -189,7 +189,7 @@ def handle_duplicate_files_recursively(
 ) -> None:
     abs_dir_path, dir_list = _handle_dir_path(dir_path)
     if not logger:
-        logger = _configure_logger(dir_path, logger_types.ORGANIZE, output, save)
+        logger = LoggerFactory.get_logger(dir_path, logger_types.ORGANIZE, output, save)
     _create_archive(abs_dir_path, archive_format, backup)
 
     content_map, subdir_list = _create_duplicate_map_and_subdir_list(
@@ -302,11 +302,11 @@ def _handle_dir_path(dir_path: str) -> tuple[str, list[str]]:
     return abs_dir_path, dir_list
 
 
-def _configure_logger(dir_path: str, logger_type: str, output: str, save: bool) -> Logger:
-    if not output:
-        output = dir_path
-    logger = LoggerFactory.get_logger(logger_type, output, save)
-    return logger
+# def _configure_logger(dir_path: str, logger_type: str, output: str, save: bool) -> Logger:
+#     if not output:
+#         output = dir_path
+#     logger = LoggerFactory.get_logger(dir_path, logger_type, output, save)
+#     return logger
 
 
 def _create_archive(abs_dir_path: str, archive_format: str, backup: bool) -> None:

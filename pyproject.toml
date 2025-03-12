@@ -25,7 +25,6 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
   "tox == 4.11.3",
-  "codespell == 2.2.6",
   "black == 23.9.1",
   "pytest == 7.4.2",
   "build == 1.0.3",

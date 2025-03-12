@@ -1,3 +1,5 @@
+# TODO: remove new_line from end of log_messages
+
 LOG_FORMAT = "%(message)s"
 
 DELIMITER = "\n=========================================\n"
@@ -23,9 +25,9 @@ NESTED_SUBDIRS = (
 )
 
 NOT_FOUND = "Nothing found.\n"
-FOUND_BY_NAME = "Inside directory '{dir_path}' the given keyword '{keyword}' was found\n"
-FOUND_FILES_BY_NAME = "- in the following file names:\n" + "\t- {files_list}\n"
-FOUND_DIRS_BY_NAME = "- in the following subdirectory names:\n" + "\t- {subdir_list}\n"
+FOUND_BY_NAME = "Inside directory '{dir_path}' the given keyword '{keyword}' was found{delimiter}"
+FOUND_FILES_BY_NAME = "- in the following file names:\n" + "\t- {files_list}{delimiter}"
+FOUND_DIRS_BY_NAME = "- in the following subdirectory names:\n" + "\t- {subdir_list}{delimiter}"
 
 CREATE_FOLDER = "Creating folder {target_dir}"
 MOVE_FILE = "Moving {entry} to {target_dir}"

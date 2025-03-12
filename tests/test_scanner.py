@@ -97,7 +97,7 @@ def test_search_by_name(runner):
         "\t- .hidden_file.md\n"
         "- in the following subdirectory names:\n"
         "\t- .hidden_other\n"
-        "\n"
+        # "\n"
     )
 
 

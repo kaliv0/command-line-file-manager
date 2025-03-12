@@ -1,9 +1,8 @@
 from typing import Optional
 
 import click
-from directory_tree import display_tree
 
-from manager.logs.config import log_messages, logger_types
+from manager.logs.config import logger_types
 from manager.logs.logger_factory import LoggerFactory
 from manager.utils import organizer, scanner
 
@@ -40,10 +39,7 @@ from manager.utils import organizer, scanner
 def scan_files(dir_path: str, sort: str, desc: bool, save: bool, output: str) -> None:
     """DIR_PATH: Path to directory to be scanned"""
 
-    message = scanner.scan_files(dir_path, sort, desc)
-    click.echo(message)
-    if save:
-        _save_logs_to_file(output, dir_path, message, logger_types.BASIC)
+    scanner.scan_files(dir_path, sort, desc, save, output)
 
 
 @click.command()
@@ -77,10 +73,7 @@ def scan_files(dir_path: str, sort: str, desc: bool, save: bool, output: str) ->
 def scan_subdirs(dir_path: str, sort: str, desc: bool, save: bool, output: str) -> None:
     """DIR_PATH: Path to directory to be scanned"""
 
-    message = scanner.scan_subdirs(dir_path, sort, desc)
-    click.echo(message)
-    if save:
-        _save_logs_to_file(output, dir_path, message, logger_types.BASIC)
+    scanner.scan_subdirs(dir_path, sort, desc, save, output)
 
 
 #############################################################
@@ -161,10 +154,7 @@ def build_catalog_recursively(dir_path: str, save: bool, output: str) -> None:
 def build_tree(dir_path: str, show_hidden: bool, save: bool, output: str) -> None:
     """DIR_PATH: Path to directory to be scanned"""
 
-    tree_msg = scanner.build_tree(dir_path, show_hidden)
-    click.echo(tree_msg)
-    if save:
-        _save_logs_to_file(output, dir_path, tree_msg, logger_types.TREE)
+    scanner.build_tree(dir_path, show_hidden, save, output)
 
 
 @click.command()
@@ -193,10 +183,7 @@ def build_tree(dir_path: str, show_hidden: bool, save: bool, output: str) -> Non
 def build_pretty_tree(dir_path: str, show_hidden: bool, save: bool, output: str) -> None:
     """DIR_PATH: Path to directory to be scanned"""
 
-    tree_msg = display_tree(dir_path, string_rep=True, show_hidden=show_hidden)
-    click.echo(tree_msg)
-    if save:
-        _save_logs_to_file(output, dir_path, tree_msg, logger_types.TREE)
+    scanner.build_pretty_tree(dir_path, show_hidden, save, output)
 
 
 #############################################################
@@ -222,10 +209,7 @@ def search_by_name(dir_path: str, name: str, save: bool, output: str) -> None:
     Search by NAME inside DIR_PATH
     """
 
-    log_msg = scanner.search_by_name(dir_path, name)
-    click.echo(log_msg)
-    if save:
-        _save_logs_to_file(output, dir_path, log_msg, logger_types.SEARCH)
+    scanner.search_by_name(dir_path, name, save, output)
 
 
 @click.command()
@@ -250,12 +234,7 @@ def search_by_name_recursively(dir_path: str, name: str, save: bool, output: str
     Search recursively by NAME inside DIR_PATH
     """
 
-    log_msg = scanner.get_search_result(dir_path, name)
-    if not log_msg:
-        log_msg = log_messages.NOT_FOUND
-    click.echo(log_msg)
-    if save:
-        _save_logs_to_file(output, dir_path, log_msg, logger_types.SEARCH)
+    scanner.search_by_name_recursively(dir_path, name, save, output)
 
 
 @click.command()
@@ -275,10 +254,12 @@ def search_by_name_recursively(dir_path: str, name: str, save: bool, output: str
     show_default=True,
     help="Path to output directory for the saved log file",
 )
-def compare_directories(dir_path: str, other_path: str, save: bool, output: str) -> None:...
+def compare_directories(dir_path: str, other_path: str, save: bool, output: str) -> None:
+    ...
 
 
 #############################################################
+
 
 #############################################################
 # ### organize ###
