@@ -254,8 +254,7 @@ def search_by_name_recursively(dir_path: str, name: str, save: bool, output: str
     show_default=True,
     help="Path to output directory for the saved log file",
 )
-def compare_directories(dir_path: str, other_path: str, save: bool, output: str) -> None:
-    ...
+def compare_directories(dir_path: str, other_path: str, save: bool, output: str) -> None: ...
 
 
 #############################################################

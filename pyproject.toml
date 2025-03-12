@@ -25,7 +25,7 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
   "tox == 4.11.3",
-  "black == 23.9.1",
+  "ruff == 0.9.10",
   "pytest == 7.4.2",
   "build == 1.0.3",
   "twine == 5.1.1",
@@ -40,3 +40,9 @@ version = { attr = "manager.__version__" }
 [tool.setuptools.packages.find]
 where = ["."]
 exclude = ["assets", "tests"]
+
+[tool.pytest.ini_options]
+tmp_path_retention_policy = 'none'
+
+[tool.ruff.lint]
+ignore = ['E731']
