@@ -1,15 +1,47 @@
 import os
 from logging import Logger
 
-import emoji
 from directory_tree import display_tree
 
 from manager.logs.config import log_messages, logger_types
 from manager.logs.logger_factory import LoggerFactory
 
 
-# TODO: move as private function underneath
-def sort_entries_list(dir_path: str, entries_list: list[str], criteria: str, desc: bool) -> None:
+def scan_files(dir_path: str, sort: str, desc: bool, save: bool, output: str) -> None:
+    _scan_entries(dir_path, "isfile", sort, desc, save, output, "NO_FILES", "LISTED_FILES")
+
+
+def scan_subdirs(dir_path: str, sort: str, desc: bool, save: bool, output: str) -> None:
+    _scan_entries(dir_path, "isdir", sort, desc, save, output, "NO_SUBDIRS", "NESTED_SUBDIRS")
+
+
+def _scan_entries(
+    dir_path: str,
+    os_func_name: str,
+    sort: str,
+    desc: bool,
+    save: bool,
+    output: str,
+    not_found_msg: str,
+    success_msg: str,
+) -> None:
+    logger = LoggerFactory.get_logger(dir_path, logger_types.BASIC, output, save)
+
+    dir_list = os.listdir(dir_path)
+    os_func = getattr(os.path, os_func_name)
+    entries_list = [entry for entry in dir_list if os_func(os.path.join(dir_path, entry))]
+    if not entries_list:
+        logger.info(getattr(log_messages, not_found_msg).format(dir_path=dir_path))
+    else:
+        _sort_entries_list(dir_path, entries_list, sort, desc)
+        logger.info(
+            getattr(log_messages, success_msg).format(
+                dir_path=dir_path, entries_list="\n".join(entries_list)
+            )
+        )
+
+
+def _sort_entries_list(dir_path: str, entries_list: list[str], criteria: str, desc: bool) -> None:
     match criteria:
         case "name":
             sort_func = None
@@ -26,45 +58,14 @@ def sort_entries_list(dir_path: str, entries_list: list[str], criteria: str, des
     entries_list.sort(key=sort_func, reverse=desc)
 
 
-# TODO: scan_files and scan_subdirs can be combined -> 90% similar
-def scan_files(dir_path: str, sort: str, desc: bool, save: bool, output: str) -> None:
-    logger = LoggerFactory.get_logger(dir_path, logger_types.BASIC, output, save)
-
-    dir_list = os.listdir(dir_path)
-    files_list = [entry for entry in dir_list if os.path.isfile(os.path.join(dir_path, entry))]
-    if not files_list:
-        logger.info(log_messages.NO_FILES.format(dir_path=dir_path))
-    else:
-        sort_entries_list(dir_path, files_list, sort, desc)
-        logger.info(
-            log_messages.LISTED_FILES.format(dir_path=dir_path, files_list="\n".join(files_list))
-        )
-
-
-def scan_subdirs(
+#############################################################
+def build_catalog(
     dir_path: str,
-    sort: str,
-    desc: bool,
     save: bool,
     output: str,
 ) -> None:
-    logger = LoggerFactory.get_logger(dir_path, logger_types.BASIC, output, save)
+    logger = LoggerFactory.get_logger(dir_path, logger_types.CATALOG, output, save)
 
-    dir_list = os.listdir(dir_path)
-    subdir_list = [entry for entry in dir_list if os.path.isdir(os.path.join(dir_path, entry))]
-    if not subdir_list:
-        logger.info(log_messages.NO_SUBDIRS.format(dir_path=dir_path))
-    else:
-        sort_entries_list(dir_path, subdir_list, sort, desc)
-        logger.info(
-            log_messages.NESTED_SUBDIRS.format(
-                dir_path=dir_path, subdir_list="\n".join(subdir_list)
-            )
-        )
-
-
-#############################################################
-def build_catalog(dir_path: str) -> str:
     dir_list = os.listdir(dir_path)
     files_list = []
     nested_dirs = []
@@ -73,10 +74,19 @@ def build_catalog(dir_path: str) -> str:
             files_list.append(entry)
         else:
             nested_dirs.append(entry)
-    return _get_catalog_messages(dir_path, files_list, nested_dirs)
+    logger.info(_get_catalog_messages(dir_path, files_list, nested_dirs))
 
 
-def get_recursive_catalog(root_dir: str, subdir_path: str | None = None) -> str:
+def build_catalog_recursively(
+    dir_path: str,
+    save: bool,
+    output: str,
+) -> None:
+    logger = LoggerFactory.get_logger(dir_path, logger_types.RECURSIVE, output, save)
+    logger.info(_get_recursive_catalog(logger, dir_path))
+
+
+def _get_recursive_catalog(logger: Logger, root_dir: str, subdir_path: str | None = None) -> str:
     if subdir_path is None:
         subdir_path = root_dir
     subdir_list = os.listdir(subdir_path)
@@ -90,7 +100,7 @@ def get_recursive_catalog(root_dir: str, subdir_path: str | None = None) -> str:
             files_list.append(entry)
         else:
             nested_dirs.append(entry)
-            inner_msg += get_recursive_catalog(root_dir, entry_path)
+            inner_msg += _get_recursive_catalog(logger, root_dir, entry_path)
 
     message = _get_catalog_messages(subdir_path, files_list, nested_dirs)
     return message + inner_msg
@@ -101,14 +111,14 @@ def _get_catalog_messages(dir_path: str, files_list: list[str], nested_dirs: lis
         files_msg = log_messages.NO_FILES.format(dir_path=dir_path)
     else:
         files_msg = log_messages.LISTED_FILES.format(
-            dir_path=dir_path, files_list="\n".join(files_list)
+            dir_path=dir_path, entries_list="\n".join(files_list)
         )
 
     if not nested_dirs:
         nested_dirs_msg = log_messages.NO_SUBDIRS.format(dir_path=dir_path)
     else:
         nested_dirs_msg = log_messages.NESTED_SUBDIRS.format(
-            dir_path=dir_path, subdir_list="\n".join(nested_dirs)
+            dir_path=dir_path, entries_list="\n".join(nested_dirs)
         )
     return files_msg + nested_dirs_msg
 
@@ -117,22 +127,19 @@ def _get_catalog_messages(dir_path: str, files_list: list[str], nested_dirs: lis
 def build_tree(dir_path: str, show_hidden: bool, save: bool, output: str) -> None:
     logger = LoggerFactory.get_logger(dir_path, logger_types.TREE, output, save)
 
-    folder_emoji = emoji.emojize(":file_folder:")  # TODO: put inline
-    file_emoji = emoji.emojize(":page_with_curl:")
-
+    folder_emoji = "\U0001f4c1"
+    file_emoji = "\U0001f4c3"
     for root, dirs, files in os.walk(dir_path):
         if not show_hidden and os.path.basename(root).startswith("."):
             continue
         level = root.count(os.sep) - 1
         indent = " " * 4 * level
-        # TODO: refactor formatting -> inside {}
-        #  check if we need extra new_line at the end??
-        logger.info("{}{} {}/\n".format(indent, folder_emoji, os.path.abspath(root)))
+        logger.info(f"{indent}{folder_emoji} {os.path.abspath(root)}/")
         sub_indent = " " * 4 * (level + 1)
         for file in files:
             if not show_hidden and file.startswith("."):
                 continue
-            logger.info("{}{} {}\n".format(sub_indent, file_emoji, file))
+            logger.info(f"{sub_indent}{file_emoji} {file}")
 
 
 def build_pretty_tree(dir_path: str, show_hidden: bool, save: bool, output: str) -> None:

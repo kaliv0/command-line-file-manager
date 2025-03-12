@@ -2,6 +2,5 @@ ruff==0.9.10
 build==1.0.3
 click==8.1.7
 directory-tree==0.0.4
-emoji==2.8.0
 tox==4.11.3
 twine==5.1.1

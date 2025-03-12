@@ -18,10 +18,12 @@ class LoggerFactory:
                     logger_types.BASIC, save_output, output_dir + log_output.FILES
                 )
             case logger_types.CATALOG:
-                return cls._configure_logger(logger_types.CATALOG, output_dir + log_output.CATALOG)
+                return cls._configure_organize_logger(
+                    logger_types.CATALOG, save_output, output_dir + log_output.CATALOG
+                )
             case logger_types.RECURSIVE:
-                return cls._configure_logger(
-                    logger_types.RECURSIVE, output_dir + log_output.RECURSIVE_CATALOG
+                return cls._configure_organize_logger(
+                    logger_types.RECURSIVE, save_output, output_dir + log_output.RECURSIVE_CATALOG
                 )
             case logger_types.TREE:
                 return cls._configure_organize_logger(

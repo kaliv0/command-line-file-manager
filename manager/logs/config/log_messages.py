@@ -1,10 +1,11 @@
 # TODO: remove new_line from end of log_messages
+#  combine both delimiters
 
 LOG_FORMAT = "%(message)s"
 
 DELIMITER = "\n=========================================\n"
 NO_FILES = "'{dir_path}' contains no files\n\n" + DELIMITER
-LISTED_FILES = "'{dir_path}' contains the following files:\n" + "\n{files_list}\n" + DELIMITER
+LISTED_FILES = "'{dir_path}' contains the following files:\n" + "\n{entries_list}\n" + DELIMITER
 
 DUPLICATE_DELIMITER = "-----------------------------------------\n"
 NO_DUPLICATE_FILES = "'{dir_path}' contains no duplicate files\n\n" + DUPLICATE_DELIMITER
@@ -21,7 +22,7 @@ LISTED_DUPLICATE_FILES_RECURSIVELY = (
 
 NO_SUBDIRS = "'{dir_path}' contains no nested subdirectories\n\n" + DELIMITER
 NESTED_SUBDIRS = (
-    "'{dir_path}' contains the following subdirectories:\n" + "\n{subdir_list}\n" + DELIMITER
+    "'{dir_path}' contains the following subdirectories:\n" + "\n{entries_list}\n" + DELIMITER
 )
 
 NOT_FOUND = "Nothing found.\n"

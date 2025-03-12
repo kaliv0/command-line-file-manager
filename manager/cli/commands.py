@@ -1,9 +1,5 @@
-from typing import Optional
-
 import click
 
-from manager.logs.config import logger_types
-from manager.logs.logger_factory import LoggerFactory
 from manager.utils import organizer, scanner
 
 
@@ -96,10 +92,7 @@ def scan_subdirs(dir_path: str, sort: str, desc: bool, save: bool, output: str) 
 def build_catalog(dir_path: str, save: bool, output: str):
     """DIR_PATH: Path to directory to be scanned"""
 
-    message = scanner.build_catalog(dir_path)
-    click.echo(message)
-    if save:
-        _save_logs_to_file(output, dir_path, message, logger_types.CATALOG)
+    scanner.build_catalog(dir_path, save, output)
 
 
 @click.command()
@@ -121,10 +114,7 @@ def build_catalog(dir_path: str, save: bool, output: str):
 def build_catalog_recursively(dir_path: str, save: bool, output: str) -> None:
     """DIR_PATH: Path to directory to be scanned"""
 
-    message = scanner.get_recursive_catalog(dir_path)
-    click.echo(message)
-    if save:
-        _save_logs_to_file(output, dir_path, message, logger_types.RECURSIVE)
+    scanner.build_catalog_recursively(dir_path, save, output)
 
 
 #############################################################
@@ -270,8 +260,7 @@ def compare_directories(dir_path: str, other_path: str, save: bool, output: str)
     type=click.STRING,
     default=None,
     show_default=True,
-    help="Single or multiple file extensions to be skipped separated by comma"
-    "E.g. --exclude .pdf,.mp3",
+    help="Single or multiple file extensions to be skipped separated by comma e.g. --exclude .pdf,.mp3",
 )
 @click.option(
     "-h",
@@ -333,8 +322,7 @@ def organize_files(
     type=click.STRING,
     default=None,
     show_default=True,
-    help="Single or multiple file extensions to be skipped separated by comma. "
-    "E.g. --exclude .pdf,.mp3",
+    help="Single or multiple file extensions to be skipped separated by comma. E.g. --exclude .pdf,.mp3",
 )
 @click.option(
     "--exclude-dir",
@@ -532,12 +520,3 @@ def handle_duplicate_files_recursively(
         backup,
         archive_format,
     )
-
-
-#############################################################
-def _save_logs_to_file(
-    output_dir: Optional[str], dir_path: str, message: str, logger_type: str
-) -> None:
-    if not output_dir:
-        output_dir = dir_path
-    LoggerFactory.get_logger(logger_type, output_dir, True).info(message)
