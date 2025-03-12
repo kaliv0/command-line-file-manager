@@ -14,20 +14,6 @@ Python CLI tool for scanning and organizing local directories and files.
 
 #### Requires Python 3.10+
 
-## Installation
-
-Via pip:
-```console
-$ pip install command-line-file-manager
-```
-
-From main branch:
-```console
-$ git clone https://github.com/kaliv0/command-line-file-manager.git
-$ cd command-line-file-manager 
-$ pip install .
-```
-
 ## Example
 
 To run the application type <i>fm</i> followed by a sub-command, target directory and options
@@ -54,16 +40,14 @@ Options:
 ## Main Features
 - <b>scan_files</b> - list all files inside PATH
 - <b>scan_subdirs</b> - list all nested directories
-- <b>build_catalog</b> - list all contents (files, subdirs) 
-<br>(can be done recursively via <b>build_catalog_recursively</b>)
+- <b>build_catalog*</b> - list all contents (files, subdirs) 
 - <b>build_tree</b> - visualize directory structure
 - <b>build_pretty_tree</b> - a fancy alternative with emojis etc.
 -------------------------------
-- <b>search_by_name</b>
-- <b>search_by_name_recursively</b>
+- <b>search_by_name*</b>
 -------------------------------
-- <b>organize_files</b> - group files by extension into corresponding 'type' directories (e.g. music, books)
-<br>(provides recursive version)
+- <b>organize_files*</b> - group files by extension into corresponding 'type' directories (e.g. music, books)
 
-- <b>handle_duplicate_files</b> - merge identical files (in terms of content) - prompts user for file name or uses first entry in duplicates list
-<br>(has a recursive alternative)
+- <b>handle_duplicate_files*</b> - merge identical files (in terms of content) - prompts user for file name or uses first entry in duplicates list
+
+(NB: functions marked with an asterisk have recursive versions e.g. <b>build_catalog_recursively</b>)
