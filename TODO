@@ -7,5 +7,3 @@
     -> flags skip-nested-dirs, skip-hidden
     -> re-use for checking previous task?
 - expand readme / add docs?
-
-- refactor scanner save logs -> unify with organizer (?!)

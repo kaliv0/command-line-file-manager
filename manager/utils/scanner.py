@@ -25,7 +25,7 @@ def _scan_entries(
     not_found_msg: str,
     success_msg: str,
 ) -> None:
-    logger = LoggerFactory.get_logger(dir_path, logger_types.BASIC, output, save)
+    logger = LoggerFactory.get_logger(logger_types.BASIC, output, save)
 
     dir_list = os.listdir(dir_path)
     os_func = getattr(os.path, os_func_name)
@@ -64,7 +64,7 @@ def build_catalog(
     save: bool,
     output: str,
 ) -> None:
-    logger = LoggerFactory.get_logger(dir_path, logger_types.CATALOG, output, save)
+    logger = LoggerFactory.get_logger(logger_types.CATALOG, output, save)
 
     dir_list = os.listdir(dir_path)
     files_list = []
@@ -82,7 +82,7 @@ def build_catalog_recursively(
     save: bool,
     output: str,
 ) -> None:
-    logger = LoggerFactory.get_logger(dir_path, logger_types.RECURSIVE, output, save)
+    logger = LoggerFactory.get_logger(logger_types.RECURSIVE, output, save)
     logger.info(_get_recursive_catalog(logger, dir_path))
 
 
@@ -125,7 +125,7 @@ def _get_catalog_messages(dir_path: str, files_list: list[str], nested_dirs: lis
 
 #############################################################
 def build_tree(dir_path: str, show_hidden: bool, save: bool, output: str) -> None:
-    logger = LoggerFactory.get_logger(dir_path, logger_types.TREE, output, save)
+    logger = LoggerFactory.get_logger(logger_types.TREE, output, save)
 
     folder_emoji = "\U0001f4c1"
     file_emoji = "\U0001f4c3"
@@ -143,14 +143,14 @@ def build_tree(dir_path: str, show_hidden: bool, save: bool, output: str) -> Non
 
 
 def build_pretty_tree(dir_path: str, show_hidden: bool, save: bool, output: str) -> None:
-    logger = LoggerFactory.get_logger(dir_path, logger_types.TREE, output, save)
+    logger = LoggerFactory.get_logger(logger_types.TREE, output, save)
     # TODO: be a man and implement form scratch!
     logger.info(display_tree(dir_path, string_rep=True, show_hidden=show_hidden))
 
 
 #############################################################
 def search_by_name(dir_path: str, name: str, save: bool, output: str) -> None:
-    logger = LoggerFactory.get_logger(dir_path, logger_types.ORGANIZE, output, save)
+    logger = LoggerFactory.get_logger(logger_types.ORGANIZE, output, save)
 
     dir_list = os.listdir(dir_path)
     files_list = []
@@ -185,7 +185,7 @@ def search_by_name(dir_path: str, name: str, save: bool, output: str) -> None:
 def search_by_name_recursively(
     root_dir: str, name: str, save: bool, output: str, subdir_path: str | None = None
 ) -> None:
-    logger = LoggerFactory.get_logger(root_dir, logger_types.SEARCH, output, save)
+    logger = LoggerFactory.get_logger(logger_types.SEARCH, output, save)
     logger.info(_search_recursively(logger, root_dir, name, subdir_path))
 
 
