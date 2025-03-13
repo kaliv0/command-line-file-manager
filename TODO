@@ -5,7 +5,10 @@
     with/without 'hidden'
 
 - add dir_diff as separate feature
-    -> flags skip-nested-dirs, skip-hidden
-    -> re-use for checking previous task?
+    -> flags skip-nested-dirs (or recursive version)
+    -> skip-hidden
+    -> list of files to skip comparing -> supported by underlying dircmp?
+    -> full list of file names
+    -> short statistics -> numbers only per dir/subdir
 
 - expand readme / add docs?

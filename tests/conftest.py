@@ -1,4 +1,6 @@
 import shutil
+from filecmp import dircmp
+from os import path
 
 import pytest
 from click.testing import CliRunner
@@ -34,13 +36,35 @@ def mock_organizer(monkeypatch):
 
 
 # ### helpers ###
-def compare(source: str, target: str) -> tuple[int, ...]:
-    from filecmp import dircmp
-    from manager.utils.scanner import diff_report
-
+def compare(source: str, target: str, include_hidden: bool = False) -> tuple[int, ...]:
     changed_files = {}
     deleted_files = {}
     added_files = {}
 
-    diff_report(dircmp(source, target), changed_files, deleted_files, added_files)
+    _diff(dircmp(source, target), changed_files, deleted_files, added_files, include_hidden)
     return len(changed_files), len(deleted_files), len(added_files)
+
+
+def _diff(
+    cmp_obj: dircmp,
+    changed_files: dict[str, int],
+    deleted_files: dict[str, str],
+    added_files: dict[str, str],
+    include_hidden: bool,
+) -> None:
+    for changed_file in cmp_obj.diff_files:
+        file1 = f"{cmp_obj.left}/{changed_file}"
+        file2 = f"{cmp_obj.right}/{changed_file}"
+        changed_files[file2] = path.getsize(file2) - path.getsize(file1)
+
+    for deleted_file in cmp_obj.left_only:
+        file1 = f"{cmp_obj.right}/{deleted_file}"
+        deleted_files[file1] = "DELETED!"
+
+    for added_file in cmp_obj.right_only:
+        file1 = f"{cmp_obj.right}/{added_file}"
+        added_files[file1] = "ADDED!"
+
+    # TODO: only in the recursive version
+    for sub_dir in cmp_obj.subdirs.values():
+        _diff(sub_dir, changed_files, deleted_files, added_files, include_hidden)

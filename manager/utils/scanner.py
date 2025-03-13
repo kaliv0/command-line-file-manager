@@ -220,29 +220,69 @@ def _search_recursively(logger: Logger, root_dir: str, name: str, subdir_path: s
 
 
 #############################################################
-def compare_directories(dir_path: str, other_path: str, save: bool, output: str) -> tuple[int, ...]:
+def compare_directories(
+    dir_path: str, other_path: str, include_hidden: bool, save: bool, output: str
+) -> None:  # tuple[int, ...]:
     logger = LoggerFactory.get_logger(logger_types.COMPARE, output, save)  # noqa
-    changed_files = {}
-    deleted_files = {}
-    added_files = {}
+    # changed_files = {}
+    # deleted_files = {}
+    # added_files = {}
 
-    diff_report(dircmp(dir_path, other_path), changed_files, deleted_files, added_files)
-    return len(changed_files), len(deleted_files), len(added_files)
+    cmp_obj = dircmp(dir_path, other_path)
+    diff_report(cmp_obj, include_hidden, logger)
+    # return len(changed_files), len(deleted_files), len(added_files)
 
 
-def diff_report(cmp_obj: dircmp, changed_files, deleted_files, added_files):
-    for changed_file in cmp_obj.diff_files:
-        file1 = f"{cmp_obj.left}/{changed_file}"
-        file2 = f"{cmp_obj.right}/{changed_file}"
-        changed_files[file2] = path.getsize(file2) - path.getsize(file1)
+def diff_report(
+    cmp_obj: dircmp,
+    # changed_files: dict[str, int],
+    # deleted_files: dict[str, str],
+    # added_files: dict[str, str],
+    include_hidden: bool,
+    logger: Logger,
+) -> None:
+    # for changed_file in cmp_obj.diff_files:
+    #     file1 = f"{cmp_obj.left}/{changed_file}"
+    #     file2 = f"{cmp_obj.right}/{changed_file}"
+    #     changed_files[file2] = path.getsize(file2) - path.getsize(file1)
+    #
+    # for deleted_file in cmp_obj.left_only:
+    #     file1 = f"{cmp_obj.right}/{deleted_file}"
+    #     deleted_files[file1] = "DELETED!"
+    #
+    # for added_file in cmp_obj.right_only:
+    #     file1 = f"{cmp_obj.right}/{added_file}"
+    #     added_files[file1] = "ADDED!"
 
-    for deleted_file in cmp_obj.left_only:
-        file1 = f"{cmp_obj.right}/{deleted_file}"
-        deleted_files[file1] = "DELETED!"
+    _report(cmp_obj, logger)
 
-    for added_file in cmp_obj.right_only:
-        file1 = f"{cmp_obj.right}/{added_file}"
-        added_files[file1] = "ADDED!"
-
+    # TODO: only in the recursive version
     for sub_dir in cmp_obj.subdirs.values():
-        diff_report(sub_dir, changed_files, deleted_files, added_files)
+        diff_report(sub_dir, include_hidden, logger)
+
+
+def _report(cmp_obj: dircmp, logger: Logger) -> None:
+    # customizing dircmp.report()
+    logger.info("=========================================")
+    logger.info(f"Diff '{cmp_obj.left}' -- '{cmp_obj.right}'")
+    if cmp_obj.left_only:
+        cmp_obj.left_only.sort()
+        logger.info(f"- Only in '{cmp_obj.left}':\n\t- {'\n\t- '.join(cmp_obj.left_only)}")
+    if cmp_obj.right_only:
+        cmp_obj.right_only.sort()
+        logger.info(f"- Only in '{cmp_obj.right}':\n\t- {'\n\t- '.join(cmp_obj.right_only)}")
+    if cmp_obj.same_files:
+        cmp_obj.same_files.sort()
+        logger.info(f"- Identical files:\n\t- {'\n\t- '.join(cmp_obj.same_files)}")
+    if cmp_obj.diff_files:
+        cmp_obj.diff_files.sort()
+        logger.info(f"- Differing files:\n\t- {'\n\t- '.join(cmp_obj.diff_files)}")
+    if cmp_obj.funny_files:
+        cmp_obj.funny_files.sort()
+        logger.info(f"- Trouble with common files\n\t- {'\n\t- '.join(cmp_obj.funny_files)}")
+    if cmp_obj.common_dirs:
+        cmp_obj.common_dirs.sort()
+        logger.info(f"- Common subdirectories\n\t- {'\n\t- '.join(cmp_obj.common_dirs)}")
+    if cmp_obj.common_funny:
+        cmp_obj.common_funny.sort()
+        logger.info(f"- Common funny cases\n\t- {'\n\t- '.join(cmp_obj.common_funny)}")
