@@ -3,32 +3,30 @@
 
 LOG_FORMAT = "%(message)s"
 
-DELIMITER = "\n=========================================\n"
-NO_FILES = "'{dir_path}' contains no files\n\n" + DELIMITER
-LISTED_FILES = "'{dir_path}' contains the following files:\n" + "\n{entries_list}\n" + DELIMITER
+DELIMITER = "=========================================\n"
+NO_FILES = "'{dir_path}' contains no files\n" + DELIMITER
+LISTED_FILES = "'{dir_path}' contains the following files:\n\t- {entries_list}\n" + DELIMITER
 
 DUPLICATE_DELIMITER = "-----------------------------------------\n"
-NO_DUPLICATE_FILES = "'{dir_path}' contains no duplicate files\n\n" + DUPLICATE_DELIMITER
-LISTED_DUPLICATE_FILES = (
-    "'{dir_path}' contains the following duplicate files:\n" + "\n{display_list}"
-)
+NO_DUPLICATE_FILES = "'{dir_path}' contains no duplicate files\n" + DUPLICATE_DELIMITER
+LISTED_DUPLICATE_FILES = "'{dir_path}' contains the following duplicate files:\n{display_list}"
 
 NO_DUPLICATE_FILES_RECURSIVELY = (
-    "The given directory contains no duplicate files\n\n" + DUPLICATE_DELIMITER
+    "The given directory contains no duplicate files\n" + DUPLICATE_DELIMITER
 )
 LISTED_DUPLICATE_FILES_RECURSIVELY = (
-    "The given directory contains the following duplicate files:\n" + "\n{display_list}"
+    "The given directory contains the following duplicate files:\n{display_list}"
 )
 
-NO_SUBDIRS = "'{dir_path}' contains no nested subdirectories\n\n" + DELIMITER
+NO_SUBDIRS = "'{dir_path}' contains no nested subdirectories\n" + DELIMITER
 NESTED_SUBDIRS = (
-    "'{dir_path}' contains the following subdirectories:\n" + "\n{entries_list}\n" + DELIMITER
+    "'{dir_path}' contains the following subdirectories:\n\t- {entries_list}\n" + DELIMITER
 )
 
-NOT_FOUND = "Nothing found.\n"
+NOT_FOUND = "Nothing found"
 FOUND_BY_NAME = "Inside directory '{dir_path}' the given keyword '{keyword}' was found{delimiter}"
-FOUND_FILES_BY_NAME = "- in the following file names:\n" + "\t- {files_list}{delimiter}"
-FOUND_DIRS_BY_NAME = "- in the following subdirectory names:\n" + "\t- {subdir_list}{delimiter}"
+FOUND_FILES_BY_NAME = "- in the following file names:\n\t- {files_list}{delimiter}"
+FOUND_DIRS_BY_NAME = "- in the following subdirectory names:\n\t- {subdir_list}{delimiter}"
 
 CREATE_FOLDER = "Creating folder {target_dir}"
 MOVE_FILE = "Moving {entry} to {target_dir}"

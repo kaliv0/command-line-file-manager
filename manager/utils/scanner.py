@@ -36,7 +36,7 @@ def _scan_entries(
         _sort_entries_list(dir_path, entries_list, sort, desc)
         logger.info(
             getattr(log_messages, success_msg).format(
-                dir_path=dir_path, entries_list="\n".join(entries_list)
+                dir_path=dir_path, entries_list="\n\t- ".join(entries_list)
             )
         )
 
@@ -111,14 +111,14 @@ def _get_catalog_messages(dir_path: str, files_list: list[str], nested_dirs: lis
         files_msg = log_messages.NO_FILES.format(dir_path=dir_path)
     else:
         files_msg = log_messages.LISTED_FILES.format(
-            dir_path=dir_path, entries_list="\n".join(files_list)
+            dir_path=dir_path, entries_list="\n\t- ".join(files_list)
         )
 
     if not nested_dirs:
         nested_dirs_msg = log_messages.NO_SUBDIRS.format(dir_path=dir_path)
     else:
         nested_dirs_msg = log_messages.NESTED_SUBDIRS.format(
-            dir_path=dir_path, entries_list="\n".join(nested_dirs)
+            dir_path=dir_path, entries_list="\n\t- ".join(nested_dirs)
         )
     return files_msg + nested_dirs_msg
 
@@ -186,7 +186,8 @@ def search_by_name_recursively(
     root_dir: str, name: str, save: bool, output: str, subdir_path: str | None = None
 ) -> None:
     logger = LoggerFactory.get_logger(logger_types.SEARCH, output, save)
-    logger.info(_search_recursively(logger, root_dir, name, subdir_path))
+    result_msg = _search_recursively(logger, root_dir, name, subdir_path)
+    logger.info(result_msg or log_messages.NOT_FOUND)
 
 
 def _search_recursively(
