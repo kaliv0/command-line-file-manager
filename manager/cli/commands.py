@@ -244,7 +244,12 @@ def search_by_name_recursively(dir_path: str, name: str, save: bool, output: str
     show_default=True,
     help="Path to output directory for the saved log file",
 )
-def compare_directories(dir_path: str, other_path: str, save: bool, output: str) -> None: ...
+def compare_directories(dir_path: str, other_path: str, save: bool, output: str) -> None:
+    """
+    Compare DIR_PATH to OTHER_PATH
+    """
+
+    scanner.compare_directories(dir_path, other_path, save, output)
 
 
 #############################################################
@@ -449,9 +454,7 @@ def handle_duplicate_files(
     Find and clean-up duplicate files inside a PATH
     """
 
-    organizer.handle_duplicate_files(
-        dir_path, interactive, show_hidden, backup, archive_format, save, output
-    )
+    organizer.handle_duplicate_files(dir_path, interactive, show_hidden, backup, archive_format, save, output)
 
 
 #############################################################

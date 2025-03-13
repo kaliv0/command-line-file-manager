@@ -11,17 +11,13 @@ DUPLICATE_DELIMITER = "-----------------------------------------\n"
 NO_DUPLICATE_FILES = "'{dir_path}' contains no duplicate files\n" + DUPLICATE_DELIMITER
 LISTED_DUPLICATE_FILES = "'{dir_path}' contains the following duplicate files:\n{display_list}"
 
-NO_DUPLICATE_FILES_RECURSIVELY = (
-    "The given directory contains no duplicate files\n" + DUPLICATE_DELIMITER
-)
+NO_DUPLICATE_FILES_RECURSIVELY = "The given directory contains no duplicate files\n" + DUPLICATE_DELIMITER
 LISTED_DUPLICATE_FILES_RECURSIVELY = (
     "The given directory contains the following duplicate files:\n{display_list}"
 )
 
 NO_SUBDIRS = "'{dir_path}' contains no nested subdirectories\n" + DELIMITER
-NESTED_SUBDIRS = (
-    "'{dir_path}' contains the following subdirectories:\n\t- {entries_list}\n" + DELIMITER
-)
+NESTED_SUBDIRS = "'{dir_path}' contains the following subdirectories:\n\t- {entries_list}\n" + DELIMITER
 
 NOT_FOUND = "Nothing found"
 FOUND_BY_NAME = "Inside directory '{dir_path}' the given keyword '{keyword}' was found{delimiter}"

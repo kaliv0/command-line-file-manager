@@ -8,9 +8,7 @@ class LoggerFactory:
     def get_logger(cls, logger_type: str, output_dir: str, save_output: bool) -> logging.Logger:
         match logger_type:
             case logger_types.BASIC:
-                return cls._configure_logger(
-                    logger_types.BASIC, save_output, output_dir, log_output.FILES
-                )
+                return cls._configure_logger(logger_types.BASIC, save_output, output_dir, log_output.FILES)
             case logger_types.CATALOG:
                 return cls._configure_logger(
                     logger_types.CATALOG, save_output, output_dir, log_output.CATALOG
@@ -20,12 +18,12 @@ class LoggerFactory:
                     logger_types.RECURSIVE, save_output, output_dir, log_output.RECURSIVE_CATALOG
                 )
             case logger_types.TREE:
-                return cls._configure_logger(
-                    logger_types.TREE, save_output, output_dir, log_output.TREE
-                )
+                return cls._configure_logger(logger_types.TREE, save_output, output_dir, log_output.TREE)
             case logger_types.SEARCH:
+                return cls._configure_logger(logger_types.SEARCH, save_output, output_dir, log_output.SEARCH)
+            case logger_types.COMPARE:
                 return cls._configure_logger(
-                    logger_types.SEARCH, save_output, output_dir, log_output.SEARCH
+                    logger_types.COMPARE, save_output, output_dir, log_output.COMPARE
                 )
             case logger_types.ORGANIZE:
                 return cls._configure_logger(
@@ -36,9 +34,7 @@ class LoggerFactory:
                     logger_types.ORGANIZE, save_output, output_dir, log_output.RECURSIVE_ORGANIZE
                 )
             case _:
-                return cls._configure_logger(
-                    logger_types.BASIC, save_output, output_dir, log_output.FILES
-                )
+                return cls._configure_logger(logger_types.BASIC, save_output, output_dir, log_output.FILES)
 
     @staticmethod
     def _configure_logger(

@@ -1,7 +1,7 @@
 import os
 
 from manager.cli import commands
-from tests.util import compare
+from tests.conftest import compare
 
 RESOURCE_DIR = "tests/resources/plain"
 DUPLICATES_RESOURCE_DIR = "tests/resources/duplicates"

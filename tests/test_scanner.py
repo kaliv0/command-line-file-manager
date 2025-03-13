@@ -1,4 +1,5 @@
 from manager.cli import commands
+from tests.conftest import compare
 
 RESOURCE_DIR = "tests/resources/plain"
 
@@ -129,3 +130,10 @@ def test_search_by_name_recursively(runner):
         ),
     ]
     assert all(substring in result.output for substring in message_substrings)
+
+
+def test_compare_dirs(runner, tmp_cmp_dirs):
+    source, target = tmp_cmp_dirs
+    result = runner.invoke(commands.compare_directories, [source, target])
+    assert result.exit_code == 0
+    assert compare(source, target) == (2, 3, 1)
