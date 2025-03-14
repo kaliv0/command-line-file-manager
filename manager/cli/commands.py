@@ -268,7 +268,8 @@ def compare_directories(
     """
     Compare DIR_PATH to OTHER_PATH
     """
-
+    if short and one_line:
+        raise click.BadParameter("Mutually exclusive flags: 'short' and 'oneline'")
     scanner.compare_directories(dir_path, other_path, include_hidden, short, one_line, save, output)
 
 

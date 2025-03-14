@@ -2,6 +2,7 @@ import os
 from os import path, listdir
 from filecmp import dircmp
 from logging import Logger
+from typing import Callable
 
 from directory_tree import display_tree
 
@@ -146,7 +147,6 @@ def build_tree(dir_path: str, show_hidden: bool, save: bool, output: str) -> Non
 
 def build_pretty_tree(dir_path: str, show_hidden: bool, save: bool, output: str) -> None:
     logger = LoggerFactory.get_logger(logger_types.TREE, output, save)
-    # TODO: be a man and implement form scratch!
     logger.info(display_tree(dir_path, string_rep=True, show_hidden=show_hidden))
 
 
@@ -230,8 +230,15 @@ def compare_directories(
     output: str,
     diff_recursively=False,
 ) -> None:
+    abs_dir_path = path.abspath(dir_path)
+    abs_other_path = path.abspath(other_path)
+    if not include_hidden and any(
+        path.basename(entry).startswith(".") for entry in (abs_dir_path, abs_other_path)
+    ):
+        return
+
     logger = LoggerFactory.get_logger(logger_types.COMPARE, output, save)
-    cmp_obj = dircmp(dir_path, other_path)
+    cmp_obj = dircmp(abs_dir_path, abs_other_path)
     diff_report(cmp_obj, include_hidden, diff_recursively, short, one_line, logger)
 
 
@@ -243,15 +250,14 @@ def diff_report(
     one_line: bool,
     logger: Logger,
 ) -> None:
-    _report(cmp_obj, short, one_line, logger)
+    _report(cmp_obj, include_hidden, short, one_line, logger)
 
     if diff_recursively:
         for sub_dir in cmp_obj.subdirs.values():
             diff_report(sub_dir, include_hidden, diff_recursively, short, one_line, logger)
 
 
-def _report(cmp_obj: dircmp, short: bool, one_line: bool, logger: Logger) -> None:
-    # customizing dircmp.report()
+def _report(cmp_obj: dircmp, include_hidden: bool, short: bool, one_line: bool, logger: Logger) -> None:
     logger.info(log_messages.DIRS_DIFF.format(left=cmp_obj.left, right=cmp_obj.right))
 
     if short:
@@ -264,64 +270,42 @@ def _report(cmp_obj: dircmp, short: bool, one_line: bool, logger: Logger) -> Non
         delimiter = ":\n\t- "
         func = lambda files: "\n\t- ".join(files)
 
-    # if cmp_obj.left_only:
-    #     cmp_obj.left_only.sort()
-    #     logger.info(
-    #         log_messages.DIFF_STATS.format(
-    #             dir=cmp_obj.left, delimiter=delimiter, list=func(cmp_obj.left_only)
-    #         )
-    #     )
-    # if cmp_obj.right_only:
-    #     cmp_obj.right_only.sort()
-    #     logger.info(
-    #         log_messages.DIFF_STATS.format(
-    #             dir=cmp_obj.right, delimiter=delimiter, list=func(cmp_obj.right_only)
-    #         )
-    #     )
-
-    stats_messages ={
-       'left_only':  log_messages.DIFF_STATS,
-        'right_only': log_messages.DIFF_STATS,
-        'same_files': log_messages.SAME_FILES,
-        'diff_files': log_messages.DIFF_FILES,
-        'funny_files': log_messages.TROUBLE_FILES,
-        'common_dirs': log_messages.COMMON_SUBDIRS,
-        'common_funny': log_messages.COMMON_TROUBLE,
+    stats_map = {
+        "left_only": log_messages.DIFF_STATS,
+        "right_only": log_messages.DIFF_STATS,
+        "same_files": log_messages.SAME_FILES,
+        "diff_files": log_messages.DIFF_FILES,
+        "funny_files": log_messages.TROUBLE_FILES,
+        "common_dirs": log_messages.COMMON_SUBDIRS,
+        "common_funny": log_messages.COMMON_TROUBLE,
     }
 
-    for attr in ['left_only', 'right_only', 'same_files', 'diff_files', 'funny_files', 'common_dirs', 'common_funny']:
-        if stats:= getattr(cmp_obj, attr, None):
-            if attr=="left_only":
+    for attr in stats_map.keys():
+        if stats := getattr(cmp_obj, attr, None):
+            if not include_hidden:
+                if not (stats := [entry for entry in stats if not entry.startswith(".")]):
+                    continue
+
+            if attr == "left_only":
                 dir_path = cmp_obj.left
-            elif attr=="right_only":
-                dir_path= cmp_obj.right
+            elif attr == "right_only":
+                dir_path = cmp_obj.right
             else:
-                dir_path= None
-            _handle_stats_entries(dir_path, stats, logger, stats_messages[attr], delimiter, func)
+                dir_path = None
+            _handle_stats_entries(dir_path, stats, logger, stats_map[attr], delimiter, func)
 
-    # if cmp_obj.same_files:
-    #     cmp_obj.same_files.sort()
-    #     logger.info(log_messages.SAME_FILES.format(delimiter=delimiter, list=func(cmp_obj.same_files)))
-    # if cmp_obj.diff_files:
-    #     cmp_obj.diff_files.sort()
-    #     logger.info(log_messages.DIFF_FILES.format(delimiter=delimiter, list=func(cmp_obj.diff_files)))
-    # if cmp_obj.funny_files:
-    #     cmp_obj.funny_files.sort()
-    #     logger.info(log_messages.TROUBLE_FILES.format(delimiter=delimiter, list=func(cmp_obj.funny_files)))
-    # if cmp_obj.common_dirs:
-    #     cmp_obj.common_dirs.sort()
-    #     logger.info(log_messages.COMMON_SUBDIRS.format(delimiter=delimiter, list=func(cmp_obj.common_dirs)))
-    # if cmp_obj.common_funny:
-    #     cmp_obj.common_funny.sort()
-    #     logger.info(log_messages.COMMON_TROUBLE.format(delimiter=delimiter, list=func(cmp_obj.common_funny)))
 
-def _handle_stats_entries(dir_path, entries, logger, message, delimiter, func):
-    fmt={
-        'delimiter': delimiter,
-        'list': func(entries)
-    }
+def _handle_stats_entries(
+    dir_path: str,
+    entries: list[str],
+    logger: Logger,
+    message: str,
+    delimiter: str,
+    func: Callable[[list[str]], str | int],
+) -> None:
+    fmt = {"delimiter": delimiter, "list": func(entries)}
     if dir:
-        fmt['dir'] = dir_path
+        fmt["dir"] = dir_path
 
     entries.sort()
     logger.info(message.format(**fmt))
