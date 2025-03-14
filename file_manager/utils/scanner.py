@@ -1,13 +1,12 @@
 import os
-from os import path, listdir
 from filecmp import dircmp
 from logging import Logger
 from typing import Callable
 
 from directory_tree import display_tree
 
-from manager.logs.config import log_messages, logger_types
-from manager.logs.logger_factory import LoggerFactory
+from file_manager.logs.config import log_messages, logger_types
+from file_manager.logs.logger_factory import LoggerFactory
 
 
 def scan_files(dir_path: str, sort: str, desc: bool, save: bool, output: str) -> None:
@@ -30,9 +29,9 @@ def _scan_entries(
 ) -> None:
     logger = LoggerFactory.get_logger(logger_types.BASIC, output, save)
 
-    dir_list = listdir(dir_path)
-    os_func = getattr(path, os_func_name)
-    entries_list = [entry for entry in dir_list if os_func(path.join(dir_path, entry))]
+    dir_list = os.listdir(dir_path)
+    os_func = getattr(os.path, os_func_name)
+    entries_list = [entry for entry in dir_list if os_func(os.path.join(dir_path, entry))]
     if not entries_list:
         logger.info(getattr(log_messages, not_found_msg).format(dir_path=dir_path))
     else:
@@ -49,13 +48,13 @@ def _sort_entries_list(dir_path: str, entries_list: list[str], criteria: str, de
         case "name":
             sort_func = None
         case "size":
-            sort_func = lambda file: path.getsize(path.join(dir_path, file))
+            sort_func = lambda file: os.path.getsize(os.path.join(dir_path, file))
         case "date":
-            sort_func = lambda file: path.getctime(path.join(dir_path, file))
+            sort_func = lambda file: os.path.getctime(os.path.join(dir_path, file))
         case "modified":
-            sort_func = lambda file: path.getmtime(path.join(dir_path, file))
+            sort_func = lambda file: os.path.getmtime(os.path.join(dir_path, file))
         case "type":
-            sort_func = lambda file: path.splitext(path.join(dir_path, file))[1]
+            sort_func = lambda file: os.path.splitext(os.path.join(dir_path, file))[1]
         case _:
             sort_func = None
     entries_list.sort(key=sort_func, reverse=desc)
@@ -69,11 +68,11 @@ def build_catalog(
 ) -> None:
     logger = LoggerFactory.get_logger(logger_types.CATALOG, output, save)
 
-    dir_list = listdir(dir_path)
+    dir_list = os.listdir(dir_path)
     files_list = []
     nested_dirs = []
     for entry in dir_list:
-        if path.isfile(path.join(dir_path, entry)):
+        if os.path.isfile(os.path.join(dir_path, entry)):
             files_list.append(entry)
         else:
             nested_dirs.append(entry)
@@ -92,14 +91,14 @@ def build_catalog_recursively(
 def _get_recursive_catalog(logger: Logger, root_dir: str, subdir_path: str | None = None) -> str:
     if subdir_path is None:
         subdir_path = root_dir
-    subdir_list = listdir(subdir_path)
+    subdir_list = os.listdir(subdir_path)
 
     files_list = []
     nested_dirs = []
     inner_msg = ""
     for entry in subdir_list:
-        entry_path = path.join(subdir_path, entry)
-        if path.isfile(entry_path):
+        entry_path = os.path.join(subdir_path, entry)
+        if os.path.isfile(entry_path):
             files_list.append(entry)
         else:
             nested_dirs.append(entry)
@@ -133,11 +132,11 @@ def build_tree(dir_path: str, show_hidden: bool, save: bool, output: str) -> Non
     folder_emoji = "\U0001f4c1"
     file_emoji = "\U0001f4c3"
     for root, dirs, files in os.walk(dir_path):
-        if not show_hidden and path.basename(root).startswith("."):
+        if not show_hidden and os.path.basename(root).startswith("."):
             continue
         level = root.count(os.sep) - 1
         indent = " " * 4 * level
-        logger.info(f"{indent}{folder_emoji} {path.abspath(root)}/")
+        logger.info(f"{indent}{folder_emoji} {os.path.abspath(root)}/")
         sub_indent = " " * 4 * (level + 1)
         for file in files:
             if not show_hidden and file.startswith("."):
@@ -154,12 +153,12 @@ def build_pretty_tree(dir_path: str, show_hidden: bool, save: bool, output: str)
 def search_by_name(dir_path: str, name: str, save: bool, output: str) -> None:
     logger = LoggerFactory.get_logger(logger_types.ORGANIZE, output, save)
 
-    dir_list = listdir(dir_path)
+    dir_list = os.listdir(dir_path)
     files_list = []
     nested_dirs = []
     for entry in dir_list:
         if name in entry:
-            if path.isfile(path.join(dir_path, entry)):
+            if os.path.isfile(os.path.join(dir_path, entry)):
                 files_list.append(entry)
             else:
                 nested_dirs.append(entry)
@@ -189,17 +188,17 @@ def search_by_name_recursively(
 def _search_recursively(logger: Logger, root_dir: str, name: str, subdir_path: str | None = None) -> str:
     if subdir_path is None:
         subdir_path = root_dir
-    subdir_list = listdir(subdir_path)
+    subdir_list = os.listdir(subdir_path)
 
     files_list = []
     nested_dirs = []
     valid_dirs = []
     inner_msg = ""
     for entry in subdir_list:
-        entry_path = path.join(subdir_path, entry)
-        if path.isfile(entry_path) and name in entry:
+        entry_path = os.path.join(subdir_path, entry)
+        if os.path.isfile(entry_path) and name in entry:
             files_list.append(entry)
-        elif path.isdir(entry_path):
+        elif os.path.isdir(entry_path):
             if name in entry:
                 valid_dirs.append(entry)
             nested_dirs.append(entry)
@@ -230,10 +229,10 @@ def compare_directories(
     output: str,
     diff_recursively=False,
 ) -> None:
-    abs_dir_path = path.abspath(dir_path)
-    abs_other_path = path.abspath(other_path)
+    abs_dir_path = os.path.abspath(dir_path)
+    abs_other_path = os.path.abspath(other_path)
     if not include_hidden and any(
-        path.basename(entry).startswith(".") for entry in (abs_dir_path, abs_other_path)
+        os.path.basename(entry).startswith(".") for entry in (abs_dir_path, abs_other_path)
     ):
         return
 

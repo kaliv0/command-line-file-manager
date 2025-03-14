@@ -1,6 +1,6 @@
 import logging
 
-from manager.logs.config import log_messages, log_output, logger_types
+from file_manager.logs.config import log_messages, log_output, logger_types
 
 
 class LoggerFactory:

@@ -1,6 +1,6 @@
 import click
 
-from manager.utils import organizer, scanner
+from file_manager.utils import organizer, scanner
 
 
 # ### scan ###

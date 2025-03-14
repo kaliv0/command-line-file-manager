@@ -13,7 +13,7 @@ def runner(request):
 
 @pytest.fixture(scope="session")
 def tmp_dirs(tmp_path_factory):
-    path = tmp_path_factory.mktemp("file-manager")
+    path = tmp_path_factory.mktemp("file-file_manager")
     shutil.copytree("./tests/resources/plain", path / "plain")
     shutil.copytree("./tests/resources/results/plain", path / "results/plain")
     return str(path / "plain"), str(path / "results/plain")
@@ -21,7 +21,7 @@ def tmp_dirs(tmp_path_factory):
 
 @pytest.fixture(scope="session")
 def tmp_cmp_dirs(tmp_path_factory):
-    path = tmp_path_factory.mktemp("file-manager")
+    path = tmp_path_factory.mktemp("file-file_manager")
     shutil.copytree("./tests/resources/plain", path / "plain")
     shutil.copytree("./tests/resources/results/plain_modified", path / "results/plain_modified")
     return str(path / "plain"), str(path / "results/plain_modified")

@@ -1,4 +1,4 @@
-from manager.cli import commands
+from file_manager.cli import commands
 from tests.conftest import compare
 
 RESOURCE_DIR = "tests/resources/plain"

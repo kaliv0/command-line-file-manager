@@ -1,6 +1,6 @@
 import click
 
-from manager.cli.commands import (
+from file_manager.cli.commands import (
     build_catalog,
     build_catalog_recursively,
     build_pretty_tree,
@@ -29,8 +29,10 @@ cli.add_command(build_catalog)
 cli.add_command(build_catalog_recursively)
 cli.add_command(build_tree)
 cli.add_command(build_pretty_tree)
+
 cli.add_command(search_by_name)
 cli.add_command(search_by_name_recursively)
+
 cli.add_command(compare_directories)
 cli.add_command(compare_directories_recursively)
 
