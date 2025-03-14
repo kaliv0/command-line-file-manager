@@ -1,6 +1,3 @@
-# TODO: remove new_line from end of log_messages
-#  combine both delimiters
-
 LOG_FORMAT = "%(message)s"
 
 DELIMITER = "=========================================\n"
@@ -40,3 +37,10 @@ MERGE_FILES = "Merging duplicates: {entry} into {target_name}\n" + DUPLICATE_DEL
 PRE_MERGE_PROMPT = "Please enter file name for the following duplicates: {entry}\n"
 
 DIRS_DIFF = DELIMITER + "Diff '{left}' -- '{right}':"
+DELIM_LIST = "{delimiter}{list}"
+DIFF_STATS = "- Only in '{dir}'" + DELIM_LIST
+SAME_FILES = "- Identical files" + DELIM_LIST
+DIFF_FILES = "- Differing files" + DELIM_LIST
+TROUBLE_FILES = "- Trouble with common files" + DELIM_LIST
+COMMON_SUBDIRS = "- Common subdirectories" + DELIM_LIST
+COMMON_TROUBLE = "- Common problematic cases" + DELIM_LIST

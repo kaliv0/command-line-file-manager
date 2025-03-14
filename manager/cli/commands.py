@@ -238,6 +238,17 @@ def search_by_name_recursively(dir_path: str, name: str, save: bool, output: str
     help="Include hidden files and folders",
 )
 @click.option(
+    "--short",
+    is_flag=True,
+    help="Show short statistics (count only)",
+)
+@click.option(
+    "--oneline",
+    "one_line",
+    is_flag=True,
+    help="Show compact list on single line",
+)
+@click.option(
     "-s",
     "--save",
     is_flag=True,
@@ -252,13 +263,13 @@ def search_by_name_recursively(dir_path: str, name: str, save: bool, output: str
     help="Path to output directory for the saved log file",
 )
 def compare_directories(
-    dir_path: str, other_path: str, include_hidden: bool, save: bool, output: str
+    dir_path: str, other_path: str, include_hidden: bool, short: bool, one_line: bool, save: bool, output: str
 ) -> None:
     """
     Compare DIR_PATH to OTHER_PATH
     """
 
-    scanner.compare_directories(dir_path, other_path, include_hidden, save, output)
+    scanner.compare_directories(dir_path, other_path, include_hidden, short, one_line, save, output)
 
 
 @click.command()
@@ -292,7 +303,9 @@ def compare_directories_recursively(
     Compare DIR_PATH to OTHER_PATH
     """
 
-    scanner.compare_directories(dir_path, other_path, include_hidden, save, output, diff_recursively=True)
+    scanner.compare_directories(
+        dir_path, other_path, include_hidden, True, save, output, diff_recursively=True
+    )
 
 
 #############################################################
