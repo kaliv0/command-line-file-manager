@@ -38,3 +38,5 @@ REMOVE_DIR = "Removing {abs_dir_path}"
 REMOVE_FILE = "Removing duplicate {file}"
 MERGE_FILES = "Merging duplicates: {entry} into {target_name}\n" + DUPLICATE_DELIMITER
 PRE_MERGE_PROMPT = "Please enter file name for the following duplicates: {entry}\n"
+
+DIRS_DIFF = DELIMITER + "Diff '{left}' -- '{right}':"

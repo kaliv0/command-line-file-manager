@@ -261,7 +261,38 @@ def compare_directories(
     scanner.compare_directories(dir_path, other_path, include_hidden, save, output)
 
 
-#############################################################
+@click.command()
+@click.argument("dir_path", type=click.STRING)
+@click.argument("other_path", type=click.STRING)
+@click.option(
+    "-h",
+    "--hidden",
+    "include_hidden",
+    is_flag=True,
+    help="Include hidden files and folders",
+)
+@click.option(
+    "-s",
+    "--save",
+    is_flag=True,
+    help="Save log message to file",
+)
+@click.option(
+    "-o",
+    "--output",
+    type=click.STRING,
+    default=None,
+    show_default=True,
+    help="Path to output directory for the saved log file",
+)
+def compare_directories_recursively(
+    dir_path: str, other_path: str, include_hidden: bool, save: bool, output: str
+) -> None:
+    """
+    Compare DIR_PATH to OTHER_PATH
+    """
+
+    scanner.compare_directories(dir_path, other_path, include_hidden, save, output, diff_recursively=True)
 
 
 #############################################################
