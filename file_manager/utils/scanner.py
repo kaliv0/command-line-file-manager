@@ -225,9 +225,9 @@ def compare_directories(
     include_hidden: bool,
     short: bool,
     one_line: bool,
+    recursively: bool,
     save: bool,
     output: str,
-    diff_recursively=False,
 ) -> None:
     abs_dir_path = os.path.abspath(dir_path)
     abs_other_path = os.path.abspath(other_path)
@@ -238,7 +238,7 @@ def compare_directories(
 
     logger = LoggerFactory.get_logger(logger_types.COMPARE, output, save)
     cmp_obj = dircmp(abs_dir_path, abs_other_path)
-    diff_report(cmp_obj, include_hidden, diff_recursively, short, one_line, logger)
+    diff_report(cmp_obj, include_hidden, recursively, short, one_line, logger)
 
 
 def diff_report(

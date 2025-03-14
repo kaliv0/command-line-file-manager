@@ -1,14 +1,8 @@
-- test organize plain,
-    recursively,
-    recursively-flatten,
-    archive(?),
-    with/without 'hidden'
-
 - add dir_diff as separate feature
-    -> flags skip-nested-dirs (or recursive version)
-    -> skip-hidden
     -> list of files to skip comparing -> supported by underlying dircmp?
-    -> full list of file names
-    -> short statistics -> numbers only per dir/subdir
+
+- if dir is "." -> display as pwd ?
+- add functionality to provide external config for organizing dir names
+- move all docstrings to short_help in @click.command()
 
 - expand readme / add docs?

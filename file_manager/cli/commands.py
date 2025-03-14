@@ -4,7 +4,7 @@ from file_manager.utils import organizer, scanner
 
 
 # ### scan ###
-@click.command()
+@click.command(short_help="DIR_PATH: Path to directory to be scanned")
 @click.argument("dir_path", type=click.STRING)
 @click.option(
     "--sort",
@@ -33,8 +33,6 @@ from file_manager.utils import organizer, scanner
     help="Path to output directory for the saved log file",
 )
 def scan_files(dir_path: str, sort: str, desc: bool, save: bool, output: str) -> None:
-    """DIR_PATH: Path to directory to be scanned"""
-
     scanner.scan_files(dir_path, sort, desc, save, output)
 
 
@@ -76,27 +74,11 @@ def scan_subdirs(dir_path: str, sort: str, desc: bool, save: bool, output: str) 
 @click.command()
 @click.argument("dir_path", type=click.STRING)
 @click.option(
-    "-s",
-    "--save",
+    "-r",
+    "--recursively",
     is_flag=True,
-    help="Save log message to file",
+    help="Build catalog recursively",
 )
-@click.option(
-    "-o",
-    "--output",
-    type=click.STRING,
-    default=None,
-    show_default=True,
-    help="Path to output directory for the saved log file",
-)
-def build_catalog(dir_path: str, save: bool, output: str):
-    """DIR_PATH: Path to directory to be scanned"""
-
-    scanner.build_catalog(dir_path, save, output)
-
-
-@click.command()
-@click.argument("dir_path", type=click.STRING)
 @click.option(
     "-s",
     "--save",
@@ -111,10 +93,12 @@ def build_catalog(dir_path: str, save: bool, output: str):
     show_default=True,
     help="Path to output directory for the saved log file",
 )
-def build_catalog_recursively(dir_path: str, save: bool, output: str) -> None:
+def build_catalog(dir_path: str, recursively: bool, save: bool, output: str):
     """DIR_PATH: Path to directory to be scanned"""
-
-    scanner.build_catalog_recursively(dir_path, save, output)
+    if not recursively:
+        scanner.build_catalog(dir_path, save, output)
+    else:
+        scanner.build_catalog_recursively(dir_path, save, output)
 
 
 #############################################################
@@ -249,6 +233,12 @@ def search_by_name_recursively(dir_path: str, name: str, save: bool, output: str
     help="Show compact list on single line",
 )
 @click.option(
+    "-r",
+    "--recursively",
+    is_flag=True,
+    help="Compare directories recursively",
+)
+@click.option(
     "-s",
     "--save",
     is_flag=True,
@@ -263,49 +253,22 @@ def search_by_name_recursively(dir_path: str, name: str, save: bool, output: str
     help="Path to output directory for the saved log file",
 )
 def compare_directories(
-    dir_path: str, other_path: str, include_hidden: bool, short: bool, one_line: bool, save: bool, output: str
+    dir_path: str,
+    other_path: str,
+    include_hidden: bool,
+    short: bool,
+    one_line: bool,
+    recursively: bool,
+    save: bool,
+    output: str,
 ) -> None:
     """
     Compare DIR_PATH to OTHER_PATH
     """
     if short and one_line:
         raise click.BadParameter("Mutually exclusive flags: 'short' and 'oneline'")
-    scanner.compare_directories(dir_path, other_path, include_hidden, short, one_line, save, output)
-
-
-@click.command()
-@click.argument("dir_path", type=click.STRING)
-@click.argument("other_path", type=click.STRING)
-@click.option(
-    "-h",
-    "--hidden",
-    "include_hidden",
-    is_flag=True,
-    help="Include hidden files and folders",
-)
-@click.option(
-    "-s",
-    "--save",
-    is_flag=True,
-    help="Save log message to file",
-)
-@click.option(
-    "-o",
-    "--output",
-    type=click.STRING,
-    default=None,
-    show_default=True,
-    help="Path to output directory for the saved log file",
-)
-def compare_directories_recursively(
-    dir_path: str, other_path: str, include_hidden: bool, save: bool, output: str
-) -> None:
-    """
-    Compare DIR_PATH to OTHER_PATH
-    """
-
     scanner.compare_directories(
-        dir_path, other_path, include_hidden, True, save, output, diff_recursively=True
+        dir_path, other_path, include_hidden, short, one_line, recursively, save, output
     )
 
 
