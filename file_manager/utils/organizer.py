@@ -7,7 +7,7 @@ from logging import Logger
 import click
 
 from file_manager.logs.config import log_messages, log_output, logger_types
-from file_manager.logs.logger_factory import LoggerFactory
+from file_manager.logs.logger_factory import get_logger
 from file_manager.utils.config import constants
 
 
@@ -21,7 +21,7 @@ def organize_files(
     output: str,
 ) -> None:
     abs_dir_path, dir_list = _handle_dir_path(dir_path)
-    logger = LoggerFactory.get_logger(logger_types.ORGANIZE, output, save)
+    logger = get_logger(logger_types.ORGANIZE, output, save)
     _create_archive(abs_dir_path, archive_format, backup)
 
     exclude_list = exclude.split(",") if exclude else []
@@ -47,7 +47,7 @@ def organize_files_recursively(
     output: str,
 ) -> None:
     abs_dir_path = os.path.abspath(dir_path)
-    logger = LoggerFactory.get_logger(logger_types.RECURSIVE_ORGANIZE, output, save)
+    logger = get_logger(logger_types.RECURSIVE_ORGANIZE, output, save)
     _create_archive(abs_dir_path, archive_format, backup)
 
     exclude_list = exclude.split(",") if exclude else []
@@ -155,7 +155,7 @@ def handle_duplicate_files(
 ) -> None:
     # BTW: could have used built-in filecmp.cmp but this is more fun
     abs_dir_path, dir_list = _handle_dir_path(dir_path)
-    logger = LoggerFactory.get_logger(logger_types.ORGANIZE, output, save)
+    logger = get_logger(logger_types.ORGANIZE, output, save)
     _create_archive(abs_dir_path, archive_format, backup)
 
     content_map = _create_duplicate_map(abs_dir_path, dir_list, show_hidden, logger)
@@ -174,7 +174,7 @@ def handle_duplicate_files_recursively(
 ) -> None:
     abs_dir_path, dir_list = _handle_dir_path(dir_path)
     if not logger:
-        logger = LoggerFactory.get_logger(logger_types.ORGANIZE, output, save)
+        logger = get_logger(logger_types.ORGANIZE, output, save)
     logger.info(log_messages.INSIDE_DIR.format(abs_dir_path=abs_dir_path))
 
     _create_archive(abs_dir_path, archive_format, backup)

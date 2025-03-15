@@ -5,4 +5,9 @@
 - add functionality to provide external config for organizing dir names
 - move all docstrings to short_help in @click.command()
 
-- expand readme / add docs?
+- move commands to root level -> combine with __main__
+- simplify names
+- combine scans -> -d flag for dirs
+- show short messages if both dirs in compare__ are identical
+
+- expand readme / add docs? -> use clik-sphinx library

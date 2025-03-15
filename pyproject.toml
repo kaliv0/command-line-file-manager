@@ -14,7 +14,7 @@ Repository = "https://github.com/kaliv0/command-line-file-manager.git"
 #Documentation = "https://command-line-file-manager.readthedocs.io/en/latest"
 
 [project.scripts]
-fm = "file_manager.__main__:cli"
+fm = "file_manager.main:cli"
 
 [tool.poetry.dependencies]
 python = "^3.10"
