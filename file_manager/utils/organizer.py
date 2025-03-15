@@ -243,7 +243,7 @@ def _handle_duplicates(content_map, dir_path, abs_dir_path, interactive, logger)
     duplicate_list = _transform_content_map(content_map)
     # display sorted map entries
     if not duplicate_list:
-        logger.info(log_messages.NO_DUPLICATE_FILES.format(dir_path=dir_path))
+        logger.info(log_messages.NO_DUPLICATE_FILES.format(dir_path=dir_path))  # todo: abs
         return
     display_list = _prepare_display_list(duplicate_list)
     logger.info(log_messages.LISTED_DUPLICATE_FILES.format(dir_path=abs_dir_path, display_list=display_list))
