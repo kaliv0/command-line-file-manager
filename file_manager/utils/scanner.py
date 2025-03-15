@@ -25,12 +25,12 @@ def show(dir_path: str, sort: str, desc: bool, list_dirs: bool, save: bool, outp
     os_func = getattr(os.path, os_func_name)
     entries_list = [entry for entry in dir_list if os_func(os.path.join(dir_path, entry))]
     if not entries_list:
-        logger.info(getattr(log_messages, not_found_msg).format(dir_path=dir_path))  # TODO: abs_dir
+        logger.info(getattr(log_messages, not_found_msg).format(dir_path=os.path.abspath(dir_path)))
     else:
         _sort_entries_list(dir_path, entries_list, sort, desc)
         logger.info(
             getattr(log_messages, success_msg).format(
-                dir_path=dir_path, entries_list="\n\t- ".join(entries_list)
+                dir_path=os.path.abspath(dir_path), entries_list="\n\t- ".join(entries_list)
             )
         )
 
@@ -102,19 +102,17 @@ def _get_recursive_catalog(logger: Logger, root_dir: str, subdir_path: str | Non
 
 def _get_catalog_messages(dir_path: str, files_list: list[str], nested_dirs: list[str]) -> str:
     if not files_list:
-        files_msg = log_messages.NO_FILES.format(dir_path=dir_path) # todo: abs_dir
+        files_msg = log_messages.NO_FILES.format(dir_path=os.path.abspath(dir_path))
     else:
-        # todo: abs_dir
         files_msg = log_messages.LISTED_FILES.format(
-            dir_path=dir_path, entries_list="\n\t- ".join(files_list)
+            dir_path=os.path.abspath(dir_path), entries_list="\n\t- ".join(files_list)
         )
 
     if not nested_dirs:
-        nested_dirs_msg = log_messages.NO_SUBDIRS.format(dir_path=dir_path) # todo: abs_dir
+        nested_dirs_msg = log_messages.NO_SUBDIRS.format(dir_path=os.path.abspath(dir_path))
     else:
-        # todo: abs_dir
         nested_dirs_msg = log_messages.NESTED_SUBDIRS.format(
-            dir_path=dir_path, entries_list="\n\t- ".join(nested_dirs)
+            dir_path=os.path.abspath(dir_path), entries_list="\n\t- ".join(nested_dirs)
         )
     return files_msg + nested_dirs_msg
 
@@ -160,7 +158,9 @@ def search(dir_path: str, name: str, save: bool, output: str) -> None:
     if not files_list and not nested_dirs:
         logger.info(log_messages.NOT_FOUND)
     else:
-        logger.info(log_messages.FOUND_BY_NAME.format(dir_path=dir_path, keyword=name, delimiter="")) # todo: absdir
+        logger.info(
+            log_messages.FOUND_BY_NAME.format(dir_path=os.path.abspath(dir_path), keyword=name, delimiter="")
+        )
         if files_list:
             logger.info(
                 log_messages.FOUND_FILES_BY_NAME.format(files_list="\n\t- ".join(files_list), delimiter="")
@@ -201,7 +201,9 @@ def _search_recursively(logger: Logger, root_dir: str, name: str, subdir_path: s
     if not files_list and not valid_dirs:
         return inner_msg
 
-    log_msg = log_messages.FOUND_BY_NAME.format(dir_path=subdir_path, keyword=name, delimiter="\n") # TODO: absdir??
+    log_msg = log_messages.FOUND_BY_NAME.format(
+        dir_path=os.path.abspath(subdir_path), keyword=name, delimiter="\n"
+    )
     if files_list:
         log_msg += log_messages.FOUND_FILES_BY_NAME.format(
             files_list="\n\t- ".join(files_list), delimiter="\n"

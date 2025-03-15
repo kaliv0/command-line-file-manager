@@ -38,3 +38,5 @@ DIFF_FILES = "- Differing files" + DELIM_LIST
 TROUBLE_FILES = "- Trouble with common files" + DELIM_LIST
 COMMON_SUBDIRS = "- Common subdirectories" + DELIM_LIST
 COMMON_TROUBLE = "- Common problematic cases" + DELIM_LIST
+
+BAD_OPTS = "Mutually exclusive flags: {flags}"

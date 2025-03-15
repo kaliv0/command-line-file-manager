@@ -159,7 +159,7 @@ def handle_duplicate_files(
     _create_archive(abs_dir_path, archive_format, backup)
 
     content_map = _create_duplicate_map(abs_dir_path, dir_list, show_hidden, logger)
-    _handle_duplicates(content_map, dir_path, abs_dir_path, interactive, logger)
+    _handle_duplicates(content_map, abs_dir_path, interactive, logger)
 
 
 def handle_duplicate_files_recursively(
@@ -183,7 +183,7 @@ def handle_duplicate_files_recursively(
         abs_dir_path, dir_list, show_hidden, logger
     )
     # ## handle duplicates in current dir ##
-    _handle_duplicates(content_map, dir_path, abs_dir_path, interactive, logger)
+    _handle_duplicates(content_map, abs_dir_path, interactive, logger)
     # ## dive recursively into nested subdirs ##
     logger.info(log_messages.DUPLICATE_DELIMITER)
     for subdir in subdir_list:
@@ -230,7 +230,7 @@ def _add_entry(
     content_map: defaultdict[str, list[str]],
     show_hidden: bool,
     logger: Logger,
-):
+) -> None:
     if not show_hidden and entry.startswith("."):
         logger.info(log_messages.SKIP_FILE.format(entry=entry))
         return
@@ -240,23 +240,25 @@ def _add_entry(
     content_map[sha].append(entry)
 
 
-def _handle_duplicates(content_map, dir_path, abs_dir_path, interactive, logger):
+def _handle_duplicates(
+    content_map: defaultdict[str, list[str]], dir_path: str, interactive: bool, logger: Logger
+) -> None:
     duplicate_list = _transform_content_map(content_map)
     # display sorted map entries
     if not duplicate_list:
-        logger.info(log_messages.NO_DUPLICATE_FILES.format(dir_path=dir_path))  # todo: abs
+        logger.info(log_messages.NO_DUPLICATE_FILES.format(dir_path=dir_path))
         return
     display_list = _prepare_display_list(duplicate_list)
-    logger.info(log_messages.LISTED_DUPLICATE_FILES.format(dir_path=abs_dir_path, display_list=display_list))
+    logger.info(log_messages.LISTED_DUPLICATE_FILES.format(dir_path=dir_path, display_list=display_list))
     # clean-up files
-    _merge_duplicates(abs_dir_path, duplicate_list, interactive, logger)
+    _merge_duplicates(dir_path, duplicate_list, interactive, logger)
 
 
 def _transform_content_map(content_map: defaultdict[str, list[str]]) -> list[list[str]]:
     return [sorted(file_list) for file_list in content_map.values() if len(file_list) > 1]
 
 
-def _prepare_display_list(duplicate_list) -> str:
+def _prepare_display_list(duplicate_list: list[list[str]]) -> str:
     display_list = ""
     for file_list in duplicate_list:
         for file in sorted(file_list):

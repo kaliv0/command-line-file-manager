@@ -1,16 +1,18 @@
 import click
 
+from file_manager.logs.config import log_messages
 from file_manager.utils import organizer, scanner
 
 
 @click.group()
 def fm() -> None:
+    """Good old command-line file manager\f"""
     pass
 
 
 # ### scan ###
-@fm.command(short_help="DIR_PATH: Path to directory to be scanned")
-@click.argument("dir_path", type=click.STRING)
+@fm.command(options_metavar="<options>")
+@click.argument("dir_path", type=click.STRING, metavar="<dir_path>")
 @click.option(
     "--sort",
     type=click.Choice(["name", "size", "date", "modified", "type"], case_sensitive=False),
@@ -45,12 +47,13 @@ def fm() -> None:
     help="Path to output directory for the saved log file",
 )
 def show(dir_path: str, sort: str, desc: bool, list_dirs: bool, save: bool, output: str) -> None:
+    """Short list of files or directories in <dir_path>\f"""
     scanner.show(dir_path, sort, desc, list_dirs, save, output)
 
 
 #############################################################
-@fm.command()
-@click.argument("dir_path", type=click.STRING)
+@fm.command(options_metavar="<options>")
+@click.argument("dir_path", type=click.STRING, metavar="<dir_path>")
 @click.option(
     "-r",
     "--recursively",
@@ -71,8 +74,8 @@ def show(dir_path: str, sort: str, desc: bool, list_dirs: bool, save: bool, outp
     show_default=True,
     help="Path to output directory for the saved log file",
 )
-def scan(dir_path: str, recursively: bool, save: bool, output: str):
-    """DIR_PATH: Path to directory to be scanned"""
+def scan(dir_path: str, recursively: bool, save: bool, output: str) -> None:
+    """Create full catalog of all files and subdirs in <dir_path>\f"""
     if recursively:
         scanner.scan_recursively(dir_path, save, output)
     else:
@@ -80,8 +83,8 @@ def scan(dir_path: str, recursively: bool, save: bool, output: str):
 
 
 #############################################################
-@fm.command()
-@click.argument("dir_path", type=click.STRING)
+@fm.command(options_metavar="<options>")
+@click.argument("dir_path", type=click.STRING, metavar="<dir_path>")
 @click.option(
     "-h",
     "--hidden",
@@ -104,13 +107,12 @@ def scan(dir_path: str, recursively: bool, save: bool, output: str):
     help="Path to output directory for the saved log file",
 )
 def tree(dir_path: str, show_hidden: bool, save: bool, output: str) -> None:
-    """DIR_PATH: Path to directory to be scanned"""
-
+    """Build tree of contents in <dir_path>\f"""
     scanner.build_tree(dir_path, show_hidden, save, output)
 
 
-@fm.command()
-@click.argument("dir_path", type=click.STRING)
+@fm.command(options_metavar="<options>")
+@click.argument("dir_path", type=click.STRING, metavar="<dir_path>")
 @click.option(
     "-h",
     "--hidden",
@@ -133,15 +135,14 @@ def tree(dir_path: str, show_hidden: bool, save: bool, output: str) -> None:
     help="Path to output directory for the saved log file",
 )
 def pretty_tree(dir_path: str, show_hidden: bool, save: bool, output: str) -> None:
-    """DIR_PATH: Path to directory to be scanned"""
-
+    """Build 'pretty' tree of contents in <dir_path>\f"""
     scanner.build_pretty_tree(dir_path, show_hidden, save, output)
 
 
 #############################################################
-@fm.command()
-@click.argument("dir_path", type=click.STRING)
-@click.argument("name", type=click.STRING)
+@fm.command(options_metavar="<options>")
+@click.argument("dir_path", type=click.STRING, metavar="<dir_path>")
+@click.argument("name", type=click.STRING, metavar="<name>")
 @click.option(
     "-r",
     "--recursively",
@@ -163,9 +164,7 @@ def pretty_tree(dir_path: str, show_hidden: bool, save: bool, output: str) -> No
     help="Path to output directory for the saved log file",
 )
 def search(dir_path: str, name: str, recursively: bool, save: bool, output: str) -> None:
-    """
-    Search by NAME inside DIR_PATH
-    """
+    """Search by <name> inside <dir_path>\f"""
     if recursively:
         scanner.search_recursively(dir_path, name, save, output)
     else:
@@ -173,9 +172,9 @@ def search(dir_path: str, name: str, recursively: bool, save: bool, output: str)
 
 
 #############################################################
-@fm.command()
-@click.argument("dir_path", type=click.STRING)
-@click.argument("other_path", type=click.STRING)
+@fm.command(options_metavar="<options>")
+@click.argument("dir_path", type=click.STRING, metavar="<source_path>")
+@click.argument("other_path", type=click.STRING, metavar="<target_path>")
 @click.option(
     "-h",
     "--hidden",
@@ -224,11 +223,9 @@ def diff(
     save: bool,
     output: str,
 ) -> None:
-    """
-    Compare DIR_PATH to OTHER_PATH
-    """
+    """Compare contents of <source_path> to <target_path>\f"""
     if short and one_line:
-        raise click.BadParameter("Mutually exclusive flags: 'short' and 'oneline'")
+        raise click.BadParameter(log_messages.BAD_OPTS.format(flags=" | ".join(("short", "oneline"))))
     scanner.compare_directories(
         dir_path, other_path, include_hidden, short, one_line, recursively, save, output
     )
@@ -236,8 +233,8 @@ def diff(
 
 #############################################################
 # ### organize ###
-@fm.command()
-@click.argument("dir_path", type=click.STRING)
+@fm.command(options_metavar="<options>")
+@click.argument("dir_path", type=click.STRING, metavar="<dir_path>")
 @click.option(
     "-x",
     "--exclude",
@@ -312,9 +309,7 @@ def tidy(
     save: bool,
     output: str,
 ) -> None:
-    """
-    Organize files by extension/type inside DIR_PATH
-    """
+    """Organize files by extension/type inside <dir_path>\f"""
     if recursively:
         organizer.organize_files_recursively(
             dir_path, exclude, exclude_dir, flat, show_hidden, backup, archive_format, save, output
@@ -324,8 +319,8 @@ def tidy(
 
 
 #####################################
-@fm.command()
-@click.argument("dir_path", type=click.STRING)
+@fm.command(options_metavar="<options>")
+@click.argument("dir_path", type=click.STRING, metavar="<dir_path>")
 @click.option(
     "-i",
     "--interactive",
@@ -383,9 +378,7 @@ def dedup(
     save: bool,
     output: str,
 ) -> None:
-    """
-    Find and clean-up duplicate files inside a PATH
-    """
+    """Find and clean-up duplicate files inside a <dir_path>\f"""
     if recursively:
         organizer.handle_duplicate_files_recursively(
             dir_path,
