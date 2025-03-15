@@ -185,6 +185,7 @@ def handle_duplicate_files_recursively(
     # ## handle duplicates in current dir ##
     _handle_duplicates(content_map, dir_path, abs_dir_path, interactive, logger)
     # ## dive recursively into nested subdirs ##
+    logger.info(log_messages.DUPLICATE_DELIMITER)
     for subdir in subdir_list:
         handle_duplicate_files_recursively(
             subdir,

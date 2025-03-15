@@ -387,7 +387,7 @@ def dedup(
     Find and clean-up duplicate files inside a PATH
     """
     if recursively:
-        organizer.handle_duplicate_files(
+        organizer.handle_duplicate_files_recursively(
             dir_path,
             interactive,
             show_hidden,
