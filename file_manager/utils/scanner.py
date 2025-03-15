@@ -9,24 +9,16 @@ from file_manager.logs.config import log_messages, logger_types
 from file_manager.logs.logger_factory import get_logger
 
 
-def scan_files(dir_path: str, sort: str, desc: bool, save: bool, output: str) -> None:
-    _scan_entries(dir_path, "isfile", sort, desc, save, output, "NO_FILES", "LISTED_FILES")
+def show(dir_path: str, sort: str, desc: bool, list_dirs: bool, save: bool, output: str) -> None:
+    if list_dirs:
+        os_func_name = "isdir"
+        not_found_msg = "NO_SUBDIRS"
+        success_msg = "NESTED_SUBDIRS"
+    else:
+        os_func_name = "isfile"
+        not_found_msg = "NO_FILES"
+        success_msg = "LISTED_FILES"
 
-
-def scan_subdirs(dir_path: str, sort: str, desc: bool, save: bool, output: str) -> None:
-    _scan_entries(dir_path, "isdir", sort, desc, save, output, "NO_SUBDIRS", "NESTED_SUBDIRS")
-
-
-def _scan_entries(
-    dir_path: str,
-    os_func_name: str,
-    sort: str,
-    desc: bool,
-    save: bool,
-    output: str,
-    not_found_msg: str,
-    success_msg: str,
-) -> None:
     logger = get_logger(logger_types.BASIC, output, save)
 
     dir_list = os.listdir(dir_path)
@@ -61,7 +53,7 @@ def _sort_entries_list(dir_path: str, entries_list: list[str], criteria: str, de
 
 
 #############################################################
-def build_catalog(
+def scan(
     dir_path: str,
     save: bool,
     output: str,
@@ -79,7 +71,7 @@ def build_catalog(
     logger.info(_get_catalog_messages(dir_path, files_list, nested_dirs))
 
 
-def build_catalog_recursively(
+def scan_recursively(
     dir_path: str,
     save: bool,
     output: str,
@@ -150,7 +142,7 @@ def build_pretty_tree(dir_path: str, show_hidden: bool, save: bool, output: str)
 
 
 #############################################################
-def search_by_name(dir_path: str, name: str, save: bool, output: str) -> None:
+def search(dir_path: str, name: str, save: bool, output: str) -> None:
     logger = get_logger(logger_types.ORGANIZE, output, save)
 
     dir_list = os.listdir(dir_path)
@@ -177,7 +169,7 @@ def search_by_name(dir_path: str, name: str, save: bool, output: str) -> None:
             )
 
 
-def search_by_name_recursively(
+def search_recursively(
     root_dir: str, name: str, save: bool, output: str, subdir_path: str | None = None
 ) -> None:
     logger = get_logger(logger_types.SEARCH, output, save)
