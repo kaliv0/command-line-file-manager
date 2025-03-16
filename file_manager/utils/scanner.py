@@ -3,20 +3,9 @@ from filecmp import dircmp
 from logging import Logger
 from typing import Callable
 
-from directory_tree import display_tree
-
 from file_manager.logs.config import log_messages, logger_types
 from file_manager.logs.logger_factory import get_logger
-
-STATS_MAP = {
-    "left_only": log_messages.DIFF_STATS,
-    "right_only": log_messages.DIFF_STATS,
-    "same_files": log_messages.SAME_FILES,
-    "diff_files": log_messages.DIFF_FILES,
-    "funny_files": log_messages.TROUBLE_FILES,
-    "common_dirs": log_messages.COMMON_SUBDIRS,
-    "common_funny": log_messages.COMMON_TROUBLE,
-}
+from file_manager.utils.config import constants
 
 
 def show(dir_path: str, sort: str, desc: bool, list_dirs: bool, save: bool, output: str) -> None:
@@ -128,27 +117,32 @@ def _get_catalog_messages(dir_path: str, files_list: list[str], nested_dirs: lis
 
 
 #############################################################
-def build_tree(dir_path: str, show_hidden: bool, save: bool, output: str) -> None:
+def build_tree(
+    dir_path: str, max_depth: int, show_hidden: bool, dirs_only: bool, save: bool, output: str
+) -> None:
     logger = get_logger(logger_types.TREE, output, save)
+    root_level = os.path.normpath(dir_path).count(os.sep)
 
-    folder_emoji = "\U0001f4c1"
-    file_emoji = "\U0001f4c3"
-    for root, dirs, files in os.walk(dir_path):
-        if not show_hidden and os.path.basename(root).startswith("."):
+    for curr_root, dirs, files in os.walk(dir_path):
+        if not show_hidden and os.path.basename(curr_root).startswith("."):
             continue
-        level = root.count(os.sep) - 1
+
+        level = os.path.normpath(curr_root).count(os.sep) - root_level
+        if max_depth is not None and level > max_depth:
+            continue
+
         indent = " " * 4 * level
-        logger.info(f"{indent}{folder_emoji} {os.path.abspath(root)}/")
+        logger.info(f"{indent}{constants.FOLDER_EMOJI} {os.path.abspath(curr_root)}/")
         sub_indent = " " * 4 * (level + 1)
-        for file in files:
-            if not show_hidden and file.startswith("."):
-                continue
-            logger.info(f"{sub_indent}{file_emoji} {file}")
+        if not dirs_only:
+            _build_file_tree(files, show_hidden, sub_indent, logger)
 
 
-def build_pretty_tree(dir_path: str, show_hidden: bool, save: bool, output: str) -> None:
-    logger = get_logger(logger_types.TREE, output, save)
-    logger.info(display_tree(dir_path, string_rep=True, show_hidden=show_hidden))
+def _build_file_tree(files: list[str], show_hidden: bool, sub_indent: str, logger: Logger) -> None:
+    for file in files:
+        if not show_hidden and file.startswith("."):
+            continue
+        logger.info(f"{sub_indent}{constants.FILE_EMOJI} {file}")
 
 
 #############################################################
@@ -281,7 +275,7 @@ def _report(cmp_obj: dircmp, include_hidden: bool, short: bool, one_line: bool, 
         delimiter = ":\n\t- "
         func = lambda files: "\n\t- ".join(files)
 
-    for attr in STATS_MAP:
+    for attr in constants.STATS_MAP:
         if stats := getattr(cmp_obj, attr, None):
             if not include_hidden:
                 if not (stats := [entry for entry in stats if not entry.startswith(".")]):
@@ -293,7 +287,7 @@ def _report(cmp_obj: dircmp, include_hidden: bool, short: bool, one_line: bool, 
                 dir_path = cmp_obj.right
             else:
                 dir_path = None
-            _handle_stats_entries(dir_path, stats, logger, STATS_MAP[attr], delimiter, func)
+            _handle_stats_entries(dir_path, stats, logger, constants.STATS_MAP[attr], delimiter, func)
 
 
 def _handle_stats_entries(

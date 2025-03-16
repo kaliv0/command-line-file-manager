@@ -86,11 +86,25 @@ def scan(dir_path: str, recursively: bool, save: bool, output: str) -> None:
 @fm.command(options_metavar="<options>")
 @click.argument("dir_path", type=click.STRING, metavar="<dir_path>")
 @click.option(
+    "-l",
+    "--level",
+    "max_depth",
+    type=click.IntRange(0),
+    help="Include hidden files and subdirectories",
+)
+@click.option(
     "-h",
     "--hidden",
     "show_hidden",
     is_flag=True,
-    help="Include hidden files and folders",
+    help="Include hidden files and subdirectories",
+)
+@click.option(
+    "-d",
+    "--dirs",
+    "dirs_only",
+    is_flag=True,
+    help="Show only nested directories",
 )
 @click.option(
     "-s",
@@ -106,37 +120,9 @@ def scan(dir_path: str, recursively: bool, save: bool, output: str) -> None:
     show_default=True,
     help="Path to output directory for the saved log file",
 )
-def tree(dir_path: str, show_hidden: bool, save: bool, output: str) -> None:
+def tree(dir_path: str, max_depth: int, show_hidden: bool, dirs_only: bool, save: bool, output: str) -> None:
     """Build tree of contents in <dir_path>\f"""
-    scanner.build_tree(dir_path, show_hidden, save, output)
-
-
-@fm.command(options_metavar="<options>")
-@click.argument("dir_path", type=click.STRING, metavar="<dir_path>")
-@click.option(
-    "-h",
-    "--hidden",
-    "show_hidden",
-    is_flag=True,
-    help="Include hidden files and folders",
-)
-@click.option(
-    "-s",
-    "--save",
-    is_flag=True,
-    help="Save log message to file",
-)
-@click.option(
-    "-o",
-    "--output",
-    type=click.STRING,
-    default=None,
-    show_default=True,
-    help="Path to output directory for the saved log file",
-)
-def pretty_tree(dir_path: str, show_hidden: bool, save: bool, output: str) -> None:
-    """Build 'pretty' tree of contents in <dir_path>\f"""
-    scanner.build_pretty_tree(dir_path, show_hidden, save, output)
+    scanner.build_tree(dir_path, max_depth, show_hidden, dirs_only, save, output)
 
 
 #############################################################
@@ -180,7 +166,7 @@ def search(dir_path: str, name: str, recursively: bool, save: bool, output: str)
     "--hidden",
     "include_hidden",
     is_flag=True,
-    help="Include hidden files and folders",
+    help="Include hidden files and subdirectories",
 )
 @click.option(
     "--short",
@@ -281,7 +267,7 @@ def diff(
 @click.option(
     "--flat",
     is_flag=True,
-    help="Move all files to target directories inside parent folder. (Used with --recursively flag)",
+    help="Move all files to target directories inside parent dir. (Used with --recursively flag)",
 )
 @click.option(
     "-s",

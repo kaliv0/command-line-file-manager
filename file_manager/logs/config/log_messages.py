@@ -16,7 +16,7 @@ FOUND_BY_NAME = "Inside directory '{dir_path}' the given keyword '{keyword}' was
 FOUND_FILES_BY_NAME = "- in the following file names:\n\t- {files_list}{delimiter}"
 FOUND_DIRS_BY_NAME = "- in the following subdirectory names:\n\t- {subdir_list}{delimiter}"
 
-CREATE_FOLDER = "Creating folder {target_dir}"
+CREATE_DIR = "Creating directory {target_dir}"
 MOVE_FILE = "Moving {entry} to {target_dir}"
 
 INSIDE_DIR = "----- Inside {abs_dir_path} -----"

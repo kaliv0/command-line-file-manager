@@ -1,3 +1,5 @@
+from file_manager.logs.config import log_messages
+
 TARGET_MAP = {
     # images
     ".jpg": "images",
@@ -49,3 +51,17 @@ TARGET_MAP = {
 
 BACKUP_FILE_NAME = "backup"
 SKIPPED_BACKUP_FILES = ["backup.tar", "backup.zip"]
+
+###################################################
+FOLDER_EMOJI = "\U0001f4c1"
+FILE_EMOJI = "\U0001f4c3"
+
+STATS_MAP = {
+    "left_only": log_messages.DIFF_STATS,
+    "right_only": log_messages.DIFF_STATS,
+    "same_files": log_messages.SAME_FILES,
+    "diff_files": log_messages.DIFF_FILES,
+    "funny_files": log_messages.TROUBLE_FILES,
+    "common_dirs": log_messages.COMMON_SUBDIRS,
+    "common_funny": log_messages.COMMON_TROUBLE,
+}

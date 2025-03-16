@@ -323,7 +323,7 @@ def _handle_entries(
         target_dir_name = constants.TARGET_MAP.get(file_extension, constants.TARGET_MAP["default"])
     target_dir = os.path.join(abs_dir_path, target_dir_name)
     if not os.path.exists(target_dir):
-        logger.info(log_messages.CREATE_FOLDER.format(target_dir=target_dir))
+        logger.info(log_messages.CREATE_DIR.format(target_dir=target_dir))
         os.makedirs(target_dir)
     logger.info(log_messages.MOVE_FILE.format(entry=entry, target_dir=target_dir))
     shutil.move(abs_entry_path, os.path.join(target_dir, entry))
