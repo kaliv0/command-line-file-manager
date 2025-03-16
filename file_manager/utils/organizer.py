@@ -247,7 +247,7 @@ def _add_entry(
 def _handle_duplicates(
     content_map: defaultdict[str, list[str]], dir_path: str, interactive: bool, logger: Logger
 ) -> None:
-    duplicate_list = _transform_content_map(content_map)
+    duplicate_list = [sorted(file_list) for file_list in content_map.values() if len(file_list) > 1]
     # display sorted map entries
     if not duplicate_list:
         logger.info(log_messages.NO_DUPLICATE_FILES.format(dir_path=dir_path))
@@ -256,10 +256,6 @@ def _handle_duplicates(
     logger.info(log_messages.LISTED_DUPLICATE_FILES.format(dir_path=dir_path, display_list=display_list))
     # clean-up files
     _merge_duplicates(dir_path, duplicate_list, interactive, logger)
-
-
-def _transform_content_map(content_map: defaultdict[str, list[str]]) -> list[list[str]]:
-    return [sorted(file_list) for file_list in content_map.values() if len(file_list) > 1]
 
 
 def _prepare_display_list(duplicate_list: list[list[str]]) -> str:

@@ -40,3 +40,4 @@ COMMON_SUBDIRS = "- Common subdirectories" + DELIM_LIST
 COMMON_TROUBLE = "- Common problematic cases" + DELIM_LIST
 
 BAD_OPTS = "Mutually exclusive flags: {flags}"
+IDENTICAL_PATHS = "Paths are identical"

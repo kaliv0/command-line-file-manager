@@ -8,6 +8,16 @@ from directory_tree import display_tree
 from file_manager.logs.config import log_messages, logger_types
 from file_manager.logs.logger_factory import get_logger
 
+STATS_MAP = {
+    "left_only": log_messages.DIFF_STATS,
+    "right_only": log_messages.DIFF_STATS,
+    "same_files": log_messages.SAME_FILES,
+    "diff_files": log_messages.DIFF_FILES,
+    "funny_files": log_messages.TROUBLE_FILES,
+    "common_dirs": log_messages.COMMON_SUBDIRS,
+    "common_funny": log_messages.COMMON_TROUBLE,
+}
+
 
 def show(dir_path: str, sort: str, desc: bool, list_dirs: bool, save: bool, output: str) -> None:
     if list_dirs:
@@ -226,19 +236,24 @@ def compare_directories(
     save: bool,
     output: str,
 ) -> None:
+    logger = get_logger(logger_types.COMPARE, output, save)
+
     abs_dir_path = os.path.abspath(dir_path)
     abs_other_path = os.path.abspath(other_path)
+    if abs_dir_path == abs_other_path:
+        logger.info(log_messages.IDENTICAL_PATHS)
+        return
+
     if not include_hidden and any(
         os.path.basename(entry).startswith(".") for entry in (abs_dir_path, abs_other_path)
     ):
         return
 
-    logger = get_logger(logger_types.COMPARE, output, save)
     cmp_obj = dircmp(abs_dir_path, abs_other_path)
-    diff_report(cmp_obj, include_hidden, recursively, short, one_line, logger)
+    _diff_report(cmp_obj, include_hidden, recursively, short, one_line, logger)
 
 
-def diff_report(
+def _diff_report(
     cmp_obj: dircmp,
     include_hidden: bool,
     diff_recursively: bool,
@@ -250,7 +265,7 @@ def diff_report(
 
     if diff_recursively:
         for sub_dir in cmp_obj.subdirs.values():
-            diff_report(sub_dir, include_hidden, diff_recursively, short, one_line, logger)
+            _diff_report(sub_dir, include_hidden, diff_recursively, short, one_line, logger)
 
 
 def _report(cmp_obj: dircmp, include_hidden: bool, short: bool, one_line: bool, logger: Logger) -> None:
@@ -266,17 +281,7 @@ def _report(cmp_obj: dircmp, include_hidden: bool, short: bool, one_line: bool, 
         delimiter = ":\n\t- "
         func = lambda files: "\n\t- ".join(files)
 
-    stats_map = {
-        "left_only": log_messages.DIFF_STATS,
-        "right_only": log_messages.DIFF_STATS,
-        "same_files": log_messages.SAME_FILES,
-        "diff_files": log_messages.DIFF_FILES,
-        "funny_files": log_messages.TROUBLE_FILES,
-        "common_dirs": log_messages.COMMON_SUBDIRS,
-        "common_funny": log_messages.COMMON_TROUBLE,
-    }
-
-    for attr in stats_map.keys():
+    for attr in STATS_MAP:
         if stats := getattr(cmp_obj, attr, None):
             if not include_hidden:
                 if not (stats := [entry for entry in stats if not entry.startswith(".")]):
@@ -288,7 +293,7 @@ def _report(cmp_obj: dircmp, include_hidden: bool, short: bool, one_line: bool, 
                 dir_path = cmp_obj.right
             else:
                 dir_path = None
-            _handle_stats_entries(dir_path, stats, logger, stats_map[attr], delimiter, func)
+            _handle_stats_entries(dir_path, stats, logger, STATS_MAP[attr], delimiter, func)
 
 
 def _handle_stats_entries(
