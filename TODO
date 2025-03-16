@@ -1,9 +1,8 @@
 - add dir_diff as separate feature
     -> list of files to skip comparing -> supported by underlying dircmp?
-- add flag to scan (catalog) only files/dirs
+- add flag to scan only files/dirs
 
 - show short messages if both dirs in compare__ are identical
-- show warning msg /error? if diff between same dir
 - similarly -> of there are no duplicates in dir (recursively)
 
 - add functionality to provide external config for organizing dir names
