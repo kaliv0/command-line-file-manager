@@ -22,7 +22,8 @@ def organize_files(
 ) -> None:
     abs_dir_path, dir_list = _handle_dir_path(dir_path)
     logger = get_logger(logger_types.ORGANIZE, output, save)
-    _create_archive(abs_dir_path, archive_format, backup)
+    if backup:
+        _create_archive(abs_dir_path, archive_format)
 
     exclude_list = exclude.split(",") if exclude else []
     for entry in dir_list:
@@ -48,7 +49,8 @@ def organize_files_recursively(
 ) -> None:
     abs_dir_path = os.path.abspath(dir_path)
     logger = get_logger(logger_types.RECURSIVE_ORGANIZE, output, save)
-    _create_archive(abs_dir_path, archive_format, backup)
+    if backup:
+        _create_archive(abs_dir_path, archive_format)
 
     exclude_list = exclude.split(",") if exclude else []
     exclude_dir_list = exclude_dir.split(",") if exclude_dir else []
@@ -156,7 +158,8 @@ def handle_duplicate_files(
     # BTW: could have used built-in filecmp.cmp but this is more fun
     abs_dir_path, dir_list = _handle_dir_path(dir_path)
     logger = get_logger(logger_types.ORGANIZE, output, save)
-    _create_archive(abs_dir_path, archive_format, backup)
+    if backup:
+        _create_archive(abs_dir_path, archive_format)
 
     content_map = _create_duplicate_map(abs_dir_path, dir_list, show_hidden, logger)
     _handle_duplicates(content_map, abs_dir_path, interactive, logger)
@@ -177,7 +180,8 @@ def handle_duplicate_files_recursively(
         logger = get_logger(logger_types.ORGANIZE, output, save)
     logger.info(log_messages.INSIDE_DIR.format(abs_dir_path=abs_dir_path))
 
-    _create_archive(abs_dir_path, archive_format, backup)
+    if backup:
+        _create_archive(abs_dir_path, archive_format)
 
     content_map, subdir_list = _create_duplicate_map_and_subdir_list(
         abs_dir_path, dir_list, show_hidden, logger
@@ -295,15 +299,14 @@ def _handle_dir_path(dir_path: str) -> tuple[str, list[str]]:
     return abs_dir_path, dir_list
 
 
-def _create_archive(abs_dir_path: str, archive_format: str, backup: bool) -> None:
-    if backup:
-        shutil.make_archive(
-            base_name=os.path.join(abs_dir_path, constants.BACKUP_FILE_NAME),
-            format=archive_format,
-            root_dir=os.path.dirname(abs_dir_path),
-            base_dir=os.path.basename(abs_dir_path),
-            verbose=True,
-        )
+def _create_archive(abs_dir_path: str, archive_format: str) -> None:
+    shutil.make_archive(
+        base_name=os.path.join(abs_dir_path, constants.BACKUP_FILE_NAME),
+        format=archive_format,
+        root_dir=os.path.dirname(abs_dir_path),
+        base_dir=os.path.basename(abs_dir_path),
+        verbose=True,
+    )
 
 
 def _handle_entries(
