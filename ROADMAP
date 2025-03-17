@@ -16,3 +16,21 @@
     -> change default ones/ align with corresponding function names
 
 - refactor and simplify logger_types/names
+
+- extract common click decorator for --save/--output
+(e.g.
+def save_output(func):
+    func = click.option(
+        "-o", "--output",
+        type=click.STRING,
+        default=None,
+        show_default=True,
+        help="Path to output directory for the saved log file"
+    )(func)
+    func = click.option(
+        "-s", "--save",
+        is_flag=True,
+        help="Save log message to file"
+    )(func)
+    return func
+)

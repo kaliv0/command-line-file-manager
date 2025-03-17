@@ -33,11 +33,11 @@ PRE_MERGE_PROMPT = "Please enter file name for the following duplicates: {entry}
 DIRS_DIFF = DELIMITER + "Diff '{left}' -- '{right}':"
 DELIM_LIST = "{delimiter}{list}"
 DIFF_STATS = "- Only in '{dir}'" + DELIM_LIST
-SAME_FILES = "- Identical files" + DELIM_LIST
-DIFF_FILES = "- Differing files" + DELIM_LIST
-TROUBLE_FILES = "- Trouble with common files" + DELIM_LIST
-COMMON_SUBDIRS = "- Common subdirectories" + DELIM_LIST
-COMMON_TROUBLE = "- Common problematic cases" + DELIM_LIST
+SAME_FILES = f"- Identical files{DELIM_LIST}"
+DIFF_FILES = f"- Differing files{DELIM_LIST}"
+TROUBLE_FILES = f"- Trouble with common files{DELIM_LIST}"
+COMMON_SUBDIRS = f"- Common subdirectories{DELIM_LIST}"
+COMMON_TROUBLE = "f- Common problematic cases{DELIM_LIST}"
 
 BAD_OPTS = "Mutually exclusive flags: {flags}"
 IDENTICAL_PATHS = "Paths are identical"

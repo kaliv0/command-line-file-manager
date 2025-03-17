@@ -22,16 +22,15 @@ def show(dir_path: str, sort: str, desc: bool, list_dirs: bool, save: bool, outp
 
     dir_list = os.listdir(dir_path)
     os_func = getattr(os.path, os_func_name)
-    entries_list = [entry for entry in dir_list if os_func(os.path.join(dir_path, entry))]
-    if not entries_list:
-        logger.info(getattr(log_messages, not_found_msg).format(dir_path=os.path.abspath(dir_path)))
-    else:
+    if entries_list := [entry for entry in dir_list if os_func(os.path.join(dir_path, entry))]:
         _sort_entries_list(dir_path, entries_list, sort, desc)
         logger.info(
             getattr(log_messages, success_msg).format(
                 dir_path=os.path.abspath(dir_path), entries_list="\n\t- ".join(entries_list)
             )
         )
+    else:
+        logger.info(getattr(log_messages, not_found_msg).format(dir_path=os.path.abspath(dir_path)))
 
 
 def _sort_entries_list(dir_path: str, entries_list: list[str], criteria: str, desc: bool) -> None:
@@ -133,8 +132,8 @@ def build_tree(
 
         indent = " " * 4 * level
         logger.info(f"{indent}{constants.FOLDER_EMOJI} {os.path.abspath(curr_root)}/")
-        sub_indent = " " * 4 * (level + 1)
         if not dirs_only:
+            sub_indent = " " * 4 * (level + 1)
             _build_file_tree(files, show_hidden, sub_indent, logger)
 
 
@@ -161,18 +160,19 @@ def search(dir_path: str, name: str, save: bool, output: str) -> None:
 
     if not files_list and not nested_dirs:
         logger.info(log_messages.NOT_FOUND)
-    else:
+        return
+
+    logger.info(
+        log_messages.FOUND_BY_NAME.format(dir_path=os.path.abspath(dir_path), keyword=name, delimiter="")
+    )
+    if files_list:
         logger.info(
-            log_messages.FOUND_BY_NAME.format(dir_path=os.path.abspath(dir_path), keyword=name, delimiter="")
+            log_messages.FOUND_FILES_BY_NAME.format(files_list="\n\t- ".join(files_list), delimiter="")
         )
-        if files_list:
-            logger.info(
-                log_messages.FOUND_FILES_BY_NAME.format(files_list="\n\t- ".join(files_list), delimiter="")
-            )
-        if nested_dirs:
-            logger.info(
-                log_messages.FOUND_DIRS_BY_NAME.format(subdir_list="\n\t- ".join(nested_dirs), delimiter="")
-            )
+    if nested_dirs:
+        logger.info(
+            log_messages.FOUND_DIRS_BY_NAME.format(subdir_list="\n\t- ".join(nested_dirs), delimiter="")
+        )
 
 
 def search_recursively(
@@ -299,7 +299,7 @@ def _handle_stats_entries(
     func: Callable[[list[str]], str | int],
 ) -> None:
     fmt = {"delimiter": delimiter, "list": func(entries)}
-    if dir:
+    if dir_path:
         fmt["dir"] = dir_path
 
     entries.sort()
