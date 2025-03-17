@@ -1,4 +1,0 @@
-- add to diff list of files to skip comparing -> use underlying dircmp
-- add flag to scan only files/dirs
-
-- add functionality to provide external config for organizing dir names

@@ -75,7 +75,7 @@ def scan_recursively(
     save: bool,
     output: str,
 ) -> None:
-    logger = get_logger(logger_types.RECURSIVE, output, save)
+    logger = get_logger(logger_types.CATALOG, output, save)
     logger.info(_get_recursive_catalog(logger, dir_path))
 
 

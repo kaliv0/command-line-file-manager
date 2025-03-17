@@ -9,10 +9,6 @@ def get_logger(logger_type: str, output_dir: str, save_output: bool) -> logging.
             return _configure_logger(logger_types.BASIC, save_output, output_dir, log_output.FILES)
         case logger_types.CATALOG:
             return _configure_logger(logger_types.CATALOG, save_output, output_dir, log_output.CATALOG)
-        case logger_types.RECURSIVE:
-            return _configure_logger(
-                logger_types.RECURSIVE, save_output, output_dir, log_output.RECURSIVE_CATALOG
-            )
         case logger_types.TREE:
             return _configure_logger(logger_types.TREE, save_output, output_dir, log_output.TREE)
         case logger_types.SEARCH:
@@ -21,9 +17,9 @@ def get_logger(logger_type: str, output_dir: str, save_output: bool) -> logging.
             return _configure_logger(logger_types.COMPARE, save_output, output_dir, log_output.COMPARE)
         case logger_types.ORGANIZE:
             return _configure_logger(logger_types.ORGANIZE, save_output, output_dir, log_output.ORGANIZE)
-        case logger_types.RECURSIVE_ORGANIZE:
+        case logger_types.DEDUPLICATE:
             return _configure_logger(
-                logger_types.ORGANIZE, save_output, output_dir, log_output.RECURSIVE_ORGANIZE
+                logger_types.DEDUPLICATE, save_output, output_dir, log_output.DEDUPLICATE
             )
         case _:
             return _configure_logger(logger_types.BASIC, save_output, output_dir, log_output.FILES)

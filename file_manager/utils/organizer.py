@@ -48,7 +48,7 @@ def organize_files_recursively(
     output: str,
 ) -> None:
     abs_dir_path = os.path.abspath(dir_path)
-    logger = get_logger(logger_types.RECURSIVE_ORGANIZE, output, save)
+    logger = get_logger(logger_types.ORGANIZE, output, save)
     if backup:
         _create_archive(abs_dir_path, archive_format)
 
@@ -80,7 +80,7 @@ def _handle_files(
         abs_entry_path = os.path.join(abs_dir_path, entry)
         # handle files
         if os.path.isfile(abs_entry_path):
-            if entry == log_output.RECURSIVE_ORGANIZE_BASE or entry in constants.SKIPPED_BACKUP_FILES:
+            if entry == log_output.ORGANIZE.lstrip("/") or entry in constants.SKIPPED_BACKUP_FILES:
                 continue
             file_extension = os.path.splitext(entry)[1]
             if not show_hidden and entry.startswith(".") or file_extension in exclude_list:
@@ -116,7 +116,7 @@ def _handle_files_by_flattening_subdirs(
         abs_entry_path = os.path.join(abs_dir_path, entry)
         # handle files
         if os.path.isfile(abs_entry_path):
-            if entry == log_output.RECURSIVE_ORGANIZE_BASE or entry in constants.SKIPPED_BACKUP_FILES:
+            if entry == log_output.ORGANIZE.lstrip("/") or entry in constants.SKIPPED_BACKUP_FILES:
                 continue
             file_extension = os.path.splitext(entry)[1]
             if not show_hidden and entry.startswith(".") or file_extension in exclude_list:
@@ -157,7 +157,7 @@ def handle_duplicate_files(
 ) -> None:
     # BTW: could have used built-in filecmp.cmp but this is more fun
     abs_dir_path, dir_list = _handle_dir_path(dir_path)
-    logger = get_logger(logger_types.ORGANIZE, output, save)
+    logger = get_logger(logger_types.DEDUPLICATE, output, save)
     if backup:
         _create_archive(abs_dir_path, archive_format)
 
@@ -177,7 +177,7 @@ def handle_duplicate_files_recursively(
 ) -> None:
     abs_dir_path, dir_list = _handle_dir_path(dir_path)
     if not logger:
-        logger = get_logger(logger_types.ORGANIZE, output, save)
+        logger = get_logger(logger_types.DEDUPLICATE, output, save)
     logger.info(log_messages.INSIDE_DIR.format(abs_dir_path=abs_dir_path))
 
     if backup:

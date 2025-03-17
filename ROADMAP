@@ -1,0 +1,18 @@
+- add to diff list of files to skip comparing
+    -> use underlying dircmp
+
+- combine show and scan
+    -> add flags fir files/dirs_only
+    -> sort/order to scan (catalog)
+    -> --hidden flag
+
+- implement pretty_tree
+    -> or add as flag to existing tree
+
+- support external config for organizing dir names (in fm tidy)
+    -> prompt user interactively according to found file types/extensions
+
+- prompt user for logger output file names
+    -> change default ones/ align with corresponding function names
+
+- refactor and simplify logger_types/names
