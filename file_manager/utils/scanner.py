@@ -3,12 +3,24 @@ from filecmp import dircmp
 from logging import Logger
 from typing import Callable
 
-from file_manager.logs.config import log_messages, logger_types
+from file_manager.logs import log_messages
 from file_manager.logs.logger_factory import get_logger
-from file_manager.utils.config import constants
 
 
-def show(dir_path: str, sort: str, desc: bool, list_dirs: bool, save: bool, output: str) -> None:
+FOLDER_EMOJI = "\U0001f4c1"
+FILE_EMOJI = "\U0001f4c3"
+STATS_MAP = {
+    "left_only": log_messages.DIFF_STATS,
+    "right_only": log_messages.DIFF_STATS,
+    "same_files": log_messages.SAME_FILES,
+    "diff_files": log_messages.DIFF_FILES,
+    "funny_files": log_messages.TROUBLE_FILES,
+    "common_dirs": log_messages.COMMON_SUBDIRS,
+    "common_funny": log_messages.COMMON_TROUBLE,
+}
+
+
+def show(dir_path: str, sort: str, desc: bool, list_dirs: bool, save: bool, output: str, log: str) -> None:
     if list_dirs:
         os_func_name = "isdir"
         not_found_msg = "NO_SUBDIRS"
@@ -18,7 +30,7 @@ def show(dir_path: str, sort: str, desc: bool, list_dirs: bool, save: bool, outp
         not_found_msg = "NO_FILES"
         success_msg = "LISTED_FILES"
 
-    logger = get_logger(logger_types.BASIC, output, save)
+    logger = get_logger(output, save, log)
 
     dir_list = os.listdir(dir_path)
     os_func = getattr(os.path, os_func_name)
@@ -51,12 +63,8 @@ def _sort_entries_list(dir_path: str, entries_list: list[str], criteria: str, de
 
 
 #############################################################
-def scan(
-    dir_path: str,
-    save: bool,
-    output: str,
-) -> None:
-    logger = get_logger(logger_types.CATALOG, output, save)
+def scan(dir_path: str, save: bool, output: str, log: str) -> None:
+    logger = get_logger(output, save, log)
 
     dir_list = os.listdir(dir_path)
     files_list = []
@@ -69,12 +77,8 @@ def scan(
     logger.info(_get_catalog_messages(dir_path, files_list, nested_dirs))
 
 
-def scan_recursively(
-    dir_path: str,
-    save: bool,
-    output: str,
-) -> None:
-    logger = get_logger(logger_types.CATALOG, output, save)
+def scan_recursively(dir_path: str, save: bool, output: str, log: str) -> None:
+    logger = get_logger(output, save, log)
     logger.info(_get_recursive_catalog(logger, dir_path))
 
 
@@ -117,9 +121,9 @@ def _get_catalog_messages(dir_path: str, files_list: list[str], nested_dirs: lis
 
 #############################################################
 def build_tree(
-    dir_path: str, max_depth: int, show_hidden: bool, dirs_only: bool, save: bool, output: str
+    dir_path: str, max_depth: int, show_hidden: bool, dirs_only: bool, save: bool, output: str, log: str
 ) -> None:
-    logger = get_logger(logger_types.TREE, output, save)
+    logger = get_logger(output, save, log)
     root_level = os.path.normpath(dir_path).count(os.sep)
 
     for curr_root, dirs, files in os.walk(dir_path):
@@ -131,7 +135,7 @@ def build_tree(
             continue
 
         indent = " " * 4 * level
-        logger.info(f"{indent}{constants.FOLDER_EMOJI} {os.path.abspath(curr_root)}/")
+        logger.info(f"{indent}{FOLDER_EMOJI} {os.path.abspath(curr_root)}/")
         if not dirs_only:
             sub_indent = " " * 4 * (level + 1)
             _build_file_tree(files, show_hidden, sub_indent, logger)
@@ -141,12 +145,12 @@ def _build_file_tree(files: list[str], show_hidden: bool, sub_indent: str, logge
     for file in files:
         if not show_hidden and file.startswith("."):
             continue
-        logger.info(f"{sub_indent}{constants.FILE_EMOJI} {file}")
+        logger.info(f"{sub_indent}{FILE_EMOJI} {file}")
 
 
 #############################################################
-def search(dir_path: str, name: str, save: bool, output: str) -> None:
-    logger = get_logger(logger_types.ORGANIZE, output, save)
+def search(dir_path: str, name: str, save: bool, output: str, log: str) -> None:
+    logger = get_logger(output, save, log)
 
     dir_list = os.listdir(dir_path)
     files_list = []
@@ -176,9 +180,9 @@ def search(dir_path: str, name: str, save: bool, output: str) -> None:
 
 
 def search_recursively(
-    root_dir: str, name: str, save: bool, output: str, subdir_path: str | None = None
+    root_dir: str, name: str, save: bool, output: str, log: str, subdir_path: str | None = None
 ) -> None:
-    logger = get_logger(logger_types.SEARCH, output, save)
+    logger = get_logger(output, save, log)
     result_msg = _search_recursively(logger, root_dir, name, subdir_path)
     logger.info(result_msg or log_messages.NOT_FOUND)
 
@@ -229,8 +233,9 @@ def compare_directories(
     recursively: bool,
     save: bool,
     output: str,
+    log: str,
 ) -> None:
-    logger = get_logger(logger_types.COMPARE, output, save)
+    logger = get_logger(output, save, log)
 
     abs_dir_path = os.path.abspath(dir_path)
     abs_other_path = os.path.abspath(other_path)
@@ -275,7 +280,7 @@ def _report(cmp_obj: dircmp, include_hidden: bool, short: bool, one_line: bool, 
         delimiter = ":\n\t- "
         func = lambda files: "\n\t- ".join(files)
 
-    for attr in constants.STATS_MAP:
+    for attr in STATS_MAP:
         if stats := getattr(cmp_obj, attr, None):
             if not include_hidden:
                 if not (stats := [entry for entry in stats if not entry.startswith(".")]):
@@ -287,7 +292,7 @@ def _report(cmp_obj: dircmp, include_hidden: bool, short: bool, one_line: bool, 
                 dir_path = cmp_obj.right
             else:
                 dir_path = None
-            _handle_stats_entries(dir_path, stats, logger, constants.STATS_MAP[attr], delimiter, func)
+            _handle_stats_entries(dir_path, stats, logger, STATS_MAP[attr], delimiter, func)
 
 
 def _handle_stats_entries(

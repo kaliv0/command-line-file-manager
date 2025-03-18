@@ -6,9 +6,13 @@ from logging import Logger
 
 import click
 
-from file_manager.logs.config import log_messages, log_output, logger_types
+from file_manager.logs import log_messages
 from file_manager.logs.logger_factory import get_logger
 from file_manager.utils.config import constants
+
+
+BACKUP_FILE_NAME = ".backup"
+SKIPPED_BACKUP_FILES = [".backup.tar", ".backup.zip"]
 
 
 def organize_files(
@@ -19,9 +23,10 @@ def organize_files(
     archive_format: str,
     save: bool,
     output: str,
+    log: str,
 ) -> None:
     abs_dir_path, dir_list = _handle_dir_path(dir_path)
-    logger = get_logger(logger_types.ORGANIZE, output, save)
+    logger = get_logger(output, save, log)
     if backup:
         _create_archive(abs_dir_path, archive_format)
 
@@ -46,9 +51,10 @@ def organize_files_recursively(
     archive_format: str,
     save: bool,
     output: str,
+    log: str,
 ) -> None:
     abs_dir_path = os.path.abspath(dir_path)
-    logger = get_logger(logger_types.ORGANIZE, output, save)
+    logger = get_logger(output, save, log)
     if backup:
         _create_archive(abs_dir_path, archive_format)
 
@@ -57,10 +63,10 @@ def organize_files_recursively(
     if flat:
         root_dir = os.path.join(abs_dir_path, "")
         _handle_files_by_flattening_subdirs(
-            abs_dir_path, "", root_dir, exclude_list, exclude_dir_list, show_hidden, logger
+            abs_dir_path, "", root_dir, exclude_list, exclude_dir_list, show_hidden, logger, log
         )
     else:
-        _handle_files(abs_dir_path, "", exclude_list, exclude_dir_list, show_hidden, logger)
+        _handle_files(abs_dir_path, "", exclude_list, exclude_dir_list, show_hidden, logger, log)
 
 
 def _handle_files(
@@ -70,6 +76,7 @@ def _handle_files(
     exclude_dir_list: list[str],
     show_hidden: bool,
     logger: Logger,
+    log_file: str,
 ) -> None:
     abs_dir_path = os.path.join(parent_dir, subdir_path)
     dir_list = os.listdir(abs_dir_path)
@@ -80,7 +87,7 @@ def _handle_files(
         abs_entry_path = os.path.join(abs_dir_path, entry)
         # handle files
         if os.path.isfile(abs_entry_path):
-            if entry == log_output.ORGANIZE.lstrip("/") or entry in constants.SKIPPED_BACKUP_FILES:
+            if entry == log_file or entry in SKIPPED_BACKUP_FILES:
                 continue
             file_extension = os.path.splitext(entry)[1]
             if not show_hidden and entry.startswith(".") or file_extension in exclude_list:
@@ -95,7 +102,7 @@ def _handle_files(
             nested_dirs.append(abs_entry_path)
     # dive recursively to handle nested dirs
     for nested_dir in nested_dirs:
-        _handle_files(abs_dir_path, nested_dir, exclude_list, exclude_dir_list, show_hidden, logger)
+        _handle_files(abs_dir_path, nested_dir, exclude_list, exclude_dir_list, show_hidden, logger, log_file)
 
 
 def _handle_files_by_flattening_subdirs(
@@ -106,6 +113,7 @@ def _handle_files_by_flattening_subdirs(
     exclude_dir_list: list[str],
     show_hidden: bool,
     logger: Logger,
+    log_file: str,
 ) -> None:
     abs_dir_path = os.path.join(parent_dir, subdir_path)
     dir_list = os.listdir(abs_dir_path)
@@ -116,7 +124,7 @@ def _handle_files_by_flattening_subdirs(
         abs_entry_path = os.path.join(abs_dir_path, entry)
         # handle files
         if os.path.isfile(abs_entry_path):
-            if entry == log_output.ORGANIZE.lstrip("/") or entry in constants.SKIPPED_BACKUP_FILES:
+            if entry == log_file or entry in SKIPPED_BACKUP_FILES:
                 continue
             file_extension = os.path.splitext(entry)[1]
             if not show_hidden and entry.startswith(".") or file_extension in exclude_list:
@@ -134,7 +142,7 @@ def _handle_files_by_flattening_subdirs(
     # dive recursively to handle nested dirs
     for nested_dir in nested_dirs:
         _handle_files_by_flattening_subdirs(
-            abs_dir_path, nested_dir, root_dir, exclude_list, exclude_dir_list, show_hidden, logger
+            abs_dir_path, nested_dir, root_dir, exclude_list, exclude_dir_list, show_hidden, logger, log_file
         )
     # flatten dir
     is_not_root_dir = abs_dir_path != root_dir
@@ -150,14 +158,15 @@ def handle_duplicate_files(
     dir_path: str,
     interactive: bool,
     show_hidden: bool,
-    backup: bool,
-    archive_format: str,
     save: bool,
     output: str,
+    log: str,
+    backup: bool,
+    archive_format: str,
 ) -> None:
     # BTW: could have used built-in filecmp.cmp but this is more fun
     abs_dir_path, dir_list = _handle_dir_path(dir_path)
-    logger = get_logger(logger_types.DEDUPLICATE, output, save)
+    logger = get_logger(output, save, log)
     if backup:
         _create_archive(abs_dir_path, archive_format)
 
@@ -171,13 +180,14 @@ def handle_duplicate_files_recursively(
     show_hidden: bool,
     save: bool,
     output: str,
+    log: str,
     backup: bool,
     archive_format: str | None = None,
     logger: Logger | None = None,
 ) -> None:
     abs_dir_path, dir_list = _handle_dir_path(dir_path)
     if not logger:
-        logger = get_logger(logger_types.DEDUPLICATE, output, save)
+        logger = get_logger(output, save, log)
     logger.info(log_messages.INSIDE_DIR.format(abs_dir_path=abs_dir_path))
 
     if backup:
@@ -197,6 +207,7 @@ def handle_duplicate_files_recursively(
             show_hidden,
             save,
             output,
+            log,
             backup=False,
             archive_format=None,
             logger=logger,
@@ -306,7 +317,7 @@ def _handle_dir_path(dir_path: str) -> tuple[str, list[str]]:
 
 def _create_archive(abs_dir_path: str, archive_format: str) -> None:
     shutil.make_archive(
-        base_name=os.path.join(abs_dir_path, constants.BACKUP_FILE_NAME),
+        base_name=os.path.join(abs_dir_path, BACKUP_FILE_NAME),
         format=archive_format,
         root_dir=os.path.dirname(abs_dir_path),
         base_dir=os.path.basename(abs_dir_path),

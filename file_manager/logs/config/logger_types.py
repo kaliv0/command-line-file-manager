@@ -1,7 +1,0 @@
-BASIC = "basic_logger"
-CATALOG = "catalog_logger"
-TREE = "tree_logger"
-SEARCH = "search_logger"
-COMPARE = "compare_logger"
-DEDUPLICATE = "deduplicate_logger"
-ORGANIZE = "organize_logger"

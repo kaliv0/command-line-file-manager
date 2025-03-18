@@ -1,7 +1,0 @@
-FILES = "/list.log"
-CATALOG = "/catalog.log"
-TREE = "/tree.log"
-SEARCH = "/search.log"
-COMPARE = "/compare.log"
-DEDUPLICATE = "/deduplicate.log"
-ORGANIZE = "/organize.log"
