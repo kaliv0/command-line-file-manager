@@ -2,7 +2,7 @@ import click
 
 from file_manager.logs import log_messages
 from file_manager.utils import organizer, scanner
-from file_manager.utils.decorator import save_logs, sort_order_results
+from file_manager.utils.decorator import save_logs, sort_order_results, create_backup, recursive
 
 
 @click.group()
@@ -31,12 +31,7 @@ def show(dir_path: str, sort: str, desc: bool, list_dirs: bool, save: bool, outp
 #############################################################
 @fm.command(options_metavar="<options>")
 @click.argument("dir_path", type=click.STRING, metavar="<dir_path>")
-@click.option(
-    "-r",
-    "--recursively",
-    is_flag=True,
-    help="Build catalog recursively",
-)
+@recursive
 @sort_order_results
 @save_logs
 def scan(dir_path: str, recursively: bool, sort: str, desc: bool, save: bool, output: str, log: str) -> None:
@@ -83,12 +78,7 @@ def tree(
 @fm.command(options_metavar="<options>")
 @click.argument("dir_path", type=click.STRING, metavar="<dir_path>")
 @click.argument("name", type=click.STRING, metavar="<name>")
-@click.option(
-    "-r",
-    "--recursively",
-    is_flag=True,
-    help="Search recursively",
-)
+@recursive
 @save_logs
 def search(dir_path: str, name: str, recursively: bool, save: bool, output: str, log: str) -> None:
     """Search by <name> inside <dir_path>\f"""
@@ -120,12 +110,7 @@ def search(dir_path: str, name: str, recursively: bool, save: bool, output: str,
     is_flag=True,
     help="Show compact list on single line",
 )
-@click.option(
-    "-r",
-    "--recursively",
-    is_flag=True,
-    help="Compare directories recursively",
-)
+@recursive
 @save_logs
 def diff(
     dir_path: str,
@@ -151,76 +136,6 @@ def diff(
 @fm.command(options_metavar="<options>")
 @click.argument("dir_path", type=click.STRING, metavar="<dir_path>")
 @click.option(
-    "-x",
-    "--exclude",
-    type=click.STRING,
-    default=None,
-    help="Single or multiple file extensions to be skipped separated by comma e.g. --exclude .pdf,.mp3",
-)
-@click.option(
-    "-h",
-    "--hidden",
-    "show_hidden",
-    is_flag=True,
-    help="Include hidden files",
-)
-@click.option(
-    "-b",
-    "--backup",
-    is_flag=True,
-    help="Create an archived file of the given directory before re-organizing it",
-)
-@click.option(
-    "-f",
-    "--archive-format",
-    type=click.Choice(["tar", "zip"], case_sensitive=False),
-    default=None,
-    help="Archive format for backup file",
-)
-@click.option(
-    "-r",
-    "--recursively",
-    is_flag=True,
-    help="Organize files recursively",
-)
-@click.option(
-    "--exclude-dir",
-    type=click.STRING,
-    default=None,
-    help="Single or multiple directory names to be skipped separated by comma. (Used with --recursively flag) E.g. --exclude-dir audio,video",
-)
-@click.option(
-    "--flat",
-    is_flag=True,
-    help="Move all files to target directories inside parent dir. (Used with --recursively flag)",
-)
-@save_logs
-def tidy(
-    dir_path: str,
-    exclude: str,
-    show_hidden: bool,
-    backup: bool,
-    archive_format: str,
-    recursively: bool,
-    exclude_dir: str,
-    flat: bool,
-    save: bool,
-    output: str,
-    log: str,
-) -> None:
-    """Organize files by extension/type inside <dir_path>\f"""
-    if recursively:
-        organizer.organize_files_recursively(
-            dir_path, exclude, exclude_dir, flat, show_hidden, backup, archive_format, save, output, log
-        )
-    else:
-        organizer.organize_files(dir_path, exclude, show_hidden, backup, archive_format, save, output, log)
-
-
-#####################################
-@fm.command(options_metavar="<options>")
-@click.argument("dir_path", type=click.STRING, metavar="<dir_path>")
-@click.option(
     "-i",
     "--interactive",
     is_flag=True,
@@ -234,24 +149,12 @@ def tidy(
     help="Include hidden files",
 )
 @click.option(
-    "-b",
-    "--backup",
-    is_flag=True,
-    help="Create an archived file of the given directory before re-organizing it",
-)
-@click.option(
-    "-f",
-    "--archive-format",
-    type=click.Choice(["tar", "zip"], case_sensitive=False),
-    default=None,
-    help="Archive format for backup file",
-)
-@click.option(
     "-r",
     "--recursively",
     is_flag=True,
     help="Handle duplicates recursively",
 )
+@create_backup
 @save_logs
 def dedup(
     dir_path: str,
@@ -280,6 +183,59 @@ def dedup(
         organizer.handle_duplicate_files(
             dir_path, interactive, show_hidden, save, output, log, backup, archive_format
         )
+
+
+#####################################
+@fm.command(options_metavar="<options>")
+@click.argument("dir_path", type=click.STRING, metavar="<dir_path>")
+@click.option(
+    "-x",
+    "--exclude",
+    type=click.STRING,
+    default=None,
+    help="Single or multiple file extensions to be skipped separated by comma e.g. --exclude .pdf,.mp3",
+)
+@click.option(
+    "-h",
+    "--hidden",
+    "show_hidden",
+    is_flag=True,
+    help="Include hidden files",
+)
+@click.option(
+    "--exclude-dir",
+    type=click.STRING,
+    default=None,
+    help="Single or multiple directory names to be skipped separated by comma. (Used with --recursively flag) E.g. --exclude-dir audio,video",
+)
+@click.option(
+    "--flat",
+    is_flag=True,
+    help="Move all files to target directories inside parent dir. (Used with --recursively flag)",
+)
+@recursive
+@create_backup
+@save_logs
+def tidy(
+    dir_path: str,
+    exclude: str,
+    show_hidden: bool,
+    exclude_dir: str,
+    flat: bool,
+    recursively: bool,
+    backup: bool,
+    archive_format: str,
+    save: bool,
+    output: str,
+    log: str,
+) -> None:
+    """Organize files by extension/type inside <dir_path>\f"""
+    if recursively:
+        organizer.organize_files_recursively(
+            dir_path, exclude, exclude_dir, flat, show_hidden, backup, archive_format, save, output, log
+        )
+    else:
+        organizer.organize_files(dir_path, exclude, show_hidden, backup, archive_format, save, output, log)
 
 
 if __name__ == "__main__":

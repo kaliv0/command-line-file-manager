@@ -7,6 +7,7 @@ from file_manager.logs import log_messages
 def get_logger(output_dir: str, save_output: bool, log_name: str) -> logging.Logger:
     logger = logging.getLogger()
     stream_handler = logging.StreamHandler()
+    stream_handler.terminator = ""
     formatter = logging.Formatter(log_messages.LOG_FORMAT)
     stream_handler.setFormatter(formatter)
     logger.addHandler(stream_handler)
@@ -17,6 +18,7 @@ def get_logger(output_dir: str, save_output: bool, log_name: str) -> logging.Log
             os.remove(log_file)
 
         file_handler = logging.FileHandler(filename=log_file, mode="a")
+        file_handler.terminator = ""
         file_handler.setFormatter(formatter)
         logger.addHandler(file_handler)
 

@@ -1,6 +1,6 @@
 [project]
-name = "file_manager"
-version = "2.0.0"
+name = "command-line-file-manager"
+version = "2.0.1"
 authors = [
     { name = "kaliv0", email = "kaloyan.ivanov88@gmail.com" }
 ]
@@ -24,6 +24,9 @@ ruff = "^0.6.3"
 
 [tool.ruff.lint]
 ignore = ['E731']
+
+[tool.poetry]
+packages = [{include="file_manager"}]
 
 [build-system]
 requires = ["poetry-core"]
