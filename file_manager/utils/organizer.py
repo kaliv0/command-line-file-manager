@@ -2,6 +2,7 @@ import hashlib
 import os
 import shutil
 from collections import defaultdict
+from collections.abc import Iterator
 from logging import Logger
 
 import click
@@ -263,8 +264,11 @@ def _handle_duplicates(
     if not duplicate_list:
         logger.info(log_messages.NO_DUPLICATE_FILES.format(dir_path=dir_path))
         return
-    display_list = _prepare_display_list(duplicate_list)
-    logger.info(log_messages.LISTED_DUPLICATE_FILES.format(dir_path=dir_path, display_list=display_list))
+    logger.info(
+        log_messages.LISTED_DUPLICATE_FILES.format(
+            dir_path=dir_path, display_list="".join(_prepare_display_list(duplicate_list))
+        )
+    )
     # clean-up files
     _merge_duplicates(dir_path, duplicate_list, interactive, logger)
 
@@ -278,13 +282,13 @@ def _transform_content_map(content_map: defaultdict[str, list[str]]) -> list[lis
     ]
 
 
-def _prepare_display_list(duplicate_list: list[list[str]]) -> str:
-    display_list = ""
+def _prepare_display_list(duplicate_list: list[list[str]]) -> Iterator[str]:
+    display_list = []
     for file_list in duplicate_list:
         for file in sorted(file_list):
-            display_list += f"\t- {file}\n"
-        display_list += log_messages.DUPLICATE_DELIMITER
-    return display_list
+            display_list.append(f"\t- {file}\n")
+        display_list.append(log_messages.DUPLICATE_DELIMITER)
+    yield from display_list
 
 
 def _merge_duplicates(

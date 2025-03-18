@@ -1,4 +1,5 @@
 import os
+from collections.abc import Iterator
 from filecmp import dircmp
 import itertools
 from logging import Logger
@@ -80,10 +81,12 @@ def scan(dir_path: str, sort: str, desc: bool, save: bool, output: str, log: str
 
 def scan_recursively(dir_path: str, sort: str, desc: bool, save: bool, output: str, log: str) -> None:
     logger = get_logger(output, save, log)
-    logger.info("\n".join(list(_get_recursive_catalog(sort, desc, dir_path))))
+    logger.info("".join(_get_recursive_catalog(sort, desc, dir_path)))
 
 
-def _get_recursive_catalog(sort: str, desc: bool, root_dir: str, subdir_path: str | None = None):
+def _get_recursive_catalog(
+    sort: str, desc: bool, root_dir: str, subdir_path: str | None = None
+) -> Iterator[str]:
     if subdir_path is None:
         subdir_path = root_dir
 
@@ -187,11 +190,11 @@ def search_recursively(
     root_dir: str, name: str, save: bool, output: str, log: str, subdir_path: str | None = None
 ) -> None:
     logger = get_logger(output, save, log)
-    result_msg = _search_recursively(logger, root_dir, name, subdir_path)
+    result_msg = "".join(_search_recursively(root_dir, name, subdir_path))
     logger.info(result_msg or log_messages.NOT_FOUND)
 
 
-def _search_recursively(logger: Logger, root_dir: str, name: str, subdir_path: str | None = None) -> str:
+def _search_recursively(root_dir: str, name: str, subdir_path: str | None = None) -> Iterator[str]:
     if subdir_path is None:
         subdir_path = root_dir
     subdir_list = os.listdir(subdir_path)
@@ -199,7 +202,7 @@ def _search_recursively(logger: Logger, root_dir: str, name: str, subdir_path: s
     files_list = []
     nested_dirs = []
     valid_dirs = []
-    inner_msg = ""
+    inner_log_gen = []
     for entry in subdir_list:
         entry_path = os.path.join(subdir_path, entry)
         if os.path.isfile(entry_path) and name in entry:
@@ -208,23 +211,26 @@ def _search_recursively(logger: Logger, root_dir: str, name: str, subdir_path: s
             if name in entry:
                 valid_dirs.append(entry)
             nested_dirs.append(entry)
-            inner_msg += _search_recursively(logger, root_dir, name, entry_path)
+            inner_log_gen.append(_search_recursively(root_dir, name, entry_path))
 
     if not files_list and not valid_dirs:
-        return inner_msg
+        yield from itertools.chain(*inner_log_gen)
+        return
 
-    log_msg = log_messages.FOUND_BY_NAME.format(
-        dir_path=os.path.abspath(subdir_path), keyword=name, delimiter="\n"
-    )
+    log_msg = [
+        log_messages.FOUND_BY_NAME.format(dir_path=os.path.abspath(subdir_path), keyword=name, delimiter="\n")
+    ]
     if files_list:
-        log_msg += log_messages.FOUND_FILES_BY_NAME.format(
-            files_list="\n\t- ".join(files_list), delimiter="\n"
+        log_msg.append(
+            log_messages.FOUND_FILES_BY_NAME.format(files_list="\n\t- ".join(files_list), delimiter="\n")
         )
     if valid_dirs:
-        log_msg += log_messages.FOUND_DIRS_BY_NAME.format(
-            subdir_list="\n\t- ".join(valid_dirs), delimiter="\n"
+        log_msg.append(
+            log_messages.FOUND_DIRS_BY_NAME.format(subdir_list="\n\t- ".join(valid_dirs), delimiter="\n")
         )
-    return log_msg + log_messages.DELIMITER + inner_msg
+    log_msg.append(log_messages.DELIMITER)
+    yield "".join(log_msg)
+    yield from itertools.chain(*inner_log_gen)
 
 
 #############################################################

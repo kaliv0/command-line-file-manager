@@ -27,7 +27,7 @@ MOVE_FILE_TO_ROOT_DIR = "Moving {entry} to root directory"
 SKIP_DIR_AND_MOVE = "Moving {entry} directory without stepping inside"
 
 REMOVE_DIR = "Removing {abs_dir_path}"
-MERGE_FILES = "Merging duplicates: {entry} into {target_name}"
+MERGE_FILES = "Merging duplicates: {entry} into '{target_name}'"
 PRE_MERGE_PROMPT = "Please enter file name for the following duplicates: {entry}\n"
 
 DIRS_DIFF = DELIMITER + "Diff '{left}' -- '{right}':"
