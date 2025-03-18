@@ -1,3 +1,5 @@
+import os
+
 import click
 
 
@@ -8,7 +10,7 @@ def save_logs(func):
         "-o",
         "--output",
         type=click.STRING,
-        default=None,
+        default=lambda: os.getcwd(),
         help="Path to output directory for the saved log file",
     )(func)
 

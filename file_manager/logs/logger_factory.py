@@ -12,7 +12,7 @@ def get_logger(output_dir: str, save_output: bool, log_name: str) -> logging.Log
     logger.addHandler(stream_handler)
 
     if save_output:
-        log_file = os.path.abspath(output_dir + log_name)
+        log_file = os.path.join(os.path.abspath(output_dir), log_name)
         if os.path.exists(log_file):
             os.remove(log_file)
 
