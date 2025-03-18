@@ -1,5 +1,6 @@
 import os
 from filecmp import dircmp
+import itertools
 from logging import Logger
 from typing import Callable
 
@@ -79,29 +80,26 @@ def scan(dir_path: str, sort: str, desc: bool, save: bool, output: str, log: str
 
 def scan_recursively(dir_path: str, sort: str, desc: bool, save: bool, output: str, log: str) -> None:
     logger = get_logger(output, save, log)
-    logger.info(_get_recursive_catalog(logger, sort, desc, dir_path))
+    logger.info("\n".join(list(_get_recursive_catalog(sort, desc, dir_path))))
 
 
-def _get_recursive_catalog(
-    logger: Logger, sort: str, desc: bool, root_dir: str, subdir_path: str | None = None
-) -> str:
+def _get_recursive_catalog(sort: str, desc: bool, root_dir: str, subdir_path: str | None = None):
     if subdir_path is None:
         subdir_path = root_dir
-    subdir_list = os.listdir(subdir_path)
 
     files_list = []
     nested_dirs = []
-    inner_msg = ""
+    inner_log_gen = []
+    subdir_list = os.listdir(subdir_path)
     for entry in subdir_list:
         entry_path = os.path.join(subdir_path, entry)
         if os.path.isfile(entry_path):
             files_list.append(entry)
         else:
             nested_dirs.append(entry)
-            inner_msg += _get_recursive_catalog(logger, sort, desc, root_dir, entry_path)
-
-    message = _get_catalog_messages(subdir_path, files_list, nested_dirs, sort, desc)
-    return message + inner_msg
+            inner_log_gen.append(_get_recursive_catalog(sort, desc, root_dir, entry_path))
+    yield _get_catalog_messages(subdir_path, files_list, nested_dirs, sort, desc)
+    yield from itertools.chain(*inner_log_gen)
 
 
 def _get_catalog_messages(
