@@ -1,10 +1,7 @@
 - add to diff list of files to skip comparing
     -> use underlying dircmp
 
-- combine show and scan
-    -> add flags fir files/dirs_only
-    -> sort/order to scan (catalog)
-    -> --hidden flag
+- add --hidden to show and scan
 
 - implement pretty_tree
     -> or add as flag to existing tree

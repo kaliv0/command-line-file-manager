@@ -63,7 +63,7 @@ def _sort_entries_list(dir_path: str, entries_list: list[str], criteria: str, de
 
 
 #############################################################
-def scan(dir_path: str, save: bool, output: str, log: str) -> None:
+def scan(dir_path: str, sort: str, desc: bool, save: bool, output: str, log: str) -> None:
     logger = get_logger(output, save, log)
 
     dir_list = os.listdir(dir_path)
@@ -74,15 +74,17 @@ def scan(dir_path: str, save: bool, output: str, log: str) -> None:
             files_list.append(entry)
         else:
             nested_dirs.append(entry)
-    logger.info(_get_catalog_messages(dir_path, files_list, nested_dirs))
+    logger.info(_get_catalog_messages(dir_path, files_list, nested_dirs, sort, desc))
 
 
-def scan_recursively(dir_path: str, save: bool, output: str, log: str) -> None:
+def scan_recursively(dir_path: str, sort: str, desc: bool, save: bool, output: str, log: str) -> None:
     logger = get_logger(output, save, log)
-    logger.info(_get_recursive_catalog(logger, dir_path))
+    logger.info(_get_recursive_catalog(logger, sort, desc, dir_path))
 
 
-def _get_recursive_catalog(logger: Logger, root_dir: str, subdir_path: str | None = None) -> str:
+def _get_recursive_catalog(
+    logger: Logger, sort: str, desc: bool, root_dir: str, subdir_path: str | None = None
+) -> str:
     if subdir_path is None:
         subdir_path = root_dir
     subdir_list = os.listdir(subdir_path)
@@ -96,16 +98,19 @@ def _get_recursive_catalog(logger: Logger, root_dir: str, subdir_path: str | Non
             files_list.append(entry)
         else:
             nested_dirs.append(entry)
-            inner_msg += _get_recursive_catalog(logger, root_dir, entry_path)
+            inner_msg += _get_recursive_catalog(logger, sort, desc, root_dir, entry_path)
 
-    message = _get_catalog_messages(subdir_path, files_list, nested_dirs)
+    message = _get_catalog_messages(subdir_path, files_list, nested_dirs, sort, desc)
     return message + inner_msg
 
 
-def _get_catalog_messages(dir_path: str, files_list: list[str], nested_dirs: list[str]) -> str:
+def _get_catalog_messages(
+    dir_path: str, files_list: list[str], nested_dirs: list[str], sort: str, desc: bool
+) -> str:
     if not files_list:
         files_msg = log_messages.NO_FILES.format(dir_path=os.path.abspath(dir_path))
     else:
+        _sort_entries_list(dir_path, files_list, sort, desc)
         files_msg = log_messages.LISTED_FILES.format(
             dir_path=os.path.abspath(dir_path), entries_list="\n\t- ".join(files_list)
         )
@@ -113,6 +118,7 @@ def _get_catalog_messages(dir_path: str, files_list: list[str], nested_dirs: lis
     if not nested_dirs:
         nested_dirs_msg = log_messages.NO_SUBDIRS.format(dir_path=os.path.abspath(dir_path))
     else:
+        _sort_entries_list(dir_path, nested_dirs, sort, desc)
         nested_dirs_msg = log_messages.NESTED_SUBDIRS.format(
             dir_path=os.path.abspath(dir_path), entries_list="\n\t- ".join(nested_dirs)
         )

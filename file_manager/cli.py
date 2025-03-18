@@ -2,7 +2,7 @@ import click
 
 from file_manager.logs import log_messages
 from file_manager.utils import organizer, scanner
-from file_manager.utils.decorator import save_logs
+from file_manager.utils.decorator import save_logs, sort_order_results
 
 
 @click.group()
@@ -15,24 +15,13 @@ def fm() -> None:
 @fm.command(options_metavar="<options>")
 @click.argument("dir_path", type=click.STRING, metavar="<dir_path>")
 @click.option(
-    "--sort",
-    type=click.Choice(["name", "size", "date", "modified", "type"], case_sensitive=False),
-    default="name",
-    show_default=True,
-    help="Sorting criteria",
-)
-@click.option(
-    "--desc",
-    is_flag=True,
-    help="Display result in descending order",
-)
-@click.option(
     "-d",
     "--dirs",
     "list_dirs",
     is_flag=True,
     help="List subdirectories",
 )
+@sort_order_results
 @save_logs
 def show(dir_path: str, sort: str, desc: bool, list_dirs: bool, save: bool, output: str, log: str) -> None:
     """Short list of files or directories in <dir_path>\f"""
@@ -48,13 +37,14 @@ def show(dir_path: str, sort: str, desc: bool, list_dirs: bool, save: bool, outp
     is_flag=True,
     help="Build catalog recursively",
 )
+@sort_order_results
 @save_logs
-def scan(dir_path: str, recursively: bool, save: bool, output: str, log: str) -> None:
+def scan(dir_path: str, recursively: bool, sort: str, desc: bool, save: bool, output: str, log: str) -> None:
     """Create full catalog of all files and subdirs in <dir_path>\f"""
     if recursively:
-        scanner.scan_recursively(dir_path, save, output, log)
+        scanner.scan_recursively(dir_path, sort, desc, save, output, log)
     else:
-        scanner.scan(dir_path, save, output, log)
+        scanner.scan(dir_path, sort, desc, save, output, log)
 
 
 #############################################################
