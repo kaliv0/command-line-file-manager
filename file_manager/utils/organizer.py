@@ -2,7 +2,7 @@ import hashlib
 import os
 import shutil
 from collections import defaultdict
-from collections.abc import Iterator
+from collections.abc import Generator
 from logging import Logger
 
 import click
@@ -282,13 +282,11 @@ def _transform_content_map(content_map: defaultdict[str, list[str]]) -> list[lis
     ]
 
 
-def _prepare_display_list(duplicate_list: list[list[str]]) -> Iterator[str]:
-    display_list = []
+def _prepare_display_list(duplicate_list: list[list[str]]) -> Generator[str]:
     for file_list in duplicate_list:
         for file in sorted(file_list):
-            display_list.append(f"\t- {file}\n")
-        display_list.append(log_messages.DUPLICATE_DELIMITER)
-    yield from display_list
+            yield f"\t- {file}\n"
+        yield log_messages.DUPLICATE_DELIMITER
 
 
 def _merge_duplicates(

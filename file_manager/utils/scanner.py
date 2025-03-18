@@ -1,7 +1,6 @@
 import os
-from collections.abc import Iterator
+from collections.abc import Generator
 from filecmp import dircmp
-import itertools
 from logging import Logger
 from typing import Callable
 
@@ -76,23 +75,25 @@ def scan(dir_path: str, sort: str, desc: bool, save: bool, output: str, log: str
             files_list.append(entry)
         else:
             nested_dirs.append(entry)
-    logger.info(_get_catalog_messages(dir_path, files_list, nested_dirs, sort, desc))
+
+    for log_msg in _get_catalog_messages(dir_path, files_list, nested_dirs, sort, desc):
+        logger.info(log_msg)
 
 
 def scan_recursively(dir_path: str, sort: str, desc: bool, save: bool, output: str, log: str) -> None:
     logger = get_logger(output, save, log)
-    logger.info("".join(_get_recursive_catalog(sort, desc, dir_path)))
+    for log_msg in _get_recursive_catalog(sort, desc, dir_path):
+        logger.info(log_msg)
 
 
 def _get_recursive_catalog(
     sort: str, desc: bool, root_dir: str, subdir_path: str | None = None
-) -> Iterator[str]:
+) -> Generator[str]:
     if subdir_path is None:
         subdir_path = root_dir
 
     files_list = []
     nested_dirs = []
-    inner_log_gen = []
     subdir_list = os.listdir(subdir_path)
     for entry in subdir_list:
         entry_path = os.path.join(subdir_path, entry)
@@ -100,14 +101,15 @@ def _get_recursive_catalog(
             files_list.append(entry)
         else:
             nested_dirs.append(entry)
-            inner_log_gen.append(_get_recursive_catalog(sort, desc, root_dir, entry_path))
-    yield _get_catalog_messages(subdir_path, files_list, nested_dirs, sort, desc)
-    yield from itertools.chain(*inner_log_gen)
+
+    yield from _get_catalog_messages(subdir_path, files_list, nested_dirs, sort, desc)
+    for entry in nested_dirs:
+        yield from _get_recursive_catalog(sort, desc, root_dir, os.path.join(subdir_path, entry))
 
 
 def _get_catalog_messages(
     dir_path: str, files_list: list[str], nested_dirs: list[str], sort: str, desc: bool
-) -> str:
+) -> tuple[str, str]:
     if not files_list:
         files_msg = log_messages.NO_FILES.format(dir_path=os.path.abspath(dir_path))
     else:
@@ -123,7 +125,7 @@ def _get_catalog_messages(
         nested_dirs_msg = log_messages.NESTED_SUBDIRS.format(
             dir_path=os.path.abspath(dir_path), entries_list="\n\t- ".join(nested_dirs)
         )
-    return files_msg + nested_dirs_msg
+    return files_msg, nested_dirs_msg
 
 
 #############################################################
@@ -142,7 +144,7 @@ def build_tree(
             continue
 
         indent = " " * 4 * level
-        logger.info(f"{indent}{FOLDER_EMOJI} {os.path.abspath(curr_root)}/")
+        logger.info(f"{indent}{FOLDER_EMOJI} {os.path.abspath(curr_root)}/\n")
         if not dirs_only:
             sub_indent = " " * 4 * (level + 1)
             _build_file_tree(files, show_hidden, sub_indent, logger)
@@ -152,7 +154,7 @@ def _build_file_tree(files: list[str], show_hidden: bool, sub_indent: str, logge
     for file in files:
         if not show_hidden and file.startswith("."):
             continue
-        logger.info(f"{sub_indent}{FILE_EMOJI} {file}")
+        logger.info(f"{sub_indent}{FILE_EMOJI} {file}\n")
 
 
 #############################################################
@@ -173,28 +175,27 @@ def search(dir_path: str, name: str, save: bool, output: str, log: str) -> None:
         logger.info(log_messages.NOT_FOUND)
         return
 
-    logger.info(
-        log_messages.FOUND_BY_NAME.format(dir_path=os.path.abspath(dir_path), keyword=name, delimiter="")
-    )
+    logger.info(log_messages.FOUND_BY_NAME.format(dir_path=os.path.abspath(dir_path), keyword=name))
     if files_list:
-        logger.info(
-            log_messages.FOUND_FILES_BY_NAME.format(files_list="\n\t- ".join(files_list), delimiter="")
-        )
+        logger.info(log_messages.FOUND_FILES_BY_NAME.format(files_list="\n\t- ".join(files_list)))
     if nested_dirs:
-        logger.info(
-            log_messages.FOUND_DIRS_BY_NAME.format(subdir_list="\n\t- ".join(nested_dirs), delimiter="")
-        )
+        logger.info(log_messages.FOUND_DIRS_BY_NAME.format(subdir_list="\n\t- ".join(nested_dirs)))
 
 
 def search_recursively(
     root_dir: str, name: str, save: bool, output: str, log: str, subdir_path: str | None = None
 ) -> None:
     logger = get_logger(output, save, log)
-    result_msg = "".join(_search_recursively(root_dir, name, subdir_path))
-    logger.info(result_msg or log_messages.NOT_FOUND)
+    log_gen = _search_recursively(root_dir, name, subdir_path)
+    if not (log_msg := next(log_gen, None)):
+        logger.info(log_messages.NOT_FOUND)
+    else:
+        logger.info(log_msg)
+        for rest_msg in log_gen:
+            logger.info(rest_msg)
 
 
-def _search_recursively(root_dir: str, name: str, subdir_path: str | None = None) -> Iterator[str]:
+def _search_recursively(root_dir: str, name: str, subdir_path: str | None = None) -> Generator[str]:
     if subdir_path is None:
         subdir_path = root_dir
     subdir_list = os.listdir(subdir_path)
@@ -202,7 +203,6 @@ def _search_recursively(root_dir: str, name: str, subdir_path: str | None = None
     files_list = []
     nested_dirs = []
     valid_dirs = []
-    inner_log_gen = []
     for entry in subdir_list:
         entry_path = os.path.join(subdir_path, entry)
         if os.path.isfile(entry_path) and name in entry:
@@ -211,26 +211,19 @@ def _search_recursively(root_dir: str, name: str, subdir_path: str | None = None
             if name in entry:
                 valid_dirs.append(entry)
             nested_dirs.append(entry)
-            inner_log_gen.append(_search_recursively(root_dir, name, entry_path))
 
-    if not files_list and not valid_dirs:
-        yield from itertools.chain(*inner_log_gen)
-        return
+    log_msg = []
+    if files_list and not valid_dirs:
+        log_msg.append(log_messages.FOUND_BY_NAME.format(dir_path=os.path.abspath(subdir_path), keyword=name))
+        if files_list:
+            log_msg.append(log_messages.FOUND_FILES_BY_NAME.format(files_list="\n\t- ".join(files_list)))
+        if valid_dirs:
+            log_msg.append(log_messages.FOUND_DIRS_BY_NAME.format(subdir_list="\n\t- ".join(valid_dirs)))
+        log_msg.append(log_messages.DELIMITER)
 
-    log_msg = [
-        log_messages.FOUND_BY_NAME.format(dir_path=os.path.abspath(subdir_path), keyword=name, delimiter="\n")
-    ]
-    if files_list:
-        log_msg.append(
-            log_messages.FOUND_FILES_BY_NAME.format(files_list="\n\t- ".join(files_list), delimiter="\n")
-        )
-    if valid_dirs:
-        log_msg.append(
-            log_messages.FOUND_DIRS_BY_NAME.format(subdir_list="\n\t- ".join(valid_dirs), delimiter="\n")
-        )
-    log_msg.append(log_messages.DELIMITER)
-    yield "".join(log_msg)
-    yield from itertools.chain(*inner_log_gen)
+    yield from log_msg
+    for entry in nested_dirs:
+        yield from _search_recursively(root_dir, name, os.path.join(subdir_path, entry))
 
 
 #############################################################
@@ -291,18 +284,19 @@ def _report(cmp_obj: dircmp, include_hidden: bool, short: bool, one_line: bool, 
         func = lambda files: "\n\t- ".join(files)
 
     for attr in STATS_MAP:
-        if stats := getattr(cmp_obj, attr, None):
-            if not include_hidden:
-                if not (stats := [entry for entry in stats if not entry.startswith(".")]):
-                    continue
+        if not (stats := getattr(cmp_obj, attr, None)):
+            continue
 
-            if attr == "left_only":
-                dir_path = cmp_obj.left
-            elif attr == "right_only":
-                dir_path = cmp_obj.right
-            else:
-                dir_path = None
-            _handle_stats_entries(dir_path, stats, logger, STATS_MAP[attr], delimiter, func)
+        if not include_hidden and not (stats := [entry for entry in stats if not entry.startswith(".")]):
+            continue
+
+        if attr == "left_only":
+            dir_path = cmp_obj.left
+        elif attr == "right_only":
+            dir_path = cmp_obj.right
+        else:
+            dir_path = None
+        _handle_stats_entries(dir_path, stats, logger, STATS_MAP[attr], delimiter, func)
 
 
 def _handle_stats_entries(

@@ -8,3 +8,5 @@
 
 - support external config for organizing dir names (in fm tidy)
     -> prompt user interactively according to found file types/extensions
+
+- refactor all joins of file_lists (e.g. entries_list="\n\t- ".join(files_list)) into loops
