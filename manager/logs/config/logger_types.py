@@ -1,7 +1,0 @@
-BASIC = "basic_logger"
-CATALOG = "catalog_logger"
-RECURSIVE = "recursive_catalog_logger"
-TREE = "tree_logger"
-SEARCH = "search_logger"
-ORGANIZE = "organize_logger"
-RECURSIVE_ORGANIZE = "recursive_organize_logger"

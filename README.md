@@ -14,56 +14,36 @@ Python CLI tool for scanning and organizing local directories and files.
 
 #### Requires Python 3.10+
 
-## Installation
-
-Via pip:
-```console
-$ pip install command-line-file-manager
-```
-
-From main branch:
-```console
-$ git clone https://github.com/kaliv0/command-line-file-manager.git
-$ cd command-line-file-manager 
-$ pip install .
-```
-
 ## Example
 
 To run the application type <i>fm</i> followed by a sub-command, target directory and options
 ```console
-$ fm scan-files ../test --sort=type --save --output=./
+$ fm scan ./foo/bar --sort=type --save --output=./
 ```
 
-Add --help after the <i>fm</i> command or any of the subcommands to get more information
 ```console
-$ fm scan-files --help
+$ fm scan --help
 
-Usage: fm scan-files [OPTIONS] DIR_PATH
+Usage: fm scan <options> <dir_path>
 
-  DIR_PATH: Path to directory to be scanned
+  Create full catalog of all files and subdirs in <dir_path>
 
 Options:
-  --sort [name|size|date|modified|type]   Sorting criteria.  [default: name]
-  --desc                                  Display result in descending order.
-  -s, --save                              Save log message to file.
-  -o, --output TEXT                       Path to output directory for the saved log file.
-  --help                                  Show this message and exit.
+  -r, --recursively               Build catalog recursively
+  --sort [name|size|date|modified|type]
+                                  Sorting criteria
+  --desc                          Display result in descending order
+  -s, --save                      Save log message to file
+  -o, --output TEXT               Path to output directory for the saved log file
+  --log TEXT                      Saved log file name
+  --help                          Show this message and exit
 ```
 
 ## Main Features
-- <b>scan_files</b> - list all files inside PATH
-- <b>scan_subdirs</b> - list all nested directories
-- <b>build_catalog</b> - list all contents (files, subdirs) 
-<br>(can be done recursively via <b>build_catalog_recursively</b>)
-- <b>build_tree</b> - visualize directory structure
-- <b>build_pretty_tree</b> - a fancy alternative with emojis etc.
--------------------------------
-- <b>search_by_name</b>
-- <b>search_by_name_recursively</b>
--------------------------------
-- <b>organize_files</b> - group files by extension into corresponding 'type' directories (e.g. music, books)
-<br>(provides recursive version)
-
-- <b>handle_duplicate_files</b> - merge identical files (in terms of content) - prompts user for file name or uses first entry in duplicates list
-<br>(has a recursive alternative)
+- <b>show</b> -   Short list of files or directories in <dir_path>
+- <b>scan</b> -   Create full catalog of all files and subdirs in <dir_path>
+- <b>tree</b> -   Build tree of contents in <dir_path>
+- <b>search</b> - Search by <name> inside <dir_path>
+- <b>diff</b> -   Compare contents of <source_path> to <target_path>
+- <b>dedup</b> -  Find and clean-up duplicate files inside a <dir_path>
+- <b>tidy</b> -   Organize files by extension/type inside <dir_path>

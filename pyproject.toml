@@ -1,43 +1,30 @@
-[build-system]
-build-backend = "setuptools.build_meta"
-requires = ["setuptools>=65.5.0", "wheel"]
-
 [project]
+name = "file_manager"
+version = "2.0.0"
 authors = [
-  {name = "Kaloyan Ivanov", email = "kaloyan.ivanov88@gmail.com"},
+    { name = "kaliv0", email = "kaloyan.ivanov88@gmail.com" }
 ]
-description = "CLI tool for managing local file system storage"
-name = "command-line-file-manager"
-keywords = ["file manager", "cli tool", "command line interface"]
-urls = { repository = "https://github.com/kaliv0/command-line-file-manager.git" }
 readme = "README.md"
-license = { file = "LICENSE" }
-dynamic = ["version"]
+license = { text = "MIT" }
+description = "CLI tool for managing local file system storage"
+keywords = ["file manager", "cli tool", "command line interface"]
 
-requires-python = ">=3.10"
-
-dependencies = [
-  "click == 8.1.7",
-  "emoji == 2.8.0",
-  "directory-tree == 0.0.4",
-]
-
-[project.optional-dependencies]
-dev = [
-  "tox == 4.11.3",
-  "codespell == 2.2.6",
-  "black == 23.9.1",
-  "pytest == 7.4.2",
-  "build == 1.0.3",
-  "twine == 5.1.1",
-]
+[project.urls]
+Repository = "https://github.com/kaliv0/command-line-file-manager.git"
 
 [project.scripts]
-fm = "manager.__main__:cli"
+fm = "file_manager.cli:fm"
 
-[tool.setuptools.dynamic]
-version = { attr = "manager.__version__" }
+[tool.poetry.dependencies]
+python = "^3.10"
+click = "^8.1.7"
 
-[tool.setuptools.packages.find]
-where = ["."]
-exclude = ["assets", "tests"]
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.6.3"
+
+[tool.ruff.lint]
+ignore = ['E731']
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
