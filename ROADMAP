@@ -6,6 +6,8 @@
 - implement pretty_tree
     -> or add as flag to existing tree
 
+- expand archive options/formats
+
 - support external config for organizing dir names (in fm tidy)
     -> prompt user interactively according to found file types/extensions
 
