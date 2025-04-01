@@ -3,6 +3,8 @@
 
 - add --hidden to show and scan
 
+- expand search -> add regex/pattern globing
+
 - implement pretty_tree
     -> or add as flag to existing tree
 
