@@ -78,14 +78,23 @@ def tree(
 @fm.command(options_metavar="<options>")
 @click.argument("dir_path", type=click.STRING, metavar="<dir_path>")
 @click.argument("name", type=click.STRING, metavar="<name>")
+@click.option(
+    "-x",
+    "--regex",
+    "use_regex",
+    is_flag=True,
+    help="Search by regex pattern",
+)
 @recursive
 @save_logs
-def search(dir_path: str, name: str, recursively: bool, save: bool, output: str, log: str) -> None:
+def search(
+    dir_path: str, name: str, use_regex: bool, recursively: bool, save: bool, output: str, log: str
+) -> None:
     """Search by <name> inside <dir_path>\f"""
     if recursively:
-        scanner.search_recursively(dir_path, name, save, output, log)
+        scanner.search_recursively(dir_path, name, use_regex, save, output, log)
     else:
-        scanner.search(dir_path, name, save, output, log)
+        scanner.search(dir_path, name, use_regex, save, output, log)
 
 
 #############################################################

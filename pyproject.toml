@@ -1,6 +1,6 @@
 [project]
 name = "command-line-file-manager"
-version = "2.0.1"
+version = "2.0.2"
 authors = [
     { name = "kaliv0", email = "kaloyan.ivanov88@gmail.com" }
 ]
@@ -17,7 +17,7 @@ fm = "file_manager.cli:fm"
 
 [tool.poetry.dependencies]
 python = "^3.10"
-click = "^8.1.7"
+click = "^8.1.8"
 
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.6.3"

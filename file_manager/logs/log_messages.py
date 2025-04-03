@@ -12,7 +12,8 @@ NO_SUBDIRS = "'{dir_path}' contains no nested subdirectories\n" + DELIMITER
 NESTED_SUBDIRS = "'{dir_path}' contains the following subdirectories:\n\t- {entries_list}\n" + DELIMITER
 
 NOT_FOUND = "Nothing found\n"
-FOUND_BY_NAME = "Inside directory '{dir_path}' the given keyword '{keyword}' was found\n"
+FOUND_BY_NAME = "Inside directory '{dir_path}' the given (partial) keyword '{sequence}' was found\n"
+FOUND_BY_PATTERN = "Inside directory '{dir_path}' the given pattern '{sequence}' was found\n"
 FOUND_FILES_BY_NAME = "- in the following file names:\n\t- {files_list}\n"
 FOUND_DIRS_BY_NAME = "- in the following subdirectory names:\n\t- {subdir_list}\n"
 
