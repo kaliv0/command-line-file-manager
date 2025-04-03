@@ -43,7 +43,7 @@ Options:
 - <b>show</b> -   Short list of files or directories in <dir_path>
 - <b>scan</b> -   Create full catalog of all files and subdirs in <dir_path>
 - <b>tree</b> -   Build tree of contents in <dir_path>
-- <b>search</b> - Search by <given_name> inside <dir_path>
+- <b>search</b> - Search by <nаmе> inside <dir_path>
 - <b>diff</b> -   Compare contents of <source_path> to <target_path>
 - <b>dedup</b> -  Find and clean-up duplicate files inside a <dir_path>
 - <b>tidy</b> -   Organize files by extension/type inside <dir_path>
