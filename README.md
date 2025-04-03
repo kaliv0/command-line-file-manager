@@ -29,14 +29,13 @@ Usage: fm scan <options> <dir_path>
   Create full catalog of all files and subdirs in <dir_path>
 
 Options:
-  -r, --recursively               Build catalog recursively
-  --sort [name|size|date|modified|type]
-                                  Sorting criteria
-  --desc                          Display result in descending order
-  -s, --save                      Save log message to file
-  -o, --output TEXT               Path to output directory for the saved log file
-  --log TEXT                      Saved log file name
-  --help                          Show this message and exit
+  -r, --recursively                      Build catalog recursively
+  --sort [name|size|date|modified|type]  Sorting criteria
+  --desc                                 Display result in descending order
+  -s, --save                             Save log message to file
+  -o, --output TEXT                      Path to output directory for the saved log file
+  --log TEXT                             Saved log file name
+  --help                                 Show this message and exit
 ```
 
 ## Main Features
