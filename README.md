@@ -12,8 +12,6 @@
 
 Python CLI tool for scanning and organizing local directories and files.
 
-#### Requires Python 3.10+
-
 ## Example
 
 To run the application type <i>fm</i> followed by a sub-command, target directory and options
