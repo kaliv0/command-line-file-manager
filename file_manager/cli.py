@@ -3,7 +3,7 @@ import click
 from file_manager.logs import log_messages
 from file_manager.utils import organizer, scanner
 from file_manager.utils.custom_param import LiteralOption
-from file_manager.utils.decorator import save_logs, sort_order_results, create_backup, recursive
+from file_manager.utils.decorator import save_logs, sort_order_results, create_backup, recursive, show_hidden_entries
 
 
 @click.group()
@@ -51,14 +51,7 @@ def scan(dir_path: str, recursively: bool, sort: str, desc: bool, save: bool, ou
     "--level",
     "max_depth",
     type=click.IntRange(0),
-    help="Include hidden files and subdirectories",
-)
-@click.option(
-    "-h",
-    "--hidden",
-    "show_hidden",
-    is_flag=True,
-    help="Include hidden files and subdirectories",
+    help="Maximum depth of representation",
 )
 @click.option(
     "-d",
@@ -67,9 +60,10 @@ def scan(dir_path: str, recursively: bool, sort: str, desc: bool, save: bool, ou
     is_flag=True,
     help="Show only nested directories",
 )
+@show_hidden_entries
 @save_logs
 def tree(
-    dir_path: str, max_depth: int, show_hidden: bool, dirs_only: bool, save: bool, output: str, log: str
+    dir_path: str, max_depth: int, dirs_only: bool, show_hidden: bool, save: bool, output: str, log: str
 ) -> None:
     """Build tree of contents in <dir_path>\f"""
     scanner.build_tree(dir_path, max_depth, show_hidden, dirs_only, save, output, log)
@@ -116,13 +110,6 @@ def search(
     help="""List of paths to ignore -> pass as a literal of list of strings e.g. '["music", "movies"]'"""
 )
 @click.option(
-    "-h",
-    "--hidden",
-    "include_hidden",
-    is_flag=True,
-    help="Include hidden files and subdirectories",
-)
-@click.option(
     "--short",
     is_flag=True,
     help="Show short statistics (count only)",
@@ -134,16 +121,17 @@ def search(
     help="Show compact list on single line",
 )
 @recursive
+@show_hidden_entries
 @save_logs
 def diff(
     dir_path: str,
     other_path: str,
     ignore: str,
     ignore_list: list[str],
-    include_hidden: bool,
     short: bool,
     one_line: bool,
     recursively: bool,
+    show_hidden: bool,
     save: bool,
     output: str,
     log: str,
@@ -152,7 +140,7 @@ def diff(
     if short and one_line:
         raise click.BadParameter(log_messages.BAD_OPTS.format(flags=" | ".join(("short", "oneline"))))
     scanner.compare_directories(
-        dir_path, other_path, ignore, ignore_list, include_hidden, short, one_line, recursively, save, output, log
+        dir_path, other_path, ignore, ignore_list, show_hidden, short, one_line, recursively, save, output, log
     )
 
 
@@ -166,28 +154,17 @@ def diff(
     is_flag=True,
     help="Prompt for destination file name before merging duplicates",
 )
-@click.option(
-    "-h",
-    "--hidden",
-    "show_hidden",
-    is_flag=True,
-    help="Include hidden files",
-)
-@click.option(
-    "-r",
-    "--recursively",
-    is_flag=True,
-    help="Handle duplicates recursively",
-)
+@recursive
+@show_hidden_entries
 @create_backup
 @save_logs
 def dedup(
     dir_path: str,
     interactive: bool,
+    recursively: bool,
     show_hidden: bool,
     backup: bool,
     archive_format: str,
-    recursively: bool,
     save: bool,
     output: str,
     log: str,
@@ -221,13 +198,6 @@ def dedup(
     help="Single or multiple file extensions to be skipped separated by comma e.g. --exclude .pdf,.mp3",
 )
 @click.option(
-    "-h",
-    "--hidden",
-    "show_hidden",
-    is_flag=True,
-    help="Include hidden files",
-)
-@click.option(
     "--exclude-dir",
     type=click.STRING,
     default=None,
@@ -239,15 +209,16 @@ def dedup(
     help="Move all files to target directories inside parent dir. (Used with --recursively flag)",
 )
 @recursive
+@show_hidden_entries
 @create_backup
 @save_logs
 def tidy(
     dir_path: str,
     exclude: str,
-    show_hidden: bool,
     exclude_dir: str,
     flat: bool,
     recursively: bool,
+    show_hidden: bool,
     backup: bool,
     archive_format: str,
     save: bool,

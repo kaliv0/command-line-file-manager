@@ -1,5 +1,5 @@
-- add to diff list of files to skip comparing
-    -> use underlying dircmp
+- unify diff --ignore-list and tidy --exclude(dir)
+    -> use same comma separated for -ignore-list
 
 - add --hidden to show and scan
 

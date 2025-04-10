@@ -1,10 +1,12 @@
 import os
-from typing import Callable, Any
+from typing import Callable, Any, TypeAlias
 
 import click
 
+ClickCallable: TypeAlias = Callable[[Any, ...], None]
 
-def save_logs(func: Callable[[Any, ...], None]) -> Callable[[Any, ...], None]:
+
+def save_logs(func: ClickCallable) -> ClickCallable:
     save = click.option("-s", "--save", is_flag=True, help="Save log message to file")
     output = click.option(
         "-o",
@@ -22,7 +24,7 @@ def save_logs(func: Callable[[Any, ...], None]) -> Callable[[Any, ...], None]:
     return save(output(log(func)))
 
 
-def sort_order_results(func: Callable[[Any, ...], None]) -> Callable[[Any, ...], None]:
+def sort_order_results(func: ClickCallable) -> ClickCallable:
     sort = click.option(
         "--sort",
         type=click.Choice(["name", "size", "date", "modified", "type"], case_sensitive=False),
@@ -36,7 +38,7 @@ def sort_order_results(func: Callable[[Any, ...], None]) -> Callable[[Any, ...],
     return sort(desc(func))
 
 
-def create_backup(func: Callable[[Any, ...], None]) -> Callable[[Any, ...], None]:
+def create_backup(func: ClickCallable) -> ClickCallable:
     backup = click.option(
         "-b",
         "--backup",
@@ -53,10 +55,19 @@ def create_backup(func: Callable[[Any, ...], None]) -> Callable[[Any, ...], None
     return backup(archive_format(func))
 
 
-def recursive(func):
+def recursive(func: ClickCallable) -> ClickCallable:
     return click.option(
         "-r",
         "--recursively",
         is_flag=True,
         help="Step into nested dirs",
     )(func)
+
+def show_hidden_entries(func: ClickCallable) -> ClickCallable:
+    return click.option(
+    "-h",
+    "--hidden",
+    "show_hidden",
+    is_flag=True,
+    help="Include hidden entries paths",
+)(func)

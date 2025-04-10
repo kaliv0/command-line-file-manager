@@ -248,7 +248,7 @@ def compare_directories(
     other_path: str,
     ignore: str,
     ignore_list: list[str],
-    include_hidden: bool,
+    show_hidden: bool,
     short: bool,
     one_line: bool,
     recursively: bool,
@@ -264,40 +264,40 @@ def compare_directories(
         logger.info(log_messages.IDENTICAL_PATHS)
         return
 
-    if _should_skip_hidden(include_hidden, abs_dir_path, abs_other_path):
+    if _should_skip_hidden(show_hidden, abs_dir_path, abs_other_path):
         return
 
     if ignore:
         # ignore_list might already include 'ignore' param but transforming creating intermediary set is too expensive
         ignore_list.append(ignore)
     cmp_obj = dircmp(abs_dir_path, abs_other_path, ignore=ignore_list)
-    _diff_report(cmp_obj, include_hidden, recursively, short, one_line, logger)
+    _diff_report(cmp_obj, show_hidden, recursively, short, one_line, logger)
 
 
 def _diff_report(
     cmp_obj: dircmp,
-    include_hidden: bool,
+    show_hidden: bool,
     diff_recursively: bool,
     short: bool,
     one_line: bool,
     logger: Logger,
 ) -> None:
-    _report(cmp_obj, include_hidden, short, one_line, logger)
+    _report(cmp_obj, show_hidden, short, one_line, logger)
 
     if diff_recursively:
         for sub_dir in cmp_obj.subdirs.values():
-            if _should_skip_hidden(include_hidden, sub_dir.left, sub_dir.right):
+            if _should_skip_hidden(show_hidden, sub_dir.left, sub_dir.right):
                 continue
-            _diff_report(sub_dir, include_hidden, diff_recursively, short, one_line, logger)
+            _diff_report(sub_dir, show_hidden, diff_recursively, short, one_line, logger)
 
 
-def _should_skip_hidden(include_hidden: bool, dir_path: str, other_path: str) -> bool:
-    return not include_hidden and any(
+def _should_skip_hidden(show_hidden: bool, dir_path: str, other_path: str) -> bool:
+    return not show_hidden and any(
         os.path.basename(entry).startswith(".") for entry in (dir_path, other_path)
     )
 
 
-def _report(cmp_obj: dircmp, include_hidden: bool, short: bool, one_line: bool, logger: Logger) -> None:
+def _report(cmp_obj: dircmp, show_hidden: bool, short: bool, one_line: bool, logger: Logger) -> None:
     logger.info(log_messages.DIRS_DIFF.format(left=cmp_obj.left, right=cmp_obj.right))
 
     if short:
@@ -313,7 +313,7 @@ def _report(cmp_obj: dircmp, include_hidden: bool, short: bool, one_line: bool, 
     for attr in STATS_MAP:
         if not (stats := getattr(cmp_obj, attr, None)):
             continue
-        if not include_hidden:
+        if not show_hidden:
             # recompute stats to exclude hidden entries
             stats = [entry for entry in stats if not entry.startswith(".")]
             if not stats:
