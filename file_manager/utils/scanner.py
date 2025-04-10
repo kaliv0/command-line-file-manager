@@ -22,7 +22,15 @@ STATS_MAP = {
 }
 
 
-def show(dir_path: str, sort: str, desc: bool, list_dirs: bool, save: bool, output: str, log: str) -> None:
+def show(
+    dir_path: str,
+    sort: str,
+    desc: bool,
+    list_dirs: bool,
+    save: bool,
+    output: str,
+    log: str,
+) -> None:
     if list_dirs:
         os_func_name = "isdir"
         not_found_msg = "NO_SUBDIRS"
@@ -40,7 +48,8 @@ def show(dir_path: str, sort: str, desc: bool, list_dirs: bool, save: bool, outp
         _sort_entries_list(dir_path, entries_list, sort, desc)
         logger.info(
             getattr(log_messages, success_msg).format(
-                dir_path=os.path.abspath(dir_path), entries_list="\n\t- ".join(entries_list)
+                dir_path=os.path.abspath(dir_path),
+                entries_list="\n\t- ".join(entries_list),
             )
         )
     else:
@@ -131,7 +140,13 @@ def _get_catalog_messages(
 
 #############################################################
 def build_tree(
-    dir_path: str, max_depth: int, show_hidden: bool, dirs_only: bool, save: bool, output: str, log: str
+    dir_path: str,
+    max_depth: int,
+    show_hidden: bool,
+    dirs_only: bool,
+    save: bool,
+    output: str,
+    log: str,
 ) -> None:
     logger = get_logger(output, save, log)
     root_level = os.path.normpath(dir_path).count(os.sep)
@@ -247,7 +262,6 @@ def compare_directories(
     dir_path: str,
     other_path: str,
     ignore: str,
-    ignore_list: list[str],
     show_hidden: bool,
     short: bool,
     one_line: bool,
@@ -267,9 +281,7 @@ def compare_directories(
     if _should_skip_hidden(show_hidden, abs_dir_path, abs_other_path):
         return
 
-    if ignore:
-        # ignore_list might already include 'ignore' param but transforming creating intermediary set is too expensive
-        ignore_list.append(ignore)
+    ignore_list = ignore.split(",") if ignore else []
     cmp_obj = dircmp(abs_dir_path, abs_other_path, ignore=ignore_list)
     _diff_report(cmp_obj, show_hidden, recursively, short, one_line, logger)
 

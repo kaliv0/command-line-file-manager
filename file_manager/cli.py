@@ -2,8 +2,13 @@ import click
 
 from file_manager.logs import log_messages
 from file_manager.utils import organizer, scanner
-from file_manager.utils.custom_param import LiteralOption
-from file_manager.utils.decorator import save_logs, sort_order_results, create_backup, recursive, show_hidden_entries
+from file_manager.utils.decorator import (
+    save_logs,
+    sort_order_results,
+    create_backup,
+    recursive,
+    show_hidden_entries,
+)
 
 
 @click.group()
@@ -24,7 +29,15 @@ def fm() -> None:
 )
 @sort_order_results
 @save_logs
-def show(dir_path: str, sort: str, desc: bool, list_dirs: bool, save: bool, output: str, log: str) -> None:
+def show(
+    dir_path: str,
+    sort: str,
+    desc: bool,
+    list_dirs: bool,
+    save: bool,
+    output: str,
+    log: str,
+) -> None:
     """Short list of files or directories in <dir_path>\f"""
     scanner.show(dir_path, sort, desc, list_dirs, save, output, log)
 
@@ -35,7 +48,15 @@ def show(dir_path: str, sort: str, desc: bool, list_dirs: bool, save: bool, outp
 @recursive
 @sort_order_results
 @save_logs
-def scan(dir_path: str, recursively: bool, sort: str, desc: bool, save: bool, output: str, log: str) -> None:
+def scan(
+    dir_path: str,
+    recursively: bool,
+    sort: str,
+    desc: bool,
+    save: bool,
+    output: str,
+    log: str,
+) -> None:
     """Create full catalog of all files and subdirs in <dir_path>\f"""
     if recursively:
         scanner.scan_recursively(dir_path, sort, desc, save, output, log)
@@ -63,7 +84,13 @@ def scan(dir_path: str, recursively: bool, sort: str, desc: bool, save: bool, ou
 @show_hidden_entries
 @save_logs
 def tree(
-    dir_path: str, max_depth: int, dirs_only: bool, show_hidden: bool, save: bool, output: str, log: str
+    dir_path: str,
+    max_depth: int,
+    dirs_only: bool,
+    show_hidden: bool,
+    save: bool,
+    output: str,
+    log: str,
 ) -> None:
     """Build tree of contents in <dir_path>\f"""
     scanner.build_tree(dir_path, max_depth, show_hidden, dirs_only, save, output, log)
@@ -83,7 +110,13 @@ def tree(
 @recursive
 @save_logs
 def search(
-    dir_path: str, name: str, use_regex: bool, recursively: bool, save: bool, output: str, log: str
+    dir_path: str,
+    name: str,
+    use_regex: bool,
+    recursively: bool,
+    save: bool,
+    output: str,
+    log: str,
 ) -> None:
     """Search by <name> inside <dir_path>\f"""
     if recursively:
@@ -101,13 +134,7 @@ def search(
     "--ignore",
     type=click.STRING,
     default=None,
-    help="Path to ignore"
-)
-@click.option(
-    "--ignore-list",
-    cls=LiteralOption,
-    default='[]',
-    help="""List of paths to ignore -> pass as a literal of list of strings e.g. '["music", "movies"]'"""
+    help="Single or multiple directory names to be ignored separated by comma. E.g. --ignore music,books",
 )
 @click.option(
     "--short",
@@ -127,7 +154,6 @@ def diff(
     dir_path: str,
     other_path: str,
     ignore: str,
-    ignore_list: list[str],
     short: bool,
     one_line: bool,
     recursively: bool,
@@ -140,7 +166,16 @@ def diff(
     if short and one_line:
         raise click.BadParameter(log_messages.BAD_OPTS.format(flags=" | ".join(("short", "oneline"))))
     scanner.compare_directories(
-        dir_path, other_path, ignore, ignore_list, show_hidden, short, one_line, recursively, save, output, log
+        dir_path,
+        other_path,
+        ignore,
+        show_hidden,
+        short,
+        one_line,
+        recursively,
+        save,
+        output,
+        log,
     )
 
 
@@ -183,7 +218,14 @@ def dedup(
         )
     else:
         organizer.handle_duplicate_files(
-            dir_path, interactive, show_hidden, save, output, log, backup, archive_format
+            dir_path,
+            interactive,
+            show_hidden,
+            save,
+            output,
+            log,
+            backup,
+            archive_format,
         )
 
 
@@ -228,7 +270,16 @@ def tidy(
     """Organize files by extension/type inside <dir_path>\f"""
     if recursively:
         organizer.organize_files_recursively(
-            dir_path, exclude, exclude_dir, flat, show_hidden, backup, archive_format, save, output, log
+            dir_path,
+            exclude,
+            exclude_dir,
+            flat,
+            show_hidden,
+            backup,
+            archive_format,
+            save,
+            output,
+            log,
         )
     else:
         organizer.organize_files(dir_path, exclude, show_hidden, backup, archive_format, save, output, log)

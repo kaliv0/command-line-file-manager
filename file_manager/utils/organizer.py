@@ -64,7 +64,14 @@ def organize_files_recursively(
     if flat:
         root_dir = os.path.join(abs_dir_path, "")
         _handle_files_by_flattening_subdirs(
-            abs_dir_path, "", root_dir, exclude_list, exclude_dir_list, show_hidden, logger, log
+            abs_dir_path,
+            "",
+            root_dir,
+            exclude_list,
+            exclude_dir_list,
+            show_hidden,
+            logger,
+            log,
         )
     else:
         _handle_files(abs_dir_path, "", exclude_list, exclude_dir_list, show_hidden, logger, log)
@@ -103,7 +110,15 @@ def _handle_files(
             nested_dirs.append(abs_entry_path)
     # dive recursively to handle nested dirs
     for nested_dir in nested_dirs:
-        _handle_files(abs_dir_path, nested_dir, exclude_list, exclude_dir_list, show_hidden, logger, log_file)
+        _handle_files(
+            abs_dir_path,
+            nested_dir,
+            exclude_list,
+            exclude_dir_list,
+            show_hidden,
+            logger,
+            log_file,
+        )
 
 
 def _handle_files_by_flattening_subdirs(
@@ -143,7 +158,14 @@ def _handle_files_by_flattening_subdirs(
     # dive recursively to handle nested dirs
     for nested_dir in nested_dirs:
         _handle_files_by_flattening_subdirs(
-            abs_dir_path, nested_dir, root_dir, exclude_list, exclude_dir_list, show_hidden, logger, log_file
+            abs_dir_path,
+            nested_dir,
+            root_dir,
+            exclude_list,
+            exclude_dir_list,
+            show_hidden,
+            logger,
+            log_file,
         )
     # flatten dir
     is_not_root_dir = abs_dir_path != root_dir
@@ -257,7 +279,10 @@ def _add_entry(
 
 
 def _handle_duplicates(
-    content_map: defaultdict[str, list[str]], dir_path: str, interactive: bool, logger: Logger
+    content_map: defaultdict[str, list[str]],
+    dir_path: str,
+    interactive: bool,
+    logger: Logger,
 ) -> None:
     duplicate_list = _transform_content_map(content_map)
     # display sorted map entries
@@ -266,7 +291,8 @@ def _handle_duplicates(
         return
     logger.info(
         log_messages.LISTED_DUPLICATE_FILES.format(
-            dir_path=dir_path, display_list="".join(_prepare_display_list(duplicate_list))
+            dir_path=dir_path,
+            display_list="".join(_prepare_display_list(duplicate_list)),
         )
     )
     # clean-up files
@@ -290,7 +316,10 @@ def _prepare_display_list(duplicate_list: list[list[str]]) -> Generator[str]:
 
 
 def _merge_duplicates(
-    abs_dir_path: str, duplicate_list: list[list[str]], interactive: bool, logger: Logger
+    abs_dir_path: str,
+    duplicate_list: list[list[str]],
+    interactive: bool,
+    logger: Logger,
 ) -> None:
     for entry in duplicate_list:
         for idx, file in enumerate(entry):
@@ -328,7 +357,11 @@ def _create_archive(abs_dir_path: str, archive_format: str) -> None:
 
 
 def _handle_entries(
-    abs_dir_path: str, abs_entry_path: str, entry: str, file_extension: str, logger: Logger
+    abs_dir_path: str,
+    abs_entry_path: str,
+    entry: str,
+    file_extension: str,
+    logger: Logger,
 ) -> None:
     if entry.startswith("."):
         target_dir_name = constants.TARGET_MAP["hidden"]

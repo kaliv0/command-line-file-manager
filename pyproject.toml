@@ -1,6 +1,6 @@
 [project]
 name = "command-line-file-manager"
-version = "2.0.2"
+version = "2.1.0"
 authors = [
     { name = "kaliv0", email = "kaloyan.ivanov88@gmail.com" }
 ]
@@ -22,8 +22,10 @@ click = "^8.1.8"
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.6.3"
 
-[tool.ruff.lint]
-ignore = ['E731']
+[tool.ruff]
+lint = {ignore = ['E731']}
+fix = true
+line-length = 110
 
 [tool.poetry]
 packages = [{include="file_manager"}]

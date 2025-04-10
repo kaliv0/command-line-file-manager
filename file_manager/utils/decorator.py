@@ -63,11 +63,12 @@ def recursive(func: ClickCallable) -> ClickCallable:
         help="Step into nested dirs",
     )(func)
 
+
 def show_hidden_entries(func: ClickCallable) -> ClickCallable:
     return click.option(
-    "-h",
-    "--hidden",
-    "show_hidden",
-    is_flag=True,
-    help="Include hidden entries paths",
-)(func)
+        "-h",
+        "--hidden",
+        "show_hidden",
+        is_flag=True,
+        help="Include hidden entries paths",
+    )(func)
