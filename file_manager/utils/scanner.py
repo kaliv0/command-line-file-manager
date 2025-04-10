@@ -7,7 +7,7 @@ from typing import Callable
 
 from file_manager.logs import log_messages
 from file_manager.logs.logger_factory import get_logger
-
+from file_manager.utils import should_skip_hidden
 
 FOLDER_EMOJI = "\U0001f4c1"
 FILE_EMOJI = "\U0001f4c3"
@@ -66,7 +66,7 @@ def _build_entries_list(
     os_func = getattr(os.path, os_func_name)
     entries_list = []
     for entry in dir_list:
-        if not os_func(os.path.join(dir_path, entry)) or (not show_hidden and entry.startswith(".")):
+        if not os_func(os.path.join(dir_path, entry)) or should_skip_hidden(show_hidden, entry):
             continue
         entries_list.append(entry)
     return entries_list
@@ -97,7 +97,7 @@ def scan(dir_path: str, show_hidden: bool, sort: str, desc: bool, save: bool, ou
     files_list = []
     nested_dirs = []
     for entry in dir_list:
-        if not show_hidden and entry.startswith("."):
+        if should_skip_hidden(show_hidden, entry):
             continue
         if os.path.isfile(os.path.join(dir_path, entry)):
             files_list.append(entry)
@@ -126,7 +126,7 @@ def _get_recursive_catalog(
     nested_dirs = []
     subdir_list = os.listdir(subdir_path)
     for entry in subdir_list:
-        if not show_hidden and entry.startswith("."):
+        if should_skip_hidden(show_hidden, entry):
             continue
         entry_path = os.path.join(subdir_path, entry)
         if os.path.isfile(entry_path):
@@ -174,7 +174,7 @@ def build_tree(
     root_level = os.path.normpath(dir_path).count(os.sep)
 
     for curr_root, dirs, files in os.walk(dir_path):
-        if not show_hidden and os.path.basename(curr_root).startswith("."):
+        if should_skip_hidden(show_hidden, os.path.basename(curr_root)):
             continue
 
         level = os.path.normpath(curr_root).count(os.sep) - root_level
@@ -190,7 +190,7 @@ def build_tree(
 
 def _build_file_tree(files: list[str], show_hidden: bool, sub_indent: str, logger: Logger) -> None:
     for file in files:
-        if not show_hidden and file.startswith("."):
+        if should_skip_hidden(show_hidden, file):
             continue
         logger.info(f"{sub_indent}{FILE_EMOJI} {file}\n")
 
@@ -300,7 +300,7 @@ def compare_directories(
         logger.info(log_messages.IDENTICAL_PATHS)
         return
 
-    if _should_skip_hidden(show_hidden, abs_dir_path, abs_other_path):
+    if should_skip_hidden(show_hidden, abs_dir_path, abs_other_path):
         return
 
     ignore_list = ignore.split(",") if ignore else []
@@ -320,15 +320,9 @@ def _diff_report(
 
     if diff_recursively:
         for sub_dir in cmp_obj.subdirs.values():
-            if _should_skip_hidden(show_hidden, sub_dir.left, sub_dir.right):
+            if should_skip_hidden(show_hidden, sub_dir.left, sub_dir.right):
                 continue
             _diff_report(sub_dir, show_hidden, diff_recursively, short, one_line, logger)
-
-
-def _should_skip_hidden(show_hidden: bool, dir_path: str, other_path: str) -> bool:
-    return not show_hidden and any(
-        os.path.basename(entry).startswith(".") for entry in (dir_path, other_path)
-    )
 
 
 def _report(cmp_obj: dircmp, show_hidden: bool, short: bool, one_line: bool, logger: Logger) -> None:

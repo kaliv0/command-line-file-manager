@@ -9,6 +9,7 @@ import click
 
 from file_manager.logs import log_messages
 from file_manager.logs.logger_factory import get_logger
+from file_manager.utils import should_skip_hidden
 from file_manager.utils.config import constants
 
 
@@ -36,7 +37,7 @@ def organize_files(
         abs_entry_path = os.path.join(abs_dir_path, entry)
         if os.path.isfile(abs_entry_path):
             file_extension = os.path.splitext(entry)[1]
-            if (not show_hidden and entry.startswith(".")) or file_extension in exclude_list:
+            if (should_skip_hidden(show_hidden, entry)) or file_extension in exclude_list:
                 logger.info(log_messages.SKIP_FILE.format(entry=entry))
             else:
                 _handle_entries(abs_dir_path, abs_entry_path, entry, file_extension, logger)
@@ -98,13 +99,13 @@ def _handle_files(
             if entry == log_file or entry in SKIPPED_BACKUP_FILES:
                 continue
             file_extension = os.path.splitext(entry)[1]
-            if not show_hidden and entry.startswith(".") or file_extension in exclude_list:
+            if should_skip_hidden(show_hidden, entry) or file_extension in exclude_list:
                 logger.info(log_messages.SKIP_FILE.format(entry=entry))
             else:
                 _handle_entries(abs_dir_path, abs_entry_path, entry, file_extension, logger)
         # list nested dirs
         elif os.path.isdir(abs_entry_path):
-            if entry.startswith(".") or entry in exclude_dir_list:
+            if _should_skip_dir(entry, exclude_dir_list):
                 logger.info(log_messages.SKIP_DIR.format(entry=entry))
                 continue
             nested_dirs.append(abs_entry_path)
@@ -143,14 +144,14 @@ def _handle_files_by_flattening_subdirs(
             if entry == log_file or entry in SKIPPED_BACKUP_FILES:
                 continue
             file_extension = os.path.splitext(entry)[1]
-            if not show_hidden and entry.startswith(".") or file_extension in exclude_list:
+            if should_skip_hidden(show_hidden, entry) or file_extension in exclude_list:
                 logger.info(log_messages.MOVE_FILE_TO_ROOT_DIR.format(entry=entry))
                 shutil.move(abs_entry_path, os.path.join(root_dir, entry))
             else:
                 _handle_entries(root_dir, abs_entry_path, entry, file_extension, logger)
         # list nested dirs
         elif os.path.isdir(abs_entry_path):
-            if entry.startswith(".") or entry in exclude_dir_list:
+            if _should_skip_dir(entry, exclude_dir_list):
                 logger.info(log_messages.SKIP_DIR_AND_MOVE.format(entry=entry))
                 shutil.move(abs_entry_path, os.path.join(root_dir, entry))
                 continue
@@ -174,6 +175,10 @@ def _handle_files_by_flattening_subdirs(
     if is_not_root_dir and (is_not_one_level_nested_dir or is_not_target_dir):
         logger.info(log_messages.REMOVE_DIR.format(abs_dir_path=abs_dir_path))
         os.rmdir(abs_dir_path)
+
+
+def _should_skip_dir(entry: str, exclude_dir_list: list[str]) -> bool:
+    return entry.startswith(".") or entry in exclude_dir_list
 
 
 #####################################
@@ -269,7 +274,7 @@ def _add_entry(
     show_hidden: bool,
     logger: Logger,
 ) -> None:
-    if not show_hidden and entry.startswith("."):
+    if should_skip_hidden(show_hidden, entry):
         logger.info(log_messages.SKIP_FILE.format(entry=entry))
         return
 
