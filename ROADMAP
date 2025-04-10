@@ -1,4 +1,4 @@
-- add --hidden to show and scan
+- unify check for show_hidden flag and entry.startswith(".")
 
 - expand archive options/formats
 

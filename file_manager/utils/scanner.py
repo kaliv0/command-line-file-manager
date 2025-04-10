@@ -20,10 +20,21 @@ STATS_MAP = {
     "common_dirs": log_messages.COMMON_SUBDIRS,
     "common_funny": log_messages.COMMON_TROUBLE,
 }
+DIR_SHOW_MAP = {
+    "os_func_name": "isdir",
+    "not_found_msg": "NO_SUBDIRS",
+    "success_msg": "NESTED_SUBDIRS",
+}
+FILE_SHOW_MAP = {
+    "os_func_name": "isfile",
+    "not_found_msg": "NO_FILES",
+    "success_msg": "LISTED_FILES",
+}
 
 
 def show(
     dir_path: str,
+    show_hidden: bool,
     sort: str,
     desc: bool,
     list_dirs: bool,
@@ -31,29 +42,34 @@ def show(
     output: str,
     log: str,
 ) -> None:
-    if list_dirs:
-        os_func_name = "isdir"
-        not_found_msg = "NO_SUBDIRS"
-        success_msg = "NESTED_SUBDIRS"
-    else:
-        os_func_name = "isfile"
-        not_found_msg = "NO_FILES"
-        success_msg = "LISTED_FILES"
-
+    show_map = DIR_SHOW_MAP if list_dirs else FILE_SHOW_MAP
     logger = get_logger(output, save, log)
 
     dir_list = os.listdir(dir_path)
-    os_func = getattr(os.path, os_func_name)
-    if entries_list := [entry for entry in dir_list if os_func(os.path.join(dir_path, entry))]:
+    if entries_list := _build_entries_list(dir_path, dir_list, show_map["os_func_name"], show_hidden):
         _sort_entries_list(dir_path, entries_list, sort, desc)
         logger.info(
-            getattr(log_messages, success_msg).format(
+            getattr(log_messages, show_map["success_msg"]).format(
                 dir_path=os.path.abspath(dir_path),
                 entries_list="\n\t- ".join(entries_list),
             )
         )
     else:
-        logger.info(getattr(log_messages, not_found_msg).format(dir_path=os.path.abspath(dir_path)))
+        logger.info(
+            getattr(log_messages, show_map["not_found_msg"]).format(dir_path=os.path.abspath(dir_path))
+        )
+
+
+def _build_entries_list(
+    dir_path: str, dir_list: list[str], os_func_name: str, show_hidden: bool
+) -> list[str]:
+    os_func = getattr(os.path, os_func_name)
+    entries_list = []
+    for entry in dir_list:
+        if not os_func(os.path.join(dir_path, entry)) or (not show_hidden and entry.startswith(".")):
+            continue
+        entries_list.append(entry)
+    return entries_list
 
 
 def _sort_entries_list(dir_path: str, entries_list: list[str], criteria: str, desc: bool) -> None:
@@ -74,13 +90,15 @@ def _sort_entries_list(dir_path: str, entries_list: list[str], criteria: str, de
 
 
 #############################################################
-def scan(dir_path: str, sort: str, desc: bool, save: bool, output: str, log: str) -> None:
+def scan(dir_path: str, show_hidden: bool, sort: str, desc: bool, save: bool, output: str, log: str) -> None:
     logger = get_logger(output, save, log)
 
     dir_list = os.listdir(dir_path)
     files_list = []
     nested_dirs = []
     for entry in dir_list:
+        if not show_hidden and entry.startswith("."):
+            continue
         if os.path.isfile(os.path.join(dir_path, entry)):
             files_list.append(entry)
         else:
@@ -90,14 +108,16 @@ def scan(dir_path: str, sort: str, desc: bool, save: bool, output: str, log: str
         logger.info(log_msg)
 
 
-def scan_recursively(dir_path: str, sort: str, desc: bool, save: bool, output: str, log: str) -> None:
+def scan_recursively(
+    dir_path: str, show_hidden: bool, sort: str, desc: bool, save: bool, output: str, log: str
+) -> None:
     logger = get_logger(output, save, log)
-    for log_msg in _get_recursive_catalog(sort, desc, dir_path):
+    for log_msg in _get_recursive_catalog(show_hidden, sort, desc, dir_path):
         logger.info(log_msg)
 
 
 def _get_recursive_catalog(
-    sort: str, desc: bool, root_dir: str, subdir_path: str | None = None
+    show_hidden: bool, sort: str, desc: bool, root_dir: str, subdir_path: str | None = None
 ) -> Generator[str]:
     if subdir_path is None:
         subdir_path = root_dir
@@ -106,6 +126,8 @@ def _get_recursive_catalog(
     nested_dirs = []
     subdir_list = os.listdir(subdir_path)
     for entry in subdir_list:
+        if not show_hidden and entry.startswith("."):
+            continue
         entry_path = os.path.join(subdir_path, entry)
         if os.path.isfile(entry_path):
             files_list.append(entry)
@@ -114,7 +136,7 @@ def _get_recursive_catalog(
 
     yield from _get_catalog_messages(subdir_path, files_list, nested_dirs, sort, desc)
     for entry in nested_dirs:
-        yield from _get_recursive_catalog(sort, desc, root_dir, os.path.join(subdir_path, entry))
+        yield from _get_recursive_catalog(show_hidden, sort, desc, root_dir, os.path.join(subdir_path, entry))
 
 
 def _get_catalog_messages(

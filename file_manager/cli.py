@@ -27,10 +27,12 @@ def fm() -> None:
     is_flag=True,
     help="List subdirectories",
 )
+@show_hidden_entries
 @sort_order_results
 @save_logs
 def show(
     dir_path: str,
+    show_hidden: bool,
     sort: str,
     desc: bool,
     list_dirs: bool,
@@ -39,18 +41,20 @@ def show(
     log: str,
 ) -> None:
     """Short list of files or directories in <dir_path>\f"""
-    scanner.show(dir_path, sort, desc, list_dirs, save, output, log)
+    scanner.show(dir_path, show_hidden, sort, desc, list_dirs, save, output, log)
 
 
 #############################################################
 @fm.command(options_metavar="<options>")
 @click.argument("dir_path", type=click.STRING, metavar="<dir_path>")
 @recursive
+@show_hidden_entries
 @sort_order_results
 @save_logs
 def scan(
     dir_path: str,
     recursively: bool,
+    show_hidden: bool,
     sort: str,
     desc: bool,
     save: bool,
@@ -59,9 +63,9 @@ def scan(
 ) -> None:
     """Create full catalog of all files and subdirs in <dir_path>\f"""
     if recursively:
-        scanner.scan_recursively(dir_path, sort, desc, save, output, log)
+        scanner.scan_recursively(dir_path, show_hidden, sort, desc, save, output, log)
     else:
-        scanner.scan(dir_path, sort, desc, save, output, log)
+        scanner.scan(dir_path, show_hidden, sort, desc, save, output, log)
 
 
 #############################################################
