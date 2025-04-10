@@ -246,6 +246,8 @@ def _search_in_entry_name(name: str, entry: str, use_regex: bool):
 def compare_directories(
     dir_path: str,
     other_path: str,
+    ignore: str,
+    ignore_list: list[str],
     include_hidden: bool,
     short: bool,
     one_line: bool,
@@ -262,12 +264,13 @@ def compare_directories(
         logger.info(log_messages.IDENTICAL_PATHS)
         return
 
-    if not include_hidden and any(
-        os.path.basename(entry).startswith(".") for entry in (abs_dir_path, abs_other_path)
-    ):
+    if _should_skip_hidden(include_hidden, abs_dir_path, abs_other_path):
         return
 
-    cmp_obj = dircmp(abs_dir_path, abs_other_path)
+    if ignore:
+        # ignore_list might already include 'ignore' param but transforming creating intermediary set is too expensive
+        ignore_list.append(ignore)
+    cmp_obj = dircmp(abs_dir_path, abs_other_path, ignore=ignore_list)
     _diff_report(cmp_obj, include_hidden, recursively, short, one_line, logger)
 
 
@@ -283,7 +286,15 @@ def _diff_report(
 
     if diff_recursively:
         for sub_dir in cmp_obj.subdirs.values():
+            if _should_skip_hidden(include_hidden, sub_dir.left, sub_dir.right):
+                continue
             _diff_report(sub_dir, include_hidden, diff_recursively, short, one_line, logger)
+
+
+def _should_skip_hidden(include_hidden: bool, dir_path: str, other_path: str) -> bool:
+    return not include_hidden and any(
+        os.path.basename(entry).startswith(".") for entry in (dir_path, other_path)
+    )
 
 
 def _report(cmp_obj: dircmp, include_hidden: bool, short: bool, one_line: bool, logger: Logger) -> None:
@@ -302,9 +313,11 @@ def _report(cmp_obj: dircmp, include_hidden: bool, short: bool, one_line: bool, 
     for attr in STATS_MAP:
         if not (stats := getattr(cmp_obj, attr, None)):
             continue
-
-        if not include_hidden and not (stats := [entry for entry in stats if not entry.startswith(".")]):
-            continue
+        if not include_hidden:
+            # recompute stats to exclude hidden entries
+            stats = [entry for entry in stats if not entry.startswith(".")]
+            if not stats:
+                continue
 
         if attr == "left_only":
             dir_path = cmp_obj.left

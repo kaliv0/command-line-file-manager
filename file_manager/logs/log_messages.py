@@ -41,4 +41,5 @@ COMMON_SUBDIRS = f"- Common subdirectories{DELIM_LIST}"
 COMMON_TROUBLE = f"- Common problematic cases{DELIM_LIST}"
 
 BAD_OPTS = "Mutually exclusive flags: {flags}\n"
+BAD_LITERAL = """'{value}'. Expected literal of list of string params e.g. '["x", "y"]'\n"""
 IDENTICAL_PATHS = "Paths are identical\n"

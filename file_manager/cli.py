@@ -2,6 +2,7 @@ import click
 
 from file_manager.logs import log_messages
 from file_manager.utils import organizer, scanner
+from file_manager.utils.custom_param import LiteralOption
 from file_manager.utils.decorator import save_logs, sort_order_results, create_backup, recursive
 
 
@@ -102,6 +103,19 @@ def search(
 @click.argument("dir_path", type=click.STRING, metavar="<source_path>")
 @click.argument("other_path", type=click.STRING, metavar="<target_path>")
 @click.option(
+    "-i",
+    "--ignore",
+    type=click.STRING,
+    default=None,
+    help="Path to ignore"
+)
+@click.option(
+    "--ignore-list",
+    cls=LiteralOption,
+    default='[]',
+    help="""List of paths to ignore -> pass as a literal of list of strings e.g. '["music", "movies"]'"""
+)
+@click.option(
     "-h",
     "--hidden",
     "include_hidden",
@@ -124,6 +138,8 @@ def search(
 def diff(
     dir_path: str,
     other_path: str,
+    ignore: str,
+    ignore_list: list[str],
     include_hidden: bool,
     short: bool,
     one_line: bool,
@@ -136,7 +152,7 @@ def diff(
     if short and one_line:
         raise click.BadParameter(log_messages.BAD_OPTS.format(flags=" | ".join(("short", "oneline"))))
     scanner.compare_directories(
-        dir_path, other_path, include_hidden, short, one_line, recursively, save, output, log
+        dir_path, other_path, ignore, ignore_list, include_hidden, short, one_line, recursively, save, output, log
     )
 
 
