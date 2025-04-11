@@ -2,7 +2,7 @@ import hashlib
 import os
 import shutil
 from collections import defaultdict
-from collections.abc import Generator
+from collections.abc import Generator, Mapping
 from logging import Logger
 
 import click
@@ -15,11 +15,13 @@ from file_manager.utils.config import constants
 
 BACKUP_FILE_NAME = ".backup"
 SKIPPED_BACKUP_FILES = [".backup.tar", ".backup.zip"]
+TARGET_MAP = constants.TARGET_MAP
 
 
 def organize_files(
     dir_path: str,
     exclude: str,
+    config: str,
     show_hidden: bool,
     backup: bool,
     archive_format: str,
@@ -33,6 +35,14 @@ def organize_files(
         _create_archive(abs_dir_path, archive_format)
 
     exclude_list = exclude.split(",") if exclude else []
+
+    if config:
+        # reassign config -> could be cleaner if classes were used
+        global TARGET_MAP
+        TARGET_MAP = _parse_config(config)
+        # pprint.pprint(TARGET_MAP)
+        # exit(1)
+
     for entry in dir_list:
         abs_entry_path = os.path.join(abs_dir_path, entry)
         if os.path.isfile(abs_entry_path):
@@ -43,6 +53,52 @@ def organize_files(
                 _handle_entries(abs_dir_path, abs_entry_path, entry, file_extension, logger)
 
 
+def _parse_config(config: str) -> Mapping[str, str]:
+    if not os.path.exists(config):
+        raise click.ClickException(log_messages.MISSING_CONFIG_ERROR.format(path=config))
+    if not os.path.getsize(config):
+        raise click.ClickException(log_messages.EMPTY_CONFIG_ERROR.format(path=config))
+    return _remap_config(_read_file(config))
+
+
+def _read_file(config) -> Mapping[str, list[str]]:
+    with open(config, "rb") as f:
+        _, extension = os.path.splitext(config)
+        match extension:
+            case ".toml":
+                import tomllib
+
+                return tomllib.load(f)
+            case ".json":
+                import json
+
+                return json.load(f)
+            case ".yaml":
+                import yaml
+
+                return yaml.safe_load(f)
+            # TODO: add custom .txt config type -> books=pdf,md,epub etc -> NB no "." in front of the extensions
+            case _:
+                raise click.ClickException(log_messages.UNSUPPORTED_TYPE.format(value=extension))
+
+
+# TODO: extract typehints as aliases
+def _remap_config(config: Mapping[str, list[str]]) -> Mapping[str, str]:
+    # TODO: enable strict (i.e. no duplicates for large config files) with a flag??
+    #  if not -> remove log_messages.DUPLICATE_ENTRY
+    # remapped_config = {}
+    # for k, v in config.items():
+    #     for ext in v:
+    #         if ext in remapped_config:
+    #             raise click.ClickException(log_messages.DUPLICATE_ENTRY.format(entry=ext))
+    #         remapped_config[ext] = k
+    # return remapped_config
+
+    # if there are duplicates in the config -> take the last entry
+    return {ext: k for k, v in config.items() for ext in v}
+
+
+################################
 def organize_files_recursively(
     dir_path: str,
     exclude: str,
@@ -171,7 +227,7 @@ def _handle_files_by_flattening_subdirs(
     # flatten dir
     is_not_root_dir = abs_dir_path != root_dir
     is_not_one_level_nested_dir = not os.path.join(os.path.dirname(abs_dir_path), "") == root_dir
-    is_not_target_dir = os.path.basename(subdir_path) not in constants.TARGET_MAP.values()
+    is_not_target_dir = os.path.basename(subdir_path) not in TARGET_MAP.values()
     if is_not_root_dir and (is_not_one_level_nested_dir or is_not_target_dir):
         logger.info(log_messages.REMOVE_DIR.format(abs_dir_path=abs_dir_path))
         os.rmdir(abs_dir_path)
@@ -368,10 +424,11 @@ def _handle_entries(
     file_extension: str,
     logger: Logger,
 ) -> None:
+    # TODO: handle if user_config doesn't contain "hidden" and "default"
     if entry.startswith("."):
-        target_dir_name = constants.TARGET_MAP["hidden"]
+        target_dir_name = TARGET_MAP["hidden"]
     else:
-        target_dir_name = constants.TARGET_MAP.get(file_extension, constants.TARGET_MAP["default"])
+        target_dir_name = TARGET_MAP.get(file_extension, TARGET_MAP["default"])
     target_dir = os.path.join(abs_dir_path, target_dir_name)
     if not os.path.exists(target_dir):
         logger.info(log_messages.CREATE_DIR.format(target_dir=target_dir))
