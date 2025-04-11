@@ -1,0 +1,49 @@
+---
+images:
+  - .jpg
+  - .jpeg
+  - .png
+  - .gif
+  - .svg
+  - .heic
+  - .tif
+  - .tiff
+videos:
+  - .mp4
+  - .mpeg-4
+  - .mov
+  - .avi
+  - .webm
+music:
+  - .mp3
+  - .m4a
+  - .wav
+  - .flac
+  - .ogg
+books:
+  - .pdf
+  - .djvu
+  - .epub
+  - .fb2
+docs:
+  - .xlsx
+  - .csv
+  - .docx
+  - .doc
+  - .rtf
+  - .txt
+  - .pptx
+  - .ppt
+  - .key
+archive:
+  - .rar
+  - .zip
+  - .gz
+  - .tar
+torrent:
+  - .torrent
+default:
+  - other
+hidden:
+  - .hidden
+---

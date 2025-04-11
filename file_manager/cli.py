@@ -284,7 +284,7 @@ def tidy(
             exclude,
             exclude_dir,
             flat,
-            # config,
+            config,
             show_hidden,
             backup,
             archive_format,

@@ -11,3 +11,6 @@
     -> recursively
         -> without --flat moves dir inside newly created dir with same name (e.g. books -> books/books)
         -> with --flat moves files to same dir (e.g. from books to books)
+
+- fix tree
+    - when level is shallow -> show nested dirs without going inside them -> currently only files on the deepest level

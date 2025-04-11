@@ -2,7 +2,7 @@ import hashlib
 import os
 import shutil
 from collections import defaultdict
-from collections.abc import Generator, Mapping
+from collections.abc import Generator
 from logging import Logger
 
 import click
@@ -31,71 +31,24 @@ def organize_files(
 ) -> None:
     abs_dir_path, dir_list = _handle_dir_path(dir_path)
     logger = get_logger(output, save, log)
+
     if backup:
         _create_archive(abs_dir_path, archive_format)
-
-    exclude_list = exclude.split(",") if exclude else []
-
     if config:
         # reassign config -> could be cleaner if classes were used
         global TARGET_MAP
         TARGET_MAP = _parse_config(config)
-        # pprint.pprint(TARGET_MAP)
-        # exit(1)
 
+    exclude_list = exclude.split(",") if exclude else []
     for entry in dir_list:
         abs_entry_path = os.path.join(abs_dir_path, entry)
         if os.path.isfile(abs_entry_path):
-            file_extension = os.path.splitext(entry)[1]
+            # TODO: extract
+            file_extension = _get_file_extension(entry)
             if (should_skip_hidden(show_hidden, entry)) or file_extension in exclude_list:
                 logger.info(log_messages.SKIP_FILE.format(entry=entry))
             else:
                 _handle_entries(abs_dir_path, abs_entry_path, entry, file_extension, logger)
-
-
-def _parse_config(config: str) -> Mapping[str, str]:
-    if not os.path.exists(config):
-        raise click.ClickException(log_messages.MISSING_CONFIG_ERROR.format(path=config))
-    if not os.path.getsize(config):
-        raise click.ClickException(log_messages.EMPTY_CONFIG_ERROR.format(path=config))
-    return _remap_config(_read_file(config))
-
-
-def _read_file(config) -> Mapping[str, list[str]]:
-    with open(config, "rb") as f:
-        _, extension = os.path.splitext(config)
-        match extension:
-            case ".toml":
-                import tomllib
-
-                return tomllib.load(f)
-            case ".json":
-                import json
-
-                return json.load(f)
-            case ".yaml":
-                import yaml
-
-                return yaml.safe_load(f)
-            # TODO: add custom .txt config type -> books=pdf,md,epub etc -> NB no "." in front of the extensions
-            case _:
-                raise click.ClickException(log_messages.UNSUPPORTED_TYPE.format(value=extension))
-
-
-# TODO: extract typehints as aliases
-def _remap_config(config: Mapping[str, list[str]]) -> Mapping[str, str]:
-    # TODO: enable strict (i.e. no duplicates for large config files) with a flag??
-    #  if not -> remove log_messages.DUPLICATE_ENTRY
-    # remapped_config = {}
-    # for k, v in config.items():
-    #     for ext in v:
-    #         if ext in remapped_config:
-    #             raise click.ClickException(log_messages.DUPLICATE_ENTRY.format(entry=ext))
-    #         remapped_config[ext] = k
-    # return remapped_config
-
-    # if there are duplicates in the config -> take the last entry
-    return {ext: k for k, v in config.items() for ext in v}
 
 
 ################################
@@ -104,6 +57,7 @@ def organize_files_recursively(
     exclude: str,
     exclude_dir: str,
     flat: bool,
+    config: str,
     show_hidden: bool,
     backup: bool,
     archive_format: str,
@@ -113,8 +67,12 @@ def organize_files_recursively(
 ) -> None:
     abs_dir_path = os.path.abspath(dir_path)
     logger = get_logger(output, save, log)
+
     if backup:
         _create_archive(abs_dir_path, archive_format)
+    if config:
+        global TARGET_MAP
+        TARGET_MAP = _parse_config(config)
 
     exclude_list = exclude.split(",") if exclude else []
     exclude_dir_list = exclude_dir.split(",") if exclude_dir else []
@@ -154,7 +112,7 @@ def _handle_files(
         if os.path.isfile(abs_entry_path):
             if entry == log_file or entry in SKIPPED_BACKUP_FILES:
                 continue
-            file_extension = os.path.splitext(entry)[1]
+            file_extension = _get_file_extension(entry)
             if should_skip_hidden(show_hidden, entry) or file_extension in exclude_list:
                 logger.info(log_messages.SKIP_FILE.format(entry=entry))
             else:
@@ -199,7 +157,7 @@ def _handle_files_by_flattening_subdirs(
         if os.path.isfile(abs_entry_path):
             if entry == log_file or entry in SKIPPED_BACKUP_FILES:
                 continue
-            file_extension = os.path.splitext(entry)[1]
+            file_extension = _get_file_extension(entry)
             if should_skip_hidden(show_hidden, entry) or file_extension in exclude_list:
                 logger.info(log_messages.MOVE_FILE_TO_ROOT_DIR.format(entry=entry))
                 shutil.move(abs_entry_path, os.path.join(root_dir, entry))
@@ -235,6 +193,48 @@ def _handle_files_by_flattening_subdirs(
 
 def _should_skip_dir(entry: str, exclude_dir_list: list[str]) -> bool:
     return entry.startswith(".") or entry in exclude_dir_list
+
+
+# ### organize helpers ###
+def _parse_config(config: str) -> dict[str, str]:
+    if not os.path.exists(config):
+        raise click.ClickException(log_messages.MISSING_CONFIG_ERROR.format(path=config))
+    if not os.path.getsize(config):
+        raise click.ClickException(log_messages.EMPTY_CONFIG_ERROR.format(path=config))
+    return _remap_config(_read_file(config))
+
+
+def _read_file(config) -> dict[str, list[str]]:
+    with open(config, "rb") as f:
+        extension = _get_file_extension(config)
+        match extension:
+            case ".toml":
+                import tomllib
+
+                return tomllib.load(f)
+            case ".json":
+                import json
+
+                return json.load(f)
+            case ".yaml":
+                import yaml
+
+                return yaml.safe_load(f)
+            case _:
+                raise click.ClickException(log_messages.UNSUPPORTED_TYPE.format(value=extension))
+
+
+def _remap_config(config: dict[str, list[str]]) -> dict[str, str]:
+    result = {}
+    for k, v in config.items():
+        for ext in v:
+            if ext in result:
+                raise click.ClickException(log_messages.DUPLICATE_ENTRY.format(entry=ext))
+            result[ext] = k
+
+    result.setdefault("default", "other")
+    result.setdefault("hidden", ".hidden")
+    return result
 
 
 #####################################
@@ -365,7 +365,7 @@ def _transform_content_map(content_map: defaultdict[str, list[str]]) -> list[lis
         sorted(file_list)
         for file_list in content_map.values()
         # should contain more than elements with equal extensions
-        if len(file_list) > 1 and len({os.path.splitext(entry)[1] for entry in file_list}) == 1
+        if len(file_list) > 1 and len({_get_file_extension(entry) for entry in file_list}) == 1
     ]
 
 
@@ -424,7 +424,6 @@ def _handle_entries(
     file_extension: str,
     logger: Logger,
 ) -> None:
-    # TODO: handle if user_config doesn't contain "hidden" and "default"
     if entry.startswith("."):
         target_dir_name = TARGET_MAP["hidden"]
     else:
@@ -435,3 +434,7 @@ def _handle_entries(
         os.makedirs(target_dir)
     logger.info(log_messages.MOVE_FILE.format(entry=entry, target_dir=target_dir))
     shutil.move(abs_entry_path, os.path.join(target_dir, entry))
+
+
+def _get_file_extension(entry: str) -> str:
+    return os.path.splitext(entry)[1]
