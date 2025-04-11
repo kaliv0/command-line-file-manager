@@ -1,7 +1,6 @@
 - expand archive options/formats
 
-- support external config for organizing dir names (in fm tidy)
-    -> prompt user interactively according to found file types/extensions
+- fm tidy -> prompt user interactively according to found file types/extensions
 
 - refactor all joins of file_lists (e.g. entries_list="\n\t- ".join(files_list)) into loops?
 
@@ -11,6 +10,3 @@
     -> recursively
         -> without --flat moves dir inside newly created dir with same name (e.g. books -> books/books)
         -> with --flat moves files to same dir (e.g. from books to books)
-
-- fix tree
-    - when level is shallow -> show nested dirs without going inside them -> currently only files on the deepest level

@@ -172,18 +172,21 @@ def build_tree(
 ) -> None:
     logger = get_logger(output, save, log)
     root_level = os.path.normpath(dir_path).count(os.sep)
+    if max_depth is None:
+        max_depth = 20
 
     for curr_root, dirs, files in os.walk(dir_path):
         if should_skip_hidden(show_hidden, os.path.basename(curr_root)):
             continue
 
         level = os.path.normpath(curr_root).count(os.sep) - root_level
-        if max_depth is not None and level > max_depth:
+        if level > max_depth + 1:
             continue
 
         indent = " " * 4 * level
         logger.info(f"{indent}{FOLDER_EMOJI} {os.path.abspath(curr_root)}/\n")
-        if not dirs_only:
+        # NB: we print subdirs from the next level (max_depth + 1) but not the files inside them ( level <= max_depth)
+        if not dirs_only and level <= max_depth:
             sub_indent = " " * 4 * (level + 1)
             _build_file_tree(files, show_hidden, sub_indent, logger)
 
