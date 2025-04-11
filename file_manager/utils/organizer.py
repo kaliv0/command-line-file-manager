@@ -31,6 +31,7 @@ def organize_files(
 ) -> None:
     abs_dir_path, dir_list = _handle_dir_path(dir_path)
     logger = get_logger(output, save, log)
+    is_reorganized = False
 
     if backup:
         _create_archive(abs_dir_path, archive_format)
@@ -43,12 +44,14 @@ def organize_files(
     for entry in dir_list:
         abs_entry_path = os.path.join(abs_dir_path, entry)
         if os.path.isfile(abs_entry_path):
-            # TODO: extract
             file_extension = _get_file_extension(entry)
             if (should_skip_hidden(show_hidden, entry)) or file_extension in exclude_list:
                 logger.info(log_messages.SKIP_FILE.format(entry=entry))
-            else:
-                _handle_entries(abs_dir_path, abs_entry_path, entry, file_extension, logger)
+                continue
+            is_reorganized = _handle_entries(abs_dir_path, abs_entry_path, entry, file_extension, logger)
+
+    if not is_reorganized:
+        logger.info(log_messages.NOT_REORGANIZED)
 
 
 ################################
@@ -106,6 +109,8 @@ def _handle_files(
 
     logger.info(log_messages.INSIDE_DIR.format(abs_dir_path=abs_dir_path))
     nested_dirs = []
+    is_reorganized = False
+    has_skipped = False
     for entry in dir_list:
         abs_entry_path = os.path.join(abs_dir_path, entry)
         # handle files
@@ -116,13 +121,19 @@ def _handle_files(
             if should_skip_hidden(show_hidden, entry) or file_extension in exclude_list:
                 logger.info(log_messages.SKIP_FILE.format(entry=entry))
             else:
-                _handle_entries(abs_dir_path, abs_entry_path, entry, file_extension, logger)
+                is_reorganized = _handle_entries(abs_dir_path, abs_entry_path, entry, file_extension, logger)
         # list nested dirs
         elif os.path.isdir(abs_entry_path):
-            if _should_skip_dir(entry, exclude_dir_list):
+            # NB: skip hidden dirs -> don't create extra ".hidden" subdirs
+            if _should_skip_dir(entry, exclude_dir_list, show_hidden):
                 logger.info(log_messages.SKIP_DIR.format(entry=entry))
+                has_skipped = True
                 continue
             nested_dirs.append(abs_entry_path)
+
+    if not (is_reorganized or has_skipped):
+        logger.info(log_messages.NOT_REORGANIZED)
+
     # dive recursively to handle nested dirs
     for nested_dir in nested_dirs:
         _handle_files(
@@ -151,6 +162,7 @@ def _handle_files_by_flattening_subdirs(
 
     logger.info(log_messages.INSIDE_DIR.format(abs_dir_path=abs_dir_path))
     nested_dirs = []
+    is_reorganized = False
     for entry in dir_list:
         abs_entry_path = os.path.join(abs_dir_path, entry)
         # handle files
@@ -162,14 +174,18 @@ def _handle_files_by_flattening_subdirs(
                 logger.info(log_messages.MOVE_FILE_TO_ROOT_DIR.format(entry=entry))
                 shutil.move(abs_entry_path, os.path.join(root_dir, entry))
             else:
-                _handle_entries(root_dir, abs_entry_path, entry, file_extension, logger)
+                is_reorganized = _handle_entries(root_dir, abs_entry_path, entry, file_extension, logger)
         # list nested dirs
         elif os.path.isdir(abs_entry_path):
-            if _should_skip_dir(entry, exclude_dir_list):
+            if _should_skip_dir(entry, exclude_dir_list, show_hidden):
                 logger.info(log_messages.SKIP_DIR_AND_MOVE.format(entry=entry))
                 shutil.move(abs_entry_path, os.path.join(root_dir, entry))
                 continue
             nested_dirs.append(abs_entry_path)
+
+    if not is_reorganized:
+        logger.info(log_messages.NOT_REORGANIZED)
+
     # dive recursively to handle nested dirs
     for nested_dir in nested_dirs:
         _handle_files_by_flattening_subdirs(
@@ -191,11 +207,10 @@ def _handle_files_by_flattening_subdirs(
         os.rmdir(abs_dir_path)
 
 
-def _should_skip_dir(entry: str, exclude_dir_list: list[str]) -> bool:
-    return entry.startswith(".") or entry in exclude_dir_list
+def _should_skip_dir(entry: str, exclude_dir_list: list[str], show_hidden: bool) -> bool:
+    return (not show_hidden and entry.startswith(".")) or entry in exclude_dir_list
 
 
-# ### organize helpers ###
 def _parse_config(config: str) -> dict[str, str]:
     if not os.path.exists(config):
         raise click.ClickException(log_messages.MISSING_CONFIG_ERROR.format(path=config))
@@ -221,7 +236,7 @@ def _read_file(config) -> dict[str, list[str]]:
 
                 return yaml.safe_load(f)
             case _:
-                raise click.ClickException(log_messages.UNSUPPORTED_TYPE.format(value=extension))
+                raise click.ClickException(log_messages.UNSUPPORTED_TYPE_ERROR.format(value=extension))
 
 
 def _remap_config(config: dict[str, list[str]]) -> dict[str, str]:
@@ -229,7 +244,7 @@ def _remap_config(config: dict[str, list[str]]) -> dict[str, str]:
     for k, v in config.items():
         for ext in v:
             if ext in result:
-                raise click.ClickException(log_messages.DUPLICATE_ENTRY.format(entry=ext))
+                raise click.ClickException(log_messages.DUPLICATE_ENTRY_ERROR.format(entry=ext))
             result[ext] = k
 
     result.setdefault("default", "other")
@@ -280,9 +295,9 @@ def handle_duplicate_files_recursively(
     content_map, subdir_list = _create_duplicate_map_and_subdir_list(
         abs_dir_path, dir_list, show_hidden, logger
     )
-    # ## handle duplicates in current dir ##
+    # handle duplicates in current dir
     _handle_duplicates(content_map, abs_dir_path, interactive, logger)
-    # ## dive recursively into nested subdirs ##
+    # dive recursively into nested subdirs
     logger.info(log_messages.DUPLICATE_DELIMITER)
     for subdir in subdir_list:
         handle_duplicate_files_recursively(
@@ -423,17 +438,27 @@ def _handle_entries(
     entry: str,
     file_extension: str,
     logger: Logger,
-) -> None:
+) -> bool:
     if entry.startswith("."):
         target_dir_name = TARGET_MAP["hidden"]
     else:
         target_dir_name = TARGET_MAP.get(file_extension, TARGET_MAP["default"])
+
+    # don't create identical path inside current one e.g. foo/bar -> foo/bar/bar
+    if target_dir_name == os.path.basename(abs_dir_path):
+        return False
+
     target_dir = os.path.join(abs_dir_path, target_dir_name)
+    # don't try to move file into its own dir
+    if target_dir == os.path.dirname(abs_entry_path):
+        return False
+
     if not os.path.exists(target_dir):
         logger.info(log_messages.CREATE_DIR.format(target_dir=target_dir))
         os.makedirs(target_dir)
     logger.info(log_messages.MOVE_FILE.format(entry=entry, target_dir=target_dir))
     shutil.move(abs_entry_path, os.path.join(target_dir, entry))
+    return True
 
 
 def _get_file_extension(entry: str) -> str:
