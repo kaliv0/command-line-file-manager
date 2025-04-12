@@ -1,6 +1,6 @@
 [project]
 name = "command-line-file-manager"
-version = "2.1.1"
+version = "2.1.2"
 authors = [
     { name = "kaliv0", email = "kaloyan.ivanov88@gmail.com" }
 ]
