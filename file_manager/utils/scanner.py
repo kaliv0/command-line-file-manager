@@ -46,12 +46,12 @@ def show(
     logger = get_logger(output, save, log)
 
     dir_list = os.listdir(dir_path)
-    if entries_list := _build_entries_list(dir_path, dir_list, show_map["os_func_name"], show_hidden):
-        _sort_entries_list(dir_path, entries_list, sort, desc)
+    if entries := _build_entries_list(dir_path, dir_list, show_map["os_func_name"], show_hidden):
+        _sort_entries_list(dir_path, entries, sort, desc)
         logger.info(
             getattr(log_messages, show_map["success_msg"]).format(
                 dir_path=os.path.abspath(dir_path),
-                entries_list="\n\t- ".join(entries_list),
+                entries_list=_format_entries(entries),
             )
         )
     else:
@@ -147,7 +147,7 @@ def _get_catalog_messages(
     else:
         _sort_entries_list(dir_path, files_list, sort, desc)
         files_msg = log_messages.LISTED_FILES.format(
-            dir_path=os.path.abspath(dir_path), entries_list="\n\t- ".join(files_list)
+            dir_path=os.path.abspath(dir_path), entries_list=_format_entries(files_list)
         )
 
     if not nested_dirs:
@@ -155,7 +155,7 @@ def _get_catalog_messages(
     else:
         _sort_entries_list(dir_path, nested_dirs, sort, desc)
         nested_dirs_msg = log_messages.NESTED_SUBDIRS.format(
-            dir_path=os.path.abspath(dir_path), entries_list="\n\t- ".join(nested_dirs)
+            dir_path=os.path.abspath(dir_path), entries_list=_format_entries(nested_dirs)
         )
     return files_msg, nested_dirs_msg
 
@@ -172,18 +172,21 @@ def build_tree(
 ) -> None:
     logger = get_logger(output, save, log)
     root_level = os.path.normpath(dir_path).count(os.sep)
+    if max_depth is None:
+        max_depth = 20
 
     for curr_root, dirs, files in os.walk(dir_path):
         if should_skip_hidden(show_hidden, os.path.basename(curr_root)):
             continue
 
         level = os.path.normpath(curr_root).count(os.sep) - root_level
-        if max_depth is not None and level > max_depth:
+        if level > max_depth + 1:
             continue
 
         indent = " " * 4 * level
         logger.info(f"{indent}{FOLDER_EMOJI} {os.path.abspath(curr_root)}/\n")
-        if not dirs_only:
+        # NB: we print subdirs from the next level (max_depth + 1) but not the files inside them ( level <= max_depth)
+        if not dirs_only and level <= max_depth:
             sub_indent = " " * 4 * (level + 1)
             _build_file_tree(files, show_hidden, sub_indent, logger)
 
@@ -215,9 +218,9 @@ def search(dir_path: str, name: str, use_regex: bool, save: bool, output: str, l
 
     logger.info(log_messages.FOUND_BY_NAME.format(dir_path=os.path.abspath(dir_path), keyword=name))
     if files_list:
-        logger.info(log_messages.FOUND_FILES_BY_NAME.format(files_list="\n\t- ".join(files_list)))
+        logger.info(log_messages.FOUND_FILES_BY_NAME.format(files_list=_format_entries(files_list)))
     if nested_dirs:
-        logger.info(log_messages.FOUND_DIRS_BY_NAME.format(subdir_list="\n\t- ".join(nested_dirs)))
+        logger.info(log_messages.FOUND_DIRS_BY_NAME.format(subdir_list=_format_entries(nested_dirs)))
 
 
 def search_recursively(
@@ -259,13 +262,13 @@ def _search_recursively(
             nested_dirs.append(entry)
 
     log_msg = []
-    if files_list and not valid_dirs:
+    if files_list or valid_dirs:
         curr_log = log_messages.FOUND_BY_PATTERN if use_regex else log_messages.FOUND_BY_NAME
         log_msg.append(curr_log.format(dir_path=os.path.abspath(subdir_path), sequence=name))
         if files_list:
-            log_msg.append(log_messages.FOUND_FILES_BY_NAME.format(files_list="\n\t- ".join(files_list)))
+            log_msg.append(log_messages.FOUND_FILES_BY_NAME.format(files_list=_format_entries(files_list)))
         if valid_dirs:
-            log_msg.append(log_messages.FOUND_DIRS_BY_NAME.format(subdir_list="\n\t- ".join(valid_dirs)))
+            log_msg.append(log_messages.FOUND_DIRS_BY_NAME.format(subdir_list=_format_entries(valid_dirs)))
         log_msg.append(log_messages.DELIMITER)
 
     yield from log_msg
@@ -370,3 +373,8 @@ def _handle_stats_entries(
 
     entries.sort()
     logger.info(message.format(**fmt))
+
+
+# ### helpers ###
+def _format_entries(entries: list[str]) -> str:
+    return "\n\t- ".join(entries)

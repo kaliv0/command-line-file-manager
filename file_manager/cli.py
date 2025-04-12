@@ -254,6 +254,11 @@ def dedup(
     is_flag=True,
     help="Move all files to target directories inside parent dir. (Used with --recursively flag)",
 )
+@click.option(
+    "--config",
+    type=click.STRING,
+    help="Path to config map with target dir names and corresponding file extensions",
+)
 @recursive
 @show_hidden_entries
 @create_backup
@@ -263,6 +268,7 @@ def tidy(
     exclude: str,
     exclude_dir: str,
     flat: bool,
+    config: str,
     recursively: bool,
     show_hidden: bool,
     backup: bool,
@@ -278,6 +284,7 @@ def tidy(
             exclude,
             exclude_dir,
             flat,
+            config,
             show_hidden,
             backup,
             archive_format,
@@ -286,7 +293,9 @@ def tidy(
             log,
         )
     else:
-        organizer.organize_files(dir_path, exclude, show_hidden, backup, archive_format, save, output, log)
+        organizer.organize_files(
+            dir_path, exclude, config, show_hidden, backup, archive_format, save, output, log
+        )
 
 
 if __name__ == "__main__":
