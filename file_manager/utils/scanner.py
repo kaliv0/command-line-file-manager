@@ -262,7 +262,7 @@ def _search_recursively(
             nested_dirs.append(entry)
 
     log_msg = []
-    if files_list and not valid_dirs:
+    if files_list or valid_dirs:
         curr_log = log_messages.FOUND_BY_PATTERN if use_regex else log_messages.FOUND_BY_NAME
         log_msg.append(curr_log.format(dir_path=os.path.abspath(subdir_path), sequence=name))
         if files_list:

@@ -1,4 +1,0 @@
-- expand archive options/formats
-
-- fm tidy -> prompt user interactively according to found file types/extensions
-    -> improve "nothing to tidy up" logs in recursive versions

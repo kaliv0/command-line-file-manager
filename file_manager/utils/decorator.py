@@ -48,8 +48,8 @@ def create_backup(func: ClickCallable) -> ClickCallable:
     archive_format = click.option(
         "-f",
         "--archive-format",
-        type=click.Choice(["tar", "zip"], case_sensitive=False),
-        default="tar",
+        type=click.Choice(["zip", "gztar"], case_sensitive=False),
+        default="gztar",
         help="Archive format for backup file",
     )
     return backup(archive_format(func))

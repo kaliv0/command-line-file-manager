@@ -14,7 +14,7 @@ from file_manager.utils.config import constants
 
 
 BACKUP_FILE_NAME = ".backup"
-SKIPPED_BACKUP_FILES = [".backup.tar", ".backup.zip"]
+SKIPPED_BACKUP_FILES = [".backup.tar.gz", ".backup.zip"]
 TARGET_MAP = constants.TARGET_MAP
 
 
@@ -200,7 +200,7 @@ def _handle_files_by_flattening_subdirs(
         )
     # flatten dir
     is_not_root_dir = abs_dir_path != root_dir
-    is_not_one_level_nested_dir = not os.path.join(os.path.dirname(abs_dir_path), "") == root_dir
+    is_not_one_level_nested_dir = os.path.join(os.path.dirname(abs_dir_path), "") != root_dir
     is_not_target_dir = os.path.basename(subdir_path) not in TARGET_MAP.values()
     if is_not_root_dir and (is_not_one_level_nested_dir or is_not_target_dir):
         logger.info(log_messages.REMOVE_DIR.format(abs_dir_path=abs_dir_path))
