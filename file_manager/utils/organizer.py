@@ -13,7 +13,7 @@ from file_manager.utils import should_skip_hidden
 from file_manager.utils.config import constants
 
 
-BACKUP_FILE_NAME = ".backup"
+BACKUP_FILE_NAME = ".bak"
 SKIPPED_BACKUP_FILES = [".backup.tar.gz", ".backup.zip"]
 TARGET_MAP = constants.TARGET_MAP
 
@@ -290,7 +290,7 @@ def handle_duplicate_files_recursively(
     logger.info(log_messages.INSIDE_DIR.format(abs_dir_path=abs_dir_path))
 
     if backup:
-        _create_archive(abs_dir_path, archive_format)
+        _create_archive(abs_dir_path, archive_format)  # noqa
 
     content_map, subdir_list = _create_duplicate_map_and_subdir_list(
         abs_dir_path, dir_list, show_hidden, logger
